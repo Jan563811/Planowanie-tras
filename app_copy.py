@@ -18,7 +18,34 @@ from ortools.constraint_solver import pywrapcp
 # =========================
 st.set_page_config(page_title="Planowanie tras Plantpol", layout="wide")
 
+# =========================
+# Logowanie PIN
+# =========================
+CORRECT_PIN = st.secrets["APP_PIN"]
 
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+
+def show_login():
+    st.markdown("## Logowanie")
+    st.write("Podaj 6-cyfrowy PIN, aby uruchomić aplikację.")
+
+    with st.form("login_form"):
+        pin_input = st.text_input("PIN", type="password", max_chars=6)
+        submitted = st.form_submit_button("Zaloguj")
+
+    if submitted:
+        if pin_input == CORRECT_PIN and pin_input.isdigit() and len(pin_input) == 6:
+            st.session_state["authenticated"] = True
+            st.rerun()
+        else:
+            st.error("Nieprawidłowy PIN. Wprowadź poprawny 6-cyfrowy kod.")
+
+if not st.session_state["authenticated"]:
+    show_login()
+    st.stop()
+
+    
 col1, col2 = st.columns([1, 5])
 
 with col1:
