@@ -45,7 +45,7 @@ if not st.session_state["authenticated"]:
     show_login()
     st.stop()
 
-    
+
 col1, col2 = st.columns([1, 5])
 
 with col1:
@@ -97,6 +97,7 @@ with col_u2:
     )
 
 from io import BytesIO
+from docx import Document
 
 # =========================
 # Szablony plików do pobrania
@@ -665,6 +666,67 @@ def render_routes(
     if not any_shown:
         st.info("Solver nie przydzielił żadnych punktów do tras (wszystkie pojazdy BASE→BASE).")
 
+def df_to_xlsx_bytes(df: pd.DataFrame, sheet_name: str = "Dane") -> bytes:
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name=sheet_name)
+    return output.getvalue()
+
+
+def routes_to_word_bytes(routes, nodes, vehicle_ids, vehicle_caps, dur_s_matrix, service_time_s) -> bytes:
+    doc = Document()
+    doc.add_heading("Planowanie tras Plantpol", level=1)
+
+    node_names = nodes["name"].tolist()
+    node_addr = nodes["address"].tolist()
+    node_dem = nodes["demand_wozki"].astype(int).tolist()
+
+    any_shown = False
+
+    for v_idx, route in enumerate(routes):
+        if len(route) <= 2:
+            continue
+
+        any_shown = True
+        vehicle_label = vehicle_ids[v_idx] if v_idx < len(vehicle_ids) else str(v_idx + 1)
+        cap = vehicle_caps[v_idx] if v_idx < len(vehicle_caps) else None
+        used_capacity = sum(node_dem[idx] for idx in route if idx != 0)
+
+        doc.add_heading(
+            f"Samochód {vehicle_label}, pojemność {cap} (wykorzystane: {used_capacity})",
+            level=2
+        )
+
+        route_times = calc_arrival_departure_for_route(route, dur_s_matrix, service_time_s)
+
+        table = doc.add_table(rows=1, cols=5)
+        table.style = "Table Grid"
+
+        hdr = table.rows[0].cells
+        hdr[0].text = "Numer przystanku"
+        hdr[1].text = "Nazwa"
+        hdr[2].text = "Adres"
+        hdr[3].text = "Ilość wózków"
+        hdr[4].text = "Godzina przyjazdu i wyjazdu"
+
+        for stop_no, node_idx in enumerate(route):
+            arrival, departure = route_times[stop_no]
+            row = table.add_row().cells
+            row[0].text = str(stop_no)
+            row[1].text = str(node_names[node_idx])
+            row[2].text = str(node_addr[node_idx])
+            row[3].text = str(node_dem[node_idx])
+            row[4].text = f"{fmt_hhmm(arrival)} - {fmt_hhmm(departure)}"
+
+        doc.add_paragraph("")
+
+    if not any_shown:
+        doc.add_paragraph("Brak tras do wydruku.")
+
+    output = BytesIO()
+    doc.save(output)
+    return output.getvalue()
+
 
 # =========================
 # Zakładki
@@ -868,17 +930,31 @@ with tab_result:
                 })
 
         out_df = pd.DataFrame(export_rows)
-        csv = out_df.to_csv(index=False, sep=";").encode("utf-8")
-        st.download_button("Pobierz wynik tras CSV (;)", csv, "wynik_trasy.csv", "text/csv")
 
-        st.caption(
-            f"Ograniczenia aktywne: max {max_stops_per_route} punktów na trasie, "
-            f"rozładunek {service_time_s // 60} min/punkt, "
-            f"max czas pracy między punktami {max_route_work_s // 3600} h."
+        # XLSX
+        xlsx_bytes = df_to_xlsx_bytes(out_df, sheet_name="Trasy")
+        st.download_button(
+            "Pobierz wynik tras XLSX",
+            data=xlsx_bytes,
+            file_name="wynik_trasy.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
 
-    else:
-        st.info("Kliknij **URUCHOM CAŁY PROCES**, aby policzyć trasy.")
+        # Word do wydruku
+        word_bytes = routes_to_word_bytes(
+            routes,
+            nodes,
+            vehicle_ids,
+            vehicle_caps,
+            dur_s_matrix,
+            service_time_s
+        )
+        st.download_button(
+            "Pobierz wynik tras Word",
+            data=word_bytes,
+            file_name="wynik_trasy.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        )
 
 
 with tab_geocode:
