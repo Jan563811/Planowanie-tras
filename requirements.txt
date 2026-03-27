@@ -3,3 +3,4 @@ pandas
 openpyxl
 requests
 ortools
+python-docx
