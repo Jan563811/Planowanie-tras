@@ -61,7 +61,7 @@ st.markdown("---")
 API_KEY = st.secrets["GOOGLE_MAPS_API_KEY"]
 
 # Limit testowy (punkty)
-MAX_POINTS = 70
+MAX_POINTS = 150
 
 # Cache dla macierzy (lokalnie)
 CACHE_DIR = "cache_dm"
