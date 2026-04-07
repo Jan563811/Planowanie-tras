@@ -163,7 +163,7 @@ with tpl_col2:
 
 st.markdown("### Parametry planowania")
 
-col_p1, col_p2, col_p3, col_p4 = st.columns(4)
+col_p1, col_p2, col_p3, col_p4, col_p5 = st.columns(4)
 
 with col_p1:
     vehicle_fixed_cost_ui = st.number_input(
@@ -195,6 +195,14 @@ with col_p4:
         min_value=1,
         value=5,
         step=1,
+    )
+
+with col_p5:
+    proximity_penalty_factor = st.number_input(
+        "Kara za odległość między punktami (współczynnik)",
+        min_value=0.0,
+        value=0.2,
+        step=0.05,
     )
 
 time_limit_s = st.slider("Limit czasu szukania rozwiązania (sek.)", 2, 60, 12, 1)
@@ -400,7 +408,8 @@ def solve_vrp_capacity(
     vehicle_fixed_cost=10_000,
     service_time_s=5400,
     max_route_work_s=28800,
-    max_stops_per_route=5
+    max_stops_per_route=5,
+    proximity_penalty_factor=0.2
 ):
 
 
@@ -412,7 +421,15 @@ def solve_vrp_capacity(
     def cost_cb(from_index, to_index):
         frm = manager.IndexToNode(from_index)
         to = manager.IndexToNode(to_index)
-        return int(cost_matrix[frm][to])
+
+        base_cost = int(cost_matrix[frm][to] or 0)
+        extra_penalty = 0
+
+    if frm != depot and to != depot:
+        travel_s = int(duration_matrix_s[frm][to] or 0)
+        extra_penalty = int(travel_s * proximity_penalty_factor)
+
+    return base_cost + extra_penalty
 
     cost_callback_index = routing.RegisterTransitCallback(cost_cb)
     routing.SetArcCostEvaluatorOfAllVehicles(cost_callback_index)
@@ -861,6 +878,7 @@ with tab_result:
             service_time_s=service_time_s,
             max_route_work_s=max_route_work_s,
             max_stops_per_route=max_stops_per_route,
+            proximity_penalty_factor=proximity_penalty_factor,
 )
 
         solver_pb.progress(100)
