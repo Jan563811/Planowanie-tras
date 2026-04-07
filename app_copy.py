@@ -163,7 +163,7 @@ with tpl_col2:
 
 st.markdown("### Parametry planowania")
 
-col_p1, col_p2, col_p3, col_p4, col_p5 = st.columns(4)
+col_p1, col_p2, col_p3, col_p4, col_p5 = st.columns(5)
 
 with col_p1:
     vehicle_fixed_cost_ui = st.number_input(
@@ -425,11 +425,11 @@ def solve_vrp_capacity(
         base_cost = int(cost_matrix[frm][to] or 0)
         extra_penalty = 0
 
-    if frm != depot and to != depot:
-        travel_s = int(duration_matrix_s[frm][to] or 0)
-        extra_penalty = int(travel_s * proximity_penalty_factor)
+        if frm != depot and to != depot:
+            travel_s = int(duration_matrix_s[frm][to] or 0)
+            extra_penalty = int(travel_s * proximity_penalty_factor)
 
-    return base_cost + extra_penalty
+        return base_cost + extra_penalty
 
     cost_callback_index = routing.RegisterTransitCallback(cost_cb)
     routing.SetArcCostEvaluatorOfAllVehicles(cost_callback_index)
