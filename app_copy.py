@@ -944,8 +944,13 @@ with tab_result:
         max_route_work_s = int(max_route_hours * 3600)
 
     if "routes" in st.session_state and "nodes_df" in st.session_state:
-        dist_km_df = st.session_state.get("dist_km_df")
+        routes = st.session_state["routes"]
+        nodes = st.session_state["nodes_df"]
+        vehicle_ids = st.session_state.get("vehicle_ids", [])
+        vehicle_caps = st.session_state.get("vehicle_caps", [])
         dur_s_matrix = st.session_state.get("dur_s_matrix")
+        dist_km_df = st.session_state.get("dist_km_df")
+      
 
         metrics = calculate_route_metrics(routes, dist_km_df, dur_s_matrix)
 
@@ -958,11 +963,7 @@ with tab_result:
         col_m2.metric("Łączny czas jazdy", fmt_h(metrics["total_time_s"]))
         col_m3.metric("Czas między punktami", fmt_h(metrics["total_inter_time_s"]))
         col_m4.metric("Mediana między punktami", fmt_h(metrics["median_inter_s"]))
-        routes = st.session_state["routes"]
-        nodes = st.session_state["nodes_df"]
-        vehicle_ids = st.session_state.get("vehicle_ids", [])
-        vehicle_caps = st.session_state.get("vehicle_caps", [])
-        dur_s_matrix = st.session_state.get("dur_s_matrix")
+
 
         render_routes(
             routes,
