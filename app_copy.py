@@ -163,7 +163,7 @@ with tpl_col2:
 
 st.markdown("### Parametry planowania")
 
-col_p1, col_p2, col_p3, col_p4, col_p5 = st.columns(5)
+col_p1, col_p2, col_p3, col_p4, col_p5, col_p6 = st.columns(6)
 
 with col_p1:
     vehicle_fixed_cost_ui = st.number_input(
@@ -203,6 +203,14 @@ with col_p5:
         min_value=0.0,
         value=0.2,
         step=0.05,
+    )
+
+with col_p6:
+    long_jump_penalty = st.number_input(
+        "Kara za przejazd >1.5h",
+        min_value=0,
+        value=10000,
+        step=1000,
     )
 
 time_limit_s = st.slider("Limit czasu szukania rozwiązania (sek.)", 2, 60, 12, 1)
@@ -427,7 +435,13 @@ def solve_vrp_capacity(
 
         if frm != depot and to != depot:
             travel_s = int(duration_matrix_s[frm][to] or 0)
-            extra_penalty = int(travel_s * proximity_penalty_factor)
+
+            # kara proporcjonalna (Twoja)
+            extra_penalty += int(travel_s * proximity_penalty_factor)
+
+            # 🔥 kara skokowa
+            if travel_s > 5400:
+                extra_penalty += long_jump_penalty
 
         return base_cost + extra_penalty
 
