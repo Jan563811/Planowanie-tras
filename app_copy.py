@@ -632,6 +632,47 @@ def calc_arrival_departure_for_route(route, duration_matrix_s, service_time_s):
     return times
 
 
+def calculate_route_metrics(routes, dist_km_df, dur_s_matrix):
+    total_km = 0
+    total_time_s = 0
+    inter_point_times = []
+
+    for route in routes:
+        if len(route) < 2:
+            continue
+
+        for i in range(len(route) - 1):
+            frm = route[i]
+            to = route[i + 1]
+
+            dist = dist_km_df.iloc[frm, to] or 0
+            dur = dur_s_matrix[frm][to] or 0
+
+            total_km += dist
+            total_time_s += dur
+
+            # tylko między punktami (bez bazy)
+            if frm != 0 and to != 0:
+                inter_point_times.append(dur)
+
+    # mediana
+    median_inter = 0
+    if inter_point_times:
+        inter_point_times_sorted = sorted(inter_point_times)
+        n = len(inter_point_times_sorted)
+        mid = n // 2
+        if n % 2 == 0:
+            median_inter = (inter_point_times_sorted[mid - 1] + inter_point_times_sorted[mid]) / 2
+        else:
+            median_inter = inter_point_times_sorted[mid]
+
+    return {
+        "total_km": total_km,
+        "total_time_s": total_time_s,
+        "total_inter_time_s": sum(inter_point_times),
+        "median_inter_s": median_inter,
+    }
+
 def render_routes(
     routes: List[List[int]],
     nodes: pd.DataFrame,
@@ -903,6 +944,20 @@ with tab_result:
         max_route_work_s = int(max_route_hours * 3600)
 
     if "routes" in st.session_state and "nodes_df" in st.session_state:
+        dist_km_df = st.session_state.get("dist_km_df")
+        dur_s_matrix = st.session_state.get("dur_s_matrix")
+
+        metrics = calculate_route_metrics(routes, dist_km_df, dur_s_matrix)
+
+        def fmt_h(x):
+            return f"{x/3600:.1f} h"
+
+        col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+
+        col_m1.metric("Łączny dystans", f"{metrics['total_km']:.0f} km")
+        col_m2.metric("Łączny czas jazdy", fmt_h(metrics["total_time_s"]))
+        col_m3.metric("Czas między punktami", fmt_h(metrics["total_inter_time_s"]))
+        col_m4.metric("Mediana między punktami", fmt_h(metrics["median_inter_s"]))
         routes = st.session_state["routes"]
         nodes = st.session_state["nodes_df"]
         vehicle_ids = st.session_state.get("vehicle_ids", [])
