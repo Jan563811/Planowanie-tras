@@ -850,7 +850,13 @@ with tab_result:
 
         points_df["Kod"] = points_df["Kod"].astype("string").fillna("").str.strip()
         points_df["Miejscowosc"] = points_df["Miejscowosc"].astype("string").fillna("").str.strip()
-        points_df["adres"] = (points_df["Kod"] + " " + points_df["Miejscowosc"] + ", Polska").str.strip()
+        points_df["Kod"] = points_df["Kod"].astype("string").fillna("").str.strip()
+        points_df["Miejscowosc"] = points_df["Miejscowosc"].astype("string").fillna("").str.strip()
+
+        points_df["adres"] = (
+            points_df["Kod"].where(points_df["Kod"] != "", "") + " " +
+            points_df["Miejscowosc"].where(points_df["Miejscowosc"] != "", "")
+        ).str.strip() + ", Polska"
         points_df["demand_wozki"] = points_df["Ilość wózków"].apply(safe_int)
 
         stage.info("Etap 1/3: geokodowanie…")
