@@ -226,6 +226,11 @@ max_stops_per_route = int(max_stops_per_route_ui)
 def _norm_colname(c: str) -> str:
     return str(c).strip()
 
+def normalize_postcode(code: str) -> str:
+    s = str(code).strip().replace(" ", "")
+    if len(s) == 5 and s.isdigit():
+        return f"{s[:2]}-{s[2:]}"
+    return s
 
 def load_points(file) -> pd.DataFrame:
     name = (file.name or "").lower()
@@ -587,13 +592,10 @@ def build_nodes(points_df: pd.DataFrame) -> pd.DataFrame:
     ).str.strip()
     pts["name"] = pts["name"].where(pts["name"].str.len() > 0, fallback_name)
 
-    pts["address"] = pts.get("formatted_address", "").astype("string").fillna("").str.strip()
-    pts["address"] = pts["address"].where(
-        pts["address"].str.len() > 0,
-        pts["adres"].astype("string").fillna("").str.strip()
-    )
+    pts["address"] = pts["adres"].astype("string").fillna("").str.strip()
+    pts["google_formatted_address"] = pts.get("formatted_address", "").astype("string").fillna("").str.strip()
 
-    pts = pts[["node", "name", "address", "latitude", "longitude", "demand_wozki"]]
+    pts = pts[["node", "name", "address", "google_formatted_address", "latitude", "longitude", "demand_wozki"]]
     nodes = pd.concat([nodes, pts], ignore_index=True)
     return nodes
 
@@ -848,9 +850,7 @@ with tab_result:
         vehicle_ids = vehicles_df["samochód"].tolist()
         vehicle_caps = vehicles_df["ilość wózków"].astype(int).tolist()
 
-        points_df["Kod"] = points_df["Kod"].astype("string").fillna("").str.strip()
-        points_df["Miejscowosc"] = points_df["Miejscowosc"].astype("string").fillna("").str.strip()
-        points_df["Kod"] = points_df["Kod"].astype("string").fillna("").str.strip()
+        points_df["Kod"] = points_df["Kod"].astype("string").fillna("").str.strip().apply(normalize_postcode)
         points_df["Miejscowosc"] = points_df["Miejscowosc"].astype("string").fillna("").str.strip()
 
         points_df["adres"] = (
