@@ -12,6 +12,12 @@ import requests
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
+try:
+    from github import Github
+    GITHUB_AVAILABLE = True
+except ImportError:
+    GITHUB_AVAILABLE = False
+
 
 # =========================
 # Konfiguracja aplikacji
@@ -66,6 +72,26 @@ MAX_POINTS = 150
 # Cache dla macierzy (lokalnie)
 CACHE_DIR = "cache_dm"
 os.makedirs(CACHE_DIR, exist_ok=True)
+
+# Cache dla geocodingu
+GEOCODING_CACHE_DIR = "cache_geocoding"
+os.makedirs(GEOCODING_CACHE_DIR, exist_ok=True)
+
+# CSV cache dla Streamlit Cloud
+GEOCODING_CSV_PATH = "geocoding_cache.csv"
+
+# Inicjalizuj session_state do śledzenia nowych adresów
+if "geocoding_updates" not in st.session_state:
+    st.session_state["geocoding_updates"] = set()
+
+if "geocoding_cache_df" not in st.session_state:
+    # Załaduj istniejący CSV lub utwórz pusty
+    if os.path.exists(GEOCODING_CSV_PATH):
+        st.session_state["geocoding_cache_df"] = pd.read_csv(GEOCODING_CSV_PATH)
+    else:
+        st.session_state["geocoding_cache_df"] = pd.DataFrame(
+            columns=["address", "lat", "lng", "formatted_address", "status", "cached_at"]
+        )
 
 # Baza (depot)
 BASE_NAME = "_Plantpol baza"
@@ -276,7 +302,23 @@ def safe_int(x, default=0) -> int:
 # =========================
 # Helpers: Google APIs
 # =========================
+def geocode_cache_key(address: str) -> str:
+    """Generuj klucz cache'u dla adresu"""
+    raw = address.lower().strip().encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
+
+
 def geocode_address(address: str):
+    # Sprawdź cache
+    cache_key = geocode_cache_key(address)
+    cache_file = os.path.join(GEOCODING_CACHE_DIR, f"{cache_key}.json")
+    
+    if os.path.exists(cache_file):
+        with open(cache_file, "r", encoding="utf-8") as f:
+            cached = json.load(f)
+        return cached["lat"], cached["lng"], cached["formatted"], cached["status"]
+    
+    # Jeśli nie w cache'u, pobierz z API
     url = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {"address": address, "key": API_KEY}
     r = requests.get(url, params=params, timeout=25)
@@ -285,9 +327,93 @@ def geocode_address(address: str):
     if data.get("status") == "OK" and data.get("results"):
         loc = data["results"][0]["geometry"]["location"]
         formatted = data["results"][0].get("formatted_address", "")
-        return loc["lat"], loc["lng"], formatted, "OK"
+        lat, lng, status = loc["lat"], loc["lng"], "OK"
+    else:
+        lat, lng, formatted, status = None, None, "", data.get("status", "UNKNOWN")
+    
+    # Zapisz do cache'u
+    cache_data = {"lat": lat, "lng": lng, "formatted": formatted, "status": status}
+    with open(cache_file, "w", encoding="utf-8") as f:
+        json.dump(cache_data, f)
+    
+    # Dodaj do CSV cache'u i tracker zmian
+    new_row = pd.DataFrame([{
+        "address": address,
+        "lat": lat,
+        "lng": lng,
+        "formatted_address": formatted,
+        "status": status,
+        "cached_at": datetime.now().isoformat()
+    }])
+    
+    # Sprawdź czy adres już istnieje
+    if address not in st.session_state["geocoding_cache_df"]["address"].values:
+        st.session_state["geocoding_cache_df"] = pd.concat(
+            [st.session_state["geocoding_cache_df"], new_row],
+            ignore_index=True
+        )
+        st.session_state["geocoding_updates"].add(address)
+    
+    return lat, lng, formatted, status
 
-    return None, None, "", data.get("status", "UNKNOWN")
+
+def save_geocoding_to_csv():
+    """Zapisz cache geocodingu do CSV"""
+    st.session_state["geocoding_cache_df"].to_csv(GEOCODING_CSV_PATH, index=False)
+    return True
+
+
+def update_geocoding_csv_github():
+    """Commitnij zaktualizowany CSV do GitHub"""
+    if not GITHUB_AVAILABLE:
+        return False, "PyGithub nie zainstalowany"
+    
+    if "GITHUB_TOKEN" not in st.secrets:
+        return False, "GITHUB_TOKEN nie znaleziony w secrets"
+    
+    if "GITHUB_REPO" not in st.secrets:
+        return False, "GITHUB_REPO nie znaleziony w secrets (format: user/repo)"
+    
+    try:
+        # Zapamiętaj liczbę zmian
+        num_updates = len(st.session_state['geocoding_updates'])
+        
+        # Zaloguj do GitHub
+        g = Github(st.secrets["GITHUB_TOKEN"])
+        repo = g.get_repo(st.secrets["GITHUB_REPO"])
+        
+        # Przygotuj zawartość CSV
+        csv_content = st.session_state["geocoding_cache_df"].to_csv(index=False)
+        
+        try:
+            # Pobierz istniejący plik
+            file = repo.get_contents(GEOCODING_CSV_PATH)
+            # Update istniejącego pliku
+            repo.update_file(
+                GEOCODING_CSV_PATH,
+                f"Auto: Update geocoding cache ({num_updates} nowych adresów)",
+                csv_content,
+                file.sha
+            )
+        except:
+            # Utwórz nowy plik
+            repo.create_file(
+                GEOCODING_CSV_PATH,
+                "Auto: Create geocoding cache",
+                csv_content
+            )
+        
+        # Zapisz lokalnie
+        save_geocoding_to_csv()
+        
+        # Wyczyść tracker zmian
+        st.session_state["geocoding_updates"].clear()
+        
+        return True, f"✅ Commitnięto {num_updates} nowych adresów do GitHub"
+    
+    
+    except Exception as e:
+        return False, f"❌ Błąd commitowania: {str(e)}"
 
 
 def format_latlng(lat, lng) -> str:
@@ -1075,3 +1201,32 @@ with tab_matrix:
         st.dataframe(st.session_state["dur_min_df"].round(1), use_container_width=True)
     else:
         st.info("Brak danych – uruchom proces w zakładce Wynik trasowania.")
+
+# =========================
+# GitHub Geocoding Cache Sync
+# =========================
+st.markdown("---")
+st.subheader("📤 Synchronizacja cache geocodingu z GitHub")
+
+if len(st.session_state["geocoding_updates"]) > 0:
+    st.info(f"🆕 Nowych adresów do commitowania: {len(st.session_state['geocoding_updates'])}")
+    col_sync1, col_sync2 = st.columns(2)
+    
+    with col_sync1:
+        if st.button("💾 Zapisz lokalnie"):
+            save_geocoding_to_csv()
+            st.success("✅ Zapisano do cache_geocoding.csv")
+            st.rerun()
+    
+    with col_sync2:
+        if st.button("🚀 Commitnij na GitHub"):
+            success, msg = update_geocoding_csv_github()
+            if success:
+                st.success(msg)
+                st.rerun()
+            else:
+                st.error(msg)
+else:
+    st.success("✅ Brak zmian – cache jest aktualny")
+
+st.caption("ℹ️ Dodaj do `.streamlit/secrets.toml`:\n- `GITHUB_TOKEN` (GitHub Personal Access Token)\n- `GITHUB_REPO` (format: user/repo)")

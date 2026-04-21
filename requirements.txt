@@ -4,3 +4,4 @@ openpyxl
 requests
 ortools
 python-docx
+PyGithub
