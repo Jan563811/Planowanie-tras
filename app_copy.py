@@ -80,14 +80,46 @@ os.makedirs(GEOCODING_CACHE_DIR, exist_ok=True)
 # CSV cache dla Streamlit Cloud
 GEOCODING_CSV_PATH = "geocoding_cache.csv"
 
+
+# =========================
+# Helper: Geocoding GitHub cache
+# =========================
+def load_geocoding_from_github():
+    """Załaduj cache geocodingu z GitHub (minimalizuj zapytania do API)"""
+    if not GITHUB_AVAILABLE:
+        return None
+    
+    if "GITHUB_TOKEN" not in st.secrets or "GITHUB_REPO" not in st.secrets:
+        return None
+    
+    try:
+        g = Github(st.secrets["GITHUB_TOKEN"])
+        repo = g.get_repo(st.secrets["GITHUB_REPO"])
+        
+        try:
+            file = repo.get_contents(GEOCODING_CSV_PATH)
+            csv_content = file.decoded_content.decode("utf-8")
+            from io import StringIO
+            return pd.read_csv(StringIO(csv_content))
+        except:
+            return None
+    except:
+        return None
+
+
 # Inicjalizuj session_state do śledzenia nowych adresów
 if "geocoding_updates" not in st.session_state:
     st.session_state["geocoding_updates"] = set()
 
 if "geocoding_cache_df" not in st.session_state:
-    # Załaduj istniejący CSV lub utwórz pusty
-    if os.path.exists(GEOCODING_CSV_PATH):
+    # 1. Załaduj z GitHub (jeśli dostępny)
+    github_cache = load_geocoding_from_github()
+    if github_cache is not None and not github_cache.empty:
+        st.session_state["geocoding_cache_df"] = github_cache
+    # 2. Załaduj lokalny CSV (jeśli GitHub niedostępny)
+    elif os.path.exists(GEOCODING_CSV_PATH):
         st.session_state["geocoding_cache_df"] = pd.read_csv(GEOCODING_CSV_PATH)
+    # 3. Utwórz pusty DataFrame
     else:
         st.session_state["geocoding_cache_df"] = pd.DataFrame(
             columns=["address", "lat", "lng", "formatted_address", "status", "cached_at"]
@@ -309,7 +341,7 @@ def geocode_cache_key(address: str) -> str:
 
 
 def geocode_address(address: str):
-    # Sprawdź cache
+    # 1️⃣ Sprawdź lokalny JSON cache (najszybciej)
     cache_key = geocode_cache_key(address)
     cache_file = os.path.join(GEOCODING_CACHE_DIR, f"{cache_key}.json")
     
@@ -318,7 +350,23 @@ def geocode_address(address: str):
             cached = json.load(f)
         return cached["lat"], cached["lng"], cached["formatted"], cached["status"]
     
-    # Jeśli nie w cache'u, pobierz z API
+    # 2️⃣ Sprawdź CSV cache w session_state (załadowany z GitHub)
+    if address in st.session_state["geocoding_cache_df"]["address"].values:
+        row = st.session_state["geocoding_cache_df"][
+            st.session_state["geocoding_cache_df"]["address"] == address
+        ].iloc[0]
+        # Zapisz do lokalnego JSON aby następnym razem było jeszcze szybciej
+        cache_data = {
+            "lat": row["lat"],
+            "lng": row["lng"],
+            "formatted": row["formatted_address"],
+            "status": row["status"]
+        }
+        with open(cache_file, "w", encoding="utf-8") as f:
+            json.dump(cache_data, f)
+        return row["lat"], row["lng"], row["formatted_address"], row["status"]
+    
+    # 3️⃣ Tylko gdy nie ma w cache'u -> pobierz z Google API (płatne!)
     url = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {"address": address, "key": API_KEY}
     r = requests.get(url, params=params, timeout=25)
@@ -331,12 +379,11 @@ def geocode_address(address: str):
     else:
         lat, lng, formatted, status = None, None, "", data.get("status", "UNKNOWN")
     
-    # Zapisz do cache'u
+    # Zapisz do cache'u (lokalny JSON + session_state)
     cache_data = {"lat": lat, "lng": lng, "formatted": formatted, "status": status}
     with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(cache_data, f)
     
-    # Dodaj do CSV cache'u i tracker zmian
     new_row = pd.DataFrame([{
         "address": address,
         "lat": lat,
@@ -346,13 +393,11 @@ def geocode_address(address: str):
         "cached_at": datetime.now().isoformat()
     }])
     
-    # Sprawdź czy adres już istnieje
-    if address not in st.session_state["geocoding_cache_df"]["address"].values:
-        st.session_state["geocoding_cache_df"] = pd.concat(
-            [st.session_state["geocoding_cache_df"], new_row],
-            ignore_index=True
-        )
-        st.session_state["geocoding_updates"].add(address)
+    st.session_state["geocoding_cache_df"] = pd.concat(
+        [st.session_state["geocoding_cache_df"], new_row],
+        ignore_index=True
+    )
+    st.session_state["geocoding_updates"].add(address)
     
     return lat, lng, formatted, status
 
@@ -1017,6 +1062,14 @@ with tab_result:
             st.error("Nie udało się geokodować żadnego punktu (OK=0).")
             st.stop()
 
+        # Auto-commit nowych adresów do GitHub
+        if len(st.session_state["geocoding_updates"]) > 0:
+            success, msg = update_geocoding_csv_github()
+            if success:
+                st.toast(f"✅ {msg}")
+            else:
+                st.warning(f"⚠️ Nie udało się zsynchronizować z GitHub: {msg}")
+
         stage.info("Etap 2/3: pobieram macierz dystansów/czasów…")
 
         nodes = build_nodes(points_df)
@@ -1201,32 +1254,3 @@ with tab_matrix:
         st.dataframe(st.session_state["dur_min_df"].round(1), use_container_width=True)
     else:
         st.info("Brak danych – uruchom proces w zakładce Wynik trasowania.")
-
-# =========================
-# GitHub Geocoding Cache Sync
-# =========================
-st.markdown("---")
-st.subheader("📤 Synchronizacja cache geocodingu z GitHub")
-
-if len(st.session_state["geocoding_updates"]) > 0:
-    st.info(f"🆕 Nowych adresów do commitowania: {len(st.session_state['geocoding_updates'])}")
-    col_sync1, col_sync2 = st.columns(2)
-    
-    with col_sync1:
-        if st.button("💾 Zapisz lokalnie"):
-            save_geocoding_to_csv()
-            st.success("✅ Zapisano do cache_geocoding.csv")
-            st.rerun()
-    
-    with col_sync2:
-        if st.button("🚀 Commitnij na GitHub"):
-            success, msg = update_geocoding_csv_github()
-            if success:
-                st.success(msg)
-                st.rerun()
-            else:
-                st.error(msg)
-else:
-    st.success("✅ Brak zmian – cache jest aktualny")
-
-st.caption("ℹ️ Dodaj do `.streamlit/secrets.toml`:\n- `GITHUB_TOKEN` (GitHub Personal Access Token)\n- `GITHUB_REPO` (format: user/repo)")
