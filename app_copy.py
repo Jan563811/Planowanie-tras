@@ -983,17 +983,24 @@ def df_to_xlsx_bytes(df: pd.DataFrame, sheet_name: str = "Dane") -> bytes:
     return output.getvalue()
 
 
-_VEHICLE_COLORS = [
-    "FFC000",  # amber
-    "4472C4",  # blue
-    "00B050",  # green
-    "FF4B4B",  # red
-    "7030A0",  # purple
-    "00B0F0",  # sky blue
-    "FF6600",  # orange
-    "70AD47",  # light green
-    "C00000",  # dark red
-    "0070C0",  # dark blue
+# Vivid colors for map (30 distinct colors)
+_MAP_COLORS = [
+    "#FFC000", "#4472C4", "#00B050", "#FF4B4B", "#7030A0",
+    "#00B0F0", "#FF6600", "#70AD47", "#C00000", "#0070C0",
+    "#FF00FF", "#00CED1", "#FF8C00", "#32CD32", "#DC143C",
+    "#4169E1", "#FF1493", "#008B8B", "#FFD700", "#8B008B",
+    "#006400", "#8B4513", "#00FA9A", "#FF69B4", "#1E90FF",
+    "#FA8072", "#9ACD32", "#6A0DAD", "#20B2AA", "#FF4500",
+]
+
+# Pastel colors for Excel — light enough for black text to be readable
+_XLSX_COLORS = [
+    "FFE699", "BDD7EE", "C6EFCE", "FFCCCC", "E2CFFE",
+    "CCFFFF", "FFD9B3", "DFFFB3", "FFCCE5", "B3FFE5",
+    "FFE5CC", "CCE5FF", "E5FFE5", "FFE5E5", "E5CCFF",
+    "E5FFFF", "FFE5B3", "E5FFB3", "FFB3E5", "B3FFB3",
+    "FFD9CC", "B3E5FF", "FFFFB3", "FFB3CC", "B3FFFF",
+    "E5E5FF", "F5E6CC", "CCF5E5", "F5CCE5", "CCE5CC",
 ]
 
 
@@ -1032,7 +1039,7 @@ def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> byt
         total_wozki = 0
         first_stop = True
 
-        color_hex = _VEHICLE_COLORS[v_idx % len(_VEHICLE_COLORS)]
+        color_hex = _XLSX_COLORS[v_idx % len(_XLSX_COLORS)]
         vehicle_fill = PatternFill(start_color=color_hex, end_color=color_hex, fill_type="solid")
 
         for node_idx in route:
@@ -1148,7 +1155,7 @@ def build_map_html(routes, nodes, vehicle_ids) -> str:
             continue
 
         veh = vehicle_ids[v_idx] if v_idx < len(vehicle_ids) else str(v_idx + 1)
-        color = f"#{_VEHICLE_COLORS[v_idx % len(_VEHICLE_COLORS)]}"
+        color = _MAP_COLORS[v_idx % len(_MAP_COLORS)]
 
         coords = [
             (lats[idx], lngs[idx]) for idx in route
