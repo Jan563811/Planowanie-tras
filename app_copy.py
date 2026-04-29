@@ -970,6 +970,50 @@ def df_to_xlsx_bytes(df: pd.DataFrame, sheet_name: str = "Dane") -> bytes:
     return output.getvalue()
 
 
+def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> bytes:
+    from openpyxl import Workbook
+    from openpyxl.styles import PatternFill, Font
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Trasy"
+
+    columns = ["nr pojazdu", "Pojemnosc", "Nazwa", "adres", "liczba wózków", "przewoźnik"]
+    ws.append(columns)
+
+    node_names = nodes["name"].tolist()
+    node_addr = nodes["address"].tolist()
+    node_dem = nodes["demand_wozki"].astype(int).tolist()
+
+    gray_fill = PatternFill(start_color="C0C0C0", end_color="C0C0C0", fill_type="solid")
+    bold_font = Font(bold=True)
+
+    for v_idx, route in enumerate(routes):
+        if len(route) <= 2:
+            continue
+
+        veh = vehicle_ids[v_idx] if v_idx < len(vehicle_ids) else str(v_idx + 1)
+        cap = vehicle_caps[v_idx] if v_idx < len(vehicle_caps) else None
+        total_wozki = 0
+
+        for node_idx in route:
+            if node_idx == 0:
+                continue
+            total_wozki += node_dem[node_idx]
+            ws.append([veh, cap, node_names[node_idx], node_addr[node_idx], node_dem[node_idx], ""])
+
+        # szara linia podsumowująca pojazd
+        ws.append(["", "", "", "", total_wozki, ""])
+        summary_row_idx = ws.max_row
+        for col in range(1, len(columns) + 1):
+            ws.cell(row=summary_row_idx, column=col).fill = gray_fill
+            ws.cell(row=summary_row_idx, column=col).font = bold_font
+
+    output = BytesIO()
+    wb.save(output)
+    return output.getvalue()
+
+
 def routes_to_word_bytes(routes, nodes, vehicle_ids, vehicle_caps, dur_s_matrix, service_time_s) -> bytes:
     doc = Document()
     doc.add_heading("Planowanie tras Plantpol", level=1)
@@ -1233,39 +1277,7 @@ with tab_result:
             service_time_s
         )
 
-        export_rows = []
-        node_names = nodes["name"].tolist()
-        node_addr = nodes["address"].tolist()
-        node_dem = nodes["demand_wozki"].astype(int).tolist()
-
-        for v_idx, route in enumerate(routes):
-            if len(route) <= 2:
-                continue
-
-            veh = vehicle_ids[v_idx] if v_idx < len(vehicle_ids) else str(v_idx + 1)
-            cap = vehicle_caps[v_idx] if v_idx < len(vehicle_caps) else None
-            route_times = calc_arrival_departure_for_route(
-                route,
-                dur_s_matrix,
-                service_time_s
-            )
-
-            for stop_no, node_idx in enumerate(route):
-                arrival, departure = route_times[stop_no]
-                export_rows.append({
-                    "samochód": veh,
-                    "pojemność": cap,
-                    "numer_przystanku": stop_no,
-                    "nazwa": node_names[node_idx],
-                    "adres": node_addr[node_idx],
-                    "ilość_wózków": node_dem[node_idx],
-                    "godzina_przyjazdu_i_wyjazdu": f"{fmt_hhmm(arrival)} - {fmt_hhmm(departure)}",
-                })
-
-        out_df = pd.DataFrame(export_rows)
-
-        # XLSX
-        xlsx_bytes = df_to_xlsx_bytes(out_df, sheet_name="Trasy")
+        xlsx_bytes = routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps)
         st.download_button(
             "Pobierz wynik tras XLSX",
             data=xlsx_bytes,
