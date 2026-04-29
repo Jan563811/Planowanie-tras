@@ -970,9 +970,23 @@ def df_to_xlsx_bytes(df: pd.DataFrame, sheet_name: str = "Dane") -> bytes:
     return output.getvalue()
 
 
+_VEHICLE_COLORS = [
+    "FFC000",  # amber
+    "4472C4",  # blue
+    "00B050",  # green
+    "FF4B4B",  # red
+    "7030A0",  # purple
+    "00B0F0",  # sky blue
+    "FF6600",  # orange
+    "70AD47",  # light green
+    "C00000",  # dark red
+    "0070C0",  # dark blue
+]
+
+
 def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> bytes:
     from openpyxl import Workbook
-    from openpyxl.styles import PatternFill, Font, Border, Side
+    from openpyxl.styles import PatternFill, Font, Border, Side, Alignment
 
     wb = Workbook()
     ws = wb.active
@@ -994,6 +1008,7 @@ def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> byt
 
     summary_fill = PatternFill(start_color="C0C0C0", end_color="C0C0C0", fill_type="solid")
     thick_bottom = Border(bottom=Side(style="thick", color="000000"))
+    right_align = Alignment(horizontal="right")
 
     for v_idx, route in enumerate(routes):
         if len(route) <= 2:
@@ -1003,6 +1018,9 @@ def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> byt
         cap = vehicle_caps[v_idx] if v_idx < len(vehicle_caps) else None
         total_wozki = 0
         first_stop = True
+
+        color_hex = _VEHICLE_COLORS[v_idx % len(_VEHICLE_COLORS)]
+        vehicle_fill = PatternFill(start_color=color_hex, end_color=color_hex, fill_type="solid")
 
         for node_idx in route:
             if node_idx == 0:
@@ -1016,16 +1034,18 @@ def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> byt
                 node_dem[node_idx],
                 "",
             ])
+            ws.cell(row=ws.max_row, column=1).fill = vehicle_fill
             first_stop = False
 
-        # szara linia podsumowująca — kolumny 1-5, z grubą dolną krawędzią
-        ws.append([veh, "SUMA", "", "", total_wozki, ""])
+        # szara linia podsumowująca — SUMA w kolumnie adres (4), wyrównana do prawej
+        ws.append([veh, "", "", "SUMA", total_wozki, ""])
         summary_row_idx = ws.max_row
         for col in range(1, 6):
             cell = ws.cell(row=summary_row_idx, column=col)
             cell.fill = summary_fill
             cell.font = bold_font
             cell.border = thick_bottom
+        ws.cell(row=summary_row_idx, column=4).alignment = right_align
 
     output = BytesIO()
     wb.save(output)
