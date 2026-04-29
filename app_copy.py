@@ -246,7 +246,7 @@ with tpl_col2:
 
 st.markdown("### Parametry planowania")
 
-col_p1, col_p2, col_p3, col_p4, col_p5, col_p6 = st.columns(6)
+col_p1, col_p2, col_p3, col_p4, col_p5, col_p6, col_p7 = st.columns(7)
 
 with col_p1:
     vehicle_fixed_cost_ui = st.number_input(
@@ -290,10 +290,18 @@ with col_p5:
 
 with col_p6:
     long_jump_penalty = st.number_input(
-        "Kara za przejazd >1.5h",
+        "Wysokość kary za długi przejazd",
         min_value=0,
         value=10000,
         step=1000,
+    )
+
+with col_p7:
+    long_jump_threshold_min = st.number_input(
+        "Próg kary — czas przejazdu (min)",
+        min_value=5,
+        value=90,
+        step=5,
     )
 
 time_limit_s = st.slider("Limit czasu szukania rozwiązania (sek.)", 2, 60, 12, 1)
@@ -301,8 +309,8 @@ time_limit_s = st.slider("Limit czasu szukania rozwiązania (sek.)", 2, 60, 12, 
 service_time_s = int(service_time_h * 3600)
 max_route_work_s = int(max_route_hours * 3600)
 vehicle_fixed_cost = int(vehicle_fixed_cost_ui)
-vehicle_fixed_cost = int(vehicle_fixed_cost_ui)
 max_stops_per_route = int(max_stops_per_route_ui)
+long_jump_threshold_s = int(long_jump_threshold_min * 60)
 # =========================
 # Helpers: wczytywanie
 # =========================
@@ -658,7 +666,8 @@ def solve_vrp_capacity(
     service_time_s=5400,
     max_route_work_s=28800,
     max_stops_per_route=5,
-    proximity_penalty_factor=0.2
+    proximity_penalty_factor=0.2,
+    long_jump_threshold_s=5400,
 ):
 
 
@@ -680,8 +689,8 @@ def solve_vrp_capacity(
             # kara proporcjonalna (Twoja)
             extra_penalty += int(travel_s * proximity_penalty_factor)
 
-            # 🔥 kara skokowa
-            if travel_s > 5400:
+            # kara skokowa za przejazd powyżej progu
+            if travel_s > long_jump_threshold_s:
                 extra_penalty += long_jump_penalty
 
         return base_cost + extra_penalty
@@ -1342,6 +1351,7 @@ with tab_result:
             max_route_work_s=max_route_work_s,
             max_stops_per_route=max_stops_per_route,
             proximity_penalty_factor=proximity_penalty_factor,
+            long_jump_threshold_s=long_jump_threshold_s,
 )
 
         solver_pb.progress(100)
