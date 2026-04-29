@@ -297,11 +297,11 @@ with col_p6:
     )
 
 with col_p7:
-    long_jump_threshold_min = st.number_input(
-        "Próg kary — czas przejazdu (min)",
-        min_value=5,
-        value=90,
-        step=5,
+    long_jump_threshold_h = st.number_input(
+        "Próg kary — czas przejazdu (godziny)",
+        min_value=0.0,
+        value=1.5,
+        step=0.25,
     )
 
 time_limit_s = st.slider("Limit czasu szukania rozwiązania (sek.)", 2, 60, 12, 1)
@@ -310,7 +310,7 @@ service_time_s = int(service_time_h * 3600)
 max_route_work_s = int(max_route_hours * 3600)
 vehicle_fixed_cost = int(vehicle_fixed_cost_ui)
 max_stops_per_route = int(max_stops_per_route_ui)
-long_jump_threshold_s = int(long_jump_threshold_min * 60)
+long_jump_threshold_s = int(long_jump_threshold_h * 3600)
 # =========================
 # Helpers: wczytywanie
 # =========================
