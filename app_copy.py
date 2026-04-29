@@ -69,9 +69,8 @@ API_KEY = st.secrets["GOOGLE_MAPS_API_KEY"]
 # Limit testowy (punkty)
 MAX_POINTS = 150
 
-# Cache dla macierzy (lokalnie)
-CACHE_DIR = "cache_dm"
-os.makedirs(CACHE_DIR, exist_ok=True)
+# Cache par macierzy (punkt→punkt)
+DM_PAIRS_CACHE_PATH = "dm_pairs_cache.json"
 
 # Cache dla geocodingu
 GEOCODING_CACHE_DIR = "cache_geocoding"
@@ -84,6 +83,21 @@ GEOCODING_CSV_PATH = "geocoding_cache.csv"
 # =========================
 # Helper: Geocoding GitHub cache
 # =========================
+def load_pairs_cache_from_github() -> dict:
+    """Załaduj cache par dystansów z GitHub"""
+    if not GITHUB_AVAILABLE:
+        return {}
+    if "GITHUB_TOKEN" not in st.secrets or "GITHUB_REPO" not in st.secrets:
+        return {}
+    try:
+        g = Github(st.secrets["GITHUB_TOKEN"])
+        repo = g.get_repo(st.secrets["GITHUB_REPO"])
+        file = repo.get_contents(DM_PAIRS_CACHE_PATH)
+        return json.loads(file.decoded_content.decode("utf-8"))
+    except Exception:
+        return {}
+
+
 def load_geocoding_from_github():
     """Załaduj cache geocodingu z GitHub (minimalizuj zapytania do API)"""
     if not GITHUB_AVAILABLE:
@@ -124,6 +138,17 @@ if "geocoding_cache_df" not in st.session_state:
         st.session_state["geocoding_cache_df"] = pd.DataFrame(
             columns=["address", "lat", "lng", "formatted_address", "status", "cached_at"]
         )
+
+if "dm_pairs_cache" not in st.session_state:
+    if os.path.exists(DM_PAIRS_CACHE_PATH):
+        with open(DM_PAIRS_CACHE_PATH, "r", encoding="utf-8") as f:
+            st.session_state["dm_pairs_cache"] = json.load(f)
+    else:
+        gh_pairs = load_pairs_cache_from_github()
+        st.session_state["dm_pairs_cache"] = gh_pairs
+        if gh_pairs:
+            with open(DM_PAIRS_CACHE_PATH, "w", encoding="utf-8") as f:
+                json.dump(gh_pairs, f)
 
 # Baza (depot)
 BASE_NAME = "_Plantpol baza"
@@ -458,31 +483,12 @@ def update_geocoding_csv_github():
         return False, f"❌ Błąd commitowania: {str(e)}"
 
 
-def load_matrix_from_github(key: str):
-    """Załaduj macierz dystansów/czasów z GitHub cache"""
-    if not GITHUB_AVAILABLE:
-        return None, None
-    if "GITHUB_TOKEN" not in st.secrets or "GITHUB_REPO" not in st.secrets:
-        return None, None
-    try:
-        g = Github(st.secrets["GITHUB_TOKEN"])
-        repo = g.get_repo(st.secrets["GITHUB_REPO"])
-        dist_gh = f"cache_dm/{key}_dist.json"
-        dur_gh = f"cache_dm/{key}_dur.json"
-        dist_file = repo.get_contents(dist_gh)
-        dur_file = repo.get_contents(dur_gh)
-        dist = json.loads(dist_file.decoded_content.decode("utf-8"))
-        dur = json.loads(dur_file.decoded_content.decode("utf-8"))
-        local_dist, local_dur = cache_paths(key)
-        save_matrix_json(local_dist, dist)
-        save_matrix_json(local_dur, dur)
-        return dist, dur
-    except Exception:
-        return None, None
+def dm_pair_key(lat_o: float, lng_o: float, lat_d: float, lng_d: float) -> str:
+    raw = f"{lat_o:.7f},{lng_o:.7f}|{lat_d:.7f},{lng_d:.7f}".encode()
+    return hashlib.sha256(raw).hexdigest()
 
 
-def save_matrix_to_github(key: str, dist, dur):
-    """Commitnij macierz dystansów/czasów do GitHub cache"""
+def push_pairs_cache_to_github(pairs: dict, n_new: int):
     if not GITHUB_AVAILABLE:
         return
     if "GITHUB_TOKEN" not in st.secrets or "GITHUB_REPO" not in st.secrets:
@@ -490,14 +496,18 @@ def save_matrix_to_github(key: str, dist, dur):
     try:
         g = Github(st.secrets["GITHUB_TOKEN"])
         repo = g.get_repo(st.secrets["GITHUB_REPO"])
-        for suffix, data in [("_dist", dist), ("_dur", dur)]:
-            gh_path = f"cache_dm/{key}{suffix}.json"
-            content = json.dumps(data)
-            try:
-                existing = repo.get_contents(gh_path)
-                repo.update_file(gh_path, f"Auto: Update matrix cache {key[:8]}", content, existing.sha)
-            except Exception:
-                repo.create_file(gh_path, f"Auto: Create matrix cache {key[:8]}", content)
+        content = json.dumps(pairs)
+        try:
+            existing = repo.get_contents(DM_PAIRS_CACHE_PATH)
+            repo.update_file(
+                DM_PAIRS_CACHE_PATH,
+                f"Auto: Update DM pairs cache (+{n_new} par)",
+                content, existing.sha,
+            )
+        except Exception:
+            repo.create_file(DM_PAIRS_CACHE_PATH, "Auto: Create DM pairs cache", content)
+        with open(DM_PAIRS_CACHE_PATH, "w", encoding="utf-8") as f:
+            f.write(content)
     except Exception:
         pass
 
@@ -509,29 +519,6 @@ def format_latlng(lat, lng) -> str:
 def chunked_idx(n, chunk_size):
     for i in range(0, n, chunk_size):
         yield list(range(i, min(i + chunk_size, n)))
-
-
-def matrix_cache_key(points_latlng: list[str], mode: str = "driving") -> str:
-    payload = {"mode": mode, "points": points_latlng}
-    raw = json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
-    return hashlib.sha256(raw).hexdigest()
-
-
-def cache_paths(key: str):
-    return (
-        os.path.join(CACHE_DIR, f"{key}_dist.json"),
-        os.path.join(CACHE_DIR, f"{key}_dur.json"),
-    )
-
-
-def save_matrix_json(path: str, matrix):
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(matrix, f)
-
-
-def load_matrix_json(path: str):
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
 
 
 def distance_matrix_google(origins, destinations, mode="driving"):
@@ -567,58 +554,84 @@ def distance_matrix_google(origins, destinations, mode="driving"):
 
 
 def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05):
-    key = matrix_cache_key(points_latlng, mode=mode)
-    dist_path, dur_path = cache_paths(key)
-
-    # 1. Lokalny cache
-    if os.path.exists(dist_path) and os.path.exists(dur_path):
-        st.info(f"Macierz: załadowana z lokalnego cache (cache_dm/{key[:8]}…)")
-        return load_matrix_json(dist_path), load_matrix_json(dur_path), True
-
-    # 2. GitHub cache
-    dist_gh, dur_gh = load_matrix_from_github(key)
-    if dist_gh is not None and dur_gh is not None:
-        st.info(f"Macierz: załadowana z GitHub cache (cache_dm/{key[:8]}…)")
-        return dist_gh, dur_gh, True
-
-    st.warning(f"Macierz: nie znaleziono w cache — pobieranie z Google Distance Matrix API (klucz: {key[:8]}…)")
     n = len(points_latlng)
+    coords = [tuple(map(float, p.split(","))) for p in points_latlng]
+    pairs = st.session_state.get("dm_pairs_cache", {})
+
+    missing_count = sum(
+        1 for i in range(n) for j in range(n)
+        if i != j and dm_pair_key(*coords[i], *coords[j]) not in pairs
+    )
+
+    if missing_count == 0:
+        st.info(f"Macierz: wszystkie {n*(n-1)} par w cache — bez zapytań do Google API")
+        dist = [[0]*n for _ in range(n)]
+        dur  = [[0]*n for _ in range(n)]
+        for i in range(n):
+            for j in range(n):
+                if i == j:
+                    continue
+                e = pairs[dm_pair_key(*coords[i], *coords[j])]
+                dist[i][j] = e.get("d")
+                dur[i][j]  = e.get("t")
+        return dist, dur, True
+
+    st.warning(f"Macierz: brakuje {missing_count} par w cache — pobieranie z Google Distance Matrix API")
+
     for batch_size in [10, 8, 5, 4, 2]:
         try:
-            dist = [[None] * n for _ in range(n)]
-            dur = [[None] * n for _ in range(n)]
-
             origin_batches = list(chunked_idx(n, batch_size))
-            dest_batches = list(chunked_idx(n, batch_size))
+            dest_batches   = list(chunked_idx(n, batch_size))
 
-            total_calls = len(origin_batches) * len(dest_batches)
-            pb = st.progress(0)
+            batches_to_fetch = [
+                (ob, db)
+                for ob in origin_batches
+                for db in dest_batches
+                if any(
+                    i != j and dm_pair_key(*coords[i], *coords[j]) not in pairs
+                    for i in ob for j in db
+                )
+            ]
+
+            new_pairs   = {}
+            total_calls = len(batches_to_fetch)
+            pb  = st.progress(0)
             txt = st.empty()
-            call_no = 0
 
-            for ob in origin_batches:
-                origins = [points_latlng[i] for i in ob]
-                for db in dest_batches:
-                    destinations = [points_latlng[j] for j in db]
-                    dist_m, dur_s = distance_matrix_google(origins, destinations, mode=mode)
+            for call_no, (ob, db) in enumerate(batches_to_fetch, 1):
+                origins      = [points_latlng[i] for i in ob]
+                destinations = [points_latlng[j] for j in db]
+                dist_m, dur_s = distance_matrix_google(origins, destinations, mode=mode)
 
-                    for oi, i in enumerate(ob):
-                        for dj, j in enumerate(db):
-                            dist[i][j] = dist_m[oi][dj]
-                            dur[i][j] = dur_s[oi][dj]
+                for oi, i in enumerate(ob):
+                    for dj, j in enumerate(db):
+                        if i != j:
+                            new_pairs[dm_pair_key(*coords[i], *coords[j])] = {
+                                "d": dist_m[oi][dj],
+                                "t": dur_s[oi][dj],
+                            }
 
-                    call_no += 1
-                    pb.progress(int(call_no / total_calls * 100))
-                    txt.text(f"Macierz: {call_no}/{total_calls} zapytań (batch={batch_size})")
-                    time.sleep(sleep_s)
+                pb.progress(int(call_no / total_calls * 100))
+                txt.text(f"Macierz: {call_no}/{total_calls} zapytań (batch={batch_size})")
+                time.sleep(sleep_s)
 
             pb.empty()
             txt.empty()
 
-            save_matrix_json(dist_path, dist)
-            save_matrix_json(dur_path, dur)
-            save_matrix_to_github(key, dist, dur)
-            st.success(f"Macierz: zapisana do lokalnego cache i GitHub (klucz: {key[:8]}…)")
+            pairs.update(new_pairs)
+            st.session_state["dm_pairs_cache"] = pairs
+            push_pairs_cache_to_github(pairs, len(new_pairs))
+            st.success(f"Macierz: pobrano {len(new_pairs)} nowych par, cache zaktualizowany")
+
+            dist = [[0]*n for _ in range(n)]
+            dur  = [[0]*n for _ in range(n)]
+            for i in range(n):
+                for j in range(n):
+                    if i == j:
+                        continue
+                    e = pairs.get(dm_pair_key(*coords[i], *coords[j])) or {}
+                    dist[i][j] = e.get("d")
+                    dur[i][j]  = e.get("t")
             return dist, dur, False
 
         except RuntimeError as e:
