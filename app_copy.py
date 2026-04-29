@@ -1135,7 +1135,7 @@ def build_map_html(routes, nodes, vehicle_ids) -> str:
     center_lat = sum(x[0] for x in valid) / len(valid)
     center_lng = sum(x[1] for x in valid) / len(valid)
 
-    m = folium.Map(location=[center_lat, center_lng], zoom_start=7, tiles="OpenStreetMap")
+    m = folium.Map(location=[center_lat, center_lng], zoom_start=7, tiles="CartoDB positron")
 
     folium.Marker(
         location=[lats[0], lngs[0]],
