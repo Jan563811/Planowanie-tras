@@ -1108,9 +1108,70 @@ def routes_to_word_bytes(routes, nodes, vehicle_ids, vehicle_caps, dur_s_matrix,
 
 
 # =========================
+# Mapa
+# =========================
+def build_map_html(routes, nodes, vehicle_ids) -> str:
+    import folium
+
+    lats = nodes["latitude"].tolist()
+    lngs = nodes["longitude"].tolist()
+    names = nodes["name"].tolist()
+    addrs = nodes["address"].tolist()
+
+    valid = [(la, ln) for la, ln in zip(lats, lngs) if la is not None and ln is not None]
+    center_lat = sum(x[0] for x in valid) / len(valid)
+    center_lng = sum(x[1] for x in valid) / len(valid)
+
+    m = folium.Map(location=[center_lat, center_lng], zoom_start=7, tiles="OpenStreetMap")
+
+    folium.Marker(
+        location=[lats[0], lngs[0]],
+        tooltip="Plantpol – baza",
+        icon=folium.Icon(color="black", icon="home", prefix="fa"),
+    ).add_to(m)
+
+    for v_idx, route in enumerate(routes):
+        if len(route) <= 2:
+            continue
+
+        veh = vehicle_ids[v_idx] if v_idx < len(vehicle_ids) else str(v_idx + 1)
+        color = f"#{_VEHICLE_COLORS[v_idx % len(_VEHICLE_COLORS)]}"
+
+        coords = [
+            (lats[idx], lngs[idx]) for idx in route
+            if lats[idx] is not None and lngs[idx] is not None
+        ]
+        if len(coords) >= 2:
+            folium.PolyLine(
+                coords,
+                color=color,
+                weight=2.5,
+                opacity=0.8,
+                tooltip=f"Pojazd {veh}",
+            ).add_to(m)
+
+        for node_idx in route:
+            if node_idx == 0:
+                continue
+            if lats[node_idx] is None or lngs[node_idx] is None:
+                continue
+            folium.CircleMarker(
+                location=[lats[node_idx], lngs[node_idx]],
+                radius=7,
+                color=color,
+                fill=True,
+                fill_color=color,
+                fill_opacity=0.9,
+                tooltip=f"Pojazd {veh} | {names[node_idx]} | {addrs[node_idx]}",
+            ).add_to(m)
+
+    return m.get_root().render()
+
+
+# =========================
 # Zakładki
 # =========================
-tab_result, tab_geocode, tab_matrix = st.tabs(["Wynik trasowania", "Geokodowanie", "Macierz"])
+tab_result, tab_geocode, tab_matrix, tab_map = st.tabs(["Wynik trasowania", "Geokodowanie", "Macierz", "Mapa"])
 
 with tab_result:
     run_all = st.button("URUCHOM CAŁY PROCES", type="primary", use_container_width=True)
@@ -1362,5 +1423,25 @@ with tab_matrix:
 
         st.write("Czas [min]:")
         st.dataframe(st.session_state["dur_min_df"].round(1), use_container_width=True)
+    else:
+        st.info("Brak danych – uruchom proces w zakładce Wynik trasowania.")
+
+
+with tab_map:
+    st.subheader("Mapa tras")
+    if "routes" in st.session_state and "nodes_df" in st.session_state:
+        map_html = build_map_html(
+            st.session_state["routes"],
+            st.session_state["nodes_df"],
+            st.session_state.get("vehicle_ids", []),
+        )
+        st.components.v1.html(map_html, height=600, scrolling=False)
+        st.download_button(
+            "Pobierz mapę HTML",
+            data=map_html.encode("utf-8"),
+            file_name="mapa_tras.html",
+            mime="text/html",
+            use_container_width=True,
+        )
     else:
         st.info("Brak danych – uruchom proces w zakładce Wynik trasowania.")
