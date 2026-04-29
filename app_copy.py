@@ -972,7 +972,7 @@ def df_to_xlsx_bytes(df: pd.DataFrame, sheet_name: str = "Dane") -> bytes:
 
 def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> bytes:
     from openpyxl import Workbook
-    from openpyxl.styles import PatternFill, Font
+    from openpyxl.styles import PatternFill, Font, Border, Side
 
     wb = Workbook()
     ws = wb.active
@@ -981,12 +981,19 @@ def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> byt
     columns = ["nr pojazdu", "Pojemnosc", "Nazwa", "adres", "liczba wózków", "przewoźnik"]
     ws.append(columns)
 
+    header_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+    bold_font = Font(bold=True)
+    for col in range(1, len(columns) + 1):
+        cell = ws.cell(row=1, column=col)
+        cell.fill = header_fill
+        cell.font = bold_font
+
     node_names = nodes["name"].tolist()
     node_addr = nodes["address"].tolist()
     node_dem = nodes["demand_wozki"].astype(int).tolist()
 
-    gray_fill = PatternFill(start_color="C0C0C0", end_color="C0C0C0", fill_type="solid")
-    bold_font = Font(bold=True)
+    summary_fill = PatternFill(start_color="C0C0C0", end_color="C0C0C0", fill_type="solid")
+    thick_bottom = Border(bottom=Side(style="thick", color="000000"))
 
     for v_idx, route in enumerate(routes):
         if len(route) <= 2:
@@ -1011,12 +1018,14 @@ def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> byt
             ])
             first_stop = False
 
-        # szara linia podsumowująca — tylko do kolumny "liczba wózków" (5)
+        # szara linia podsumowująca — kolumny 1-5, z grubą dolną krawędzią
         ws.append([veh, "SUMA", "", "", total_wozki, ""])
         summary_row_idx = ws.max_row
         for col in range(1, 6):
-            ws.cell(row=summary_row_idx, column=col).fill = gray_fill
-            ws.cell(row=summary_row_idx, column=col).font = bold_font
+            cell = ws.cell(row=summary_row_idx, column=col)
+            cell.fill = summary_fill
+            cell.font = bold_font
+            cell.border = thick_bottom
 
     output = BytesIO()
     wb.save(output)
