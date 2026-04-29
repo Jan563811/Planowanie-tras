@@ -995,17 +995,26 @@ def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> byt
         veh = vehicle_ids[v_idx] if v_idx < len(vehicle_ids) else str(v_idx + 1)
         cap = vehicle_caps[v_idx] if v_idx < len(vehicle_caps) else None
         total_wozki = 0
+        first_stop = True
 
         for node_idx in route:
             if node_idx == 0:
                 continue
             total_wozki += node_dem[node_idx]
-            ws.append([veh, cap, node_names[node_idx], node_addr[node_idx], node_dem[node_idx], ""])
+            ws.append([
+                veh if first_stop else "",
+                cap if first_stop else "",
+                node_names[node_idx],
+                node_addr[node_idx],
+                node_dem[node_idx],
+                "",
+            ])
+            first_stop = False
 
-        # szara linia podsumowująca pojazd
+        # szara linia podsumowująca — tylko do kolumny "liczba wózków" (5)
         ws.append(["", "", "", "", total_wozki, ""])
         summary_row_idx = ws.max_row
-        for col in range(1, len(columns) + 1):
+        for col in range(1, 6):
             ws.cell(row=summary_row_idx, column=col).fill = gray_fill
             ws.cell(row=summary_row_idx, column=col).font = bold_font
 
