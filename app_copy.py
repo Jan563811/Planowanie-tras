@@ -1012,7 +1012,7 @@ def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> byt
             first_stop = False
 
         # szara linia podsumowująca — tylko do kolumny "liczba wózków" (5)
-        ws.append(["", "", "", "", total_wozki, ""])
+        ws.append([veh, "SUMA", "", "", total_wozki, ""])
         summary_row_idx = ws.max_row
         for col in range(1, 6):
             ws.cell(row=summary_row_idx, column=col).fill = gray_fill
