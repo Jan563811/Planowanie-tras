@@ -341,21 +341,20 @@ def geocode_cache_key(address: str) -> str:
 
 
 def geocode_address(address: str):
-    # 1️⃣ Sprawdź lokalny JSON cache (najszybciej)
     cache_key = geocode_cache_key(address)
     cache_file = os.path.join(GEOCODING_CACHE_DIR, f"{cache_key}.json")
-    
+
+    # 1. Lokalny JSON cache
     if os.path.exists(cache_file):
         with open(cache_file, "r", encoding="utf-8") as f:
             cached = json.load(f)
-        return cached["lat"], cached["lng"], cached["formatted"], cached["status"]
-    
-    # 2️⃣ Sprawdź CSV cache w session_state (załadowany z GitHub)
+        return cached["lat"], cached["lng"], cached["formatted"], cached["status"], "lokalny JSON"
+
+    # 2. CSV cache z GitHub (session_state)
     if address in st.session_state["geocoding_cache_df"]["address"].values:
         row = st.session_state["geocoding_cache_df"][
             st.session_state["geocoding_cache_df"]["address"] == address
         ].iloc[0]
-        # Zapisz do lokalnego JSON aby następnym razem było jeszcze szybciej
         cache_data = {
             "lat": row["lat"],
             "lng": row["lng"],
@@ -364,9 +363,9 @@ def geocode_address(address: str):
         }
         with open(cache_file, "w", encoding="utf-8") as f:
             json.dump(cache_data, f)
-        return row["lat"], row["lng"], row["formatted_address"], row["status"]
-    
-    # 3️⃣ Tylko gdy nie ma w cache'u -> pobierz z Google API (płatne!)
+        return row["lat"], row["lng"], row["formatted_address"], row["status"], "GitHub CSV"
+
+    # 3. Google Geocoding API
     url = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {"address": address, "key": API_KEY}
     r = requests.get(url, params=params, timeout=25)
@@ -378,12 +377,11 @@ def geocode_address(address: str):
         lat, lng, status = loc["lat"], loc["lng"], "OK"
     else:
         lat, lng, formatted, status = None, None, "", data.get("status", "UNKNOWN")
-    
-    # Zapisz do cache'u (lokalny JSON + session_state)
+
     cache_data = {"lat": lat, "lng": lng, "formatted": formatted, "status": status}
     with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(cache_data, f)
-    
+
     new_row = pd.DataFrame([{
         "address": address,
         "lat": lat,
@@ -392,14 +390,13 @@ def geocode_address(address: str):
         "status": status,
         "cached_at": datetime.now().isoformat()
     }])
-    
     st.session_state["geocoding_cache_df"] = pd.concat(
         [st.session_state["geocoding_cache_df"], new_row],
         ignore_index=True
     )
     st.session_state["geocoding_updates"].add(address)
-    
-    return lat, lng, formatted, status
+
+    return lat, lng, formatted, status, "Google API"
 
 
 def save_geocoding_to_csv():
@@ -459,6 +456,50 @@ def update_geocoding_csv_github():
     
     except Exception as e:
         return False, f"❌ Błąd commitowania: {str(e)}"
+
+
+def load_matrix_from_github(key: str):
+    """Załaduj macierz dystansów/czasów z GitHub cache"""
+    if not GITHUB_AVAILABLE:
+        return None, None
+    if "GITHUB_TOKEN" not in st.secrets or "GITHUB_REPO" not in st.secrets:
+        return None, None
+    try:
+        g = Github(st.secrets["GITHUB_TOKEN"])
+        repo = g.get_repo(st.secrets["GITHUB_REPO"])
+        dist_gh = f"cache_dm/{key}_dist.json"
+        dur_gh = f"cache_dm/{key}_dur.json"
+        dist_file = repo.get_contents(dist_gh)
+        dur_file = repo.get_contents(dur_gh)
+        dist = json.loads(dist_file.decoded_content.decode("utf-8"))
+        dur = json.loads(dur_file.decoded_content.decode("utf-8"))
+        local_dist, local_dur = cache_paths(key)
+        save_matrix_json(local_dist, dist)
+        save_matrix_json(local_dur, dur)
+        return dist, dur
+    except Exception:
+        return None, None
+
+
+def save_matrix_to_github(key: str, dist, dur):
+    """Commitnij macierz dystansów/czasów do GitHub cache"""
+    if not GITHUB_AVAILABLE:
+        return
+    if "GITHUB_TOKEN" not in st.secrets or "GITHUB_REPO" not in st.secrets:
+        return
+    try:
+        g = Github(st.secrets["GITHUB_TOKEN"])
+        repo = g.get_repo(st.secrets["GITHUB_REPO"])
+        for suffix, data in [("_dist", dist), ("_dur", dur)]:
+            gh_path = f"cache_dm/{key}{suffix}.json"
+            content = json.dumps(data)
+            try:
+                existing = repo.get_contents(gh_path)
+                repo.update_file(gh_path, f"Auto: Update matrix cache {key[:8]}", content, existing.sha)
+            except Exception:
+                repo.create_file(gh_path, f"Auto: Create matrix cache {key[:8]}", content)
+    except Exception:
+        pass
 
 
 def format_latlng(lat, lng) -> str:
@@ -529,9 +570,18 @@ def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05):
     key = matrix_cache_key(points_latlng, mode=mode)
     dist_path, dur_path = cache_paths(key)
 
+    # 1. Lokalny cache
     if os.path.exists(dist_path) and os.path.exists(dur_path):
+        st.info(f"Macierz: załadowana z lokalnego cache (cache_dm/{key[:8]}…)")
         return load_matrix_json(dist_path), load_matrix_json(dur_path), True
 
+    # 2. GitHub cache
+    dist_gh, dur_gh = load_matrix_from_github(key)
+    if dist_gh is not None and dur_gh is not None:
+        st.info(f"Macierz: załadowana z GitHub cache (cache_dm/{key[:8]}…)")
+        return dist_gh, dur_gh, True
+
+    st.warning(f"Macierz: nie znaleziono w cache — pobieranie z Google Distance Matrix API (klucz: {key[:8]}…)")
     n = len(points_latlng)
     for batch_size in [10, 8, 5, 4, 2]:
         try:
@@ -567,6 +617,8 @@ def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05):
 
             save_matrix_json(dist_path, dist)
             save_matrix_json(dur_path, dur)
+            save_matrix_to_github(key, dist, dur)
+            st.success(f"Macierz: zapisana do lokalnego cache i GitHub (klucz: {key[:8]}…)")
             return dist, dur, False
 
         except RuntimeError as e:
@@ -1035,20 +1087,28 @@ with tab_result:
         geo_txt = st.empty()
 
         lats, lngs, formatted, statuses = [], [], [], []
+        geo_sources = {"lokalny JSON": 0, "GitHub CSV": 0, "Google API": 0}
         total = len(points_df)
         for i, addr in enumerate(points_df["adres"]):
-            lat, lng, fmt, status = geocode_address(addr)
+            lat, lng, fmt, status, source = geocode_address(addr)
             lats.append(lat)
             lngs.append(lng)
             formatted.append(fmt)
             statuses.append(status)
+            geo_sources[source] = geo_sources.get(source, 0) + 1
 
             p = int((i + 1) / total * 100)
             geo_pb.progress(p)
-            geo_txt.text(f"Geokodowanie: {i+1}/{total} ({p}%)")
+            geo_txt.text(f"Geokodowanie: {i+1}/{total} ({p}%) — ostatni: {source}")
 
         geo_pb.empty()
         geo_txt.empty()
+        st.info(
+            f"Geokodowanie — źródła: "
+            f"{geo_sources['lokalny JSON']} z lokalnego cache | "
+            f"{geo_sources['GitHub CSV']} z GitHub CSV | "
+            f"{geo_sources['Google API']} nowych z Google API"
+        )
 
         points_df["latitude"] = lats
         points_df["longitude"] = lngs
