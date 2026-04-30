@@ -1168,19 +1168,6 @@ def build_map_html(routes, nodes, vehicle_ids) -> str:
         veh = vehicle_ids[v_idx] if v_idx < len(vehicle_ids) else str(v_idx + 1)
         color = _MAP_COLORS[v_idx % len(_MAP_COLORS)]
 
-        coords = [
-            (lats[idx], lngs[idx]) for idx in route
-            if lats[idx] is not None and lngs[idx] is not None
-        ]
-        if len(coords) >= 2:
-            folium.PolyLine(
-                coords,
-                color=color,
-                weight=2.5,
-                opacity=0.8,
-                tooltip=f"Pojazd {veh}",
-            ).add_to(m)
-
         for node_idx in route:
             if node_idx == 0:
                 continue
