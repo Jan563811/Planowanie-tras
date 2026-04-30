@@ -1039,16 +1039,18 @@ def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> byt
     thick_bottom = Border(bottom=Side(style="thick", color="000000"))
     right_align = Alignment(horizontal="right")
 
+    seq_num = 0
     for v_idx, route in enumerate(routes):
         if len(route) <= 2:
             continue
 
-        veh = vehicle_ids[v_idx] if v_idx < len(vehicle_ids) else str(v_idx + 1)
+        seq_num += 1
+        veh = seq_num
         cap = vehicle_caps[v_idx] if v_idx < len(vehicle_caps) else None
         total_wozki = 0
         first_stop = True
 
-        color_hex = _XLSX_COLORS[v_idx % len(_XLSX_COLORS)]
+        color_hex = _XLSX_COLORS[(seq_num - 1) % len(_XLSX_COLORS)]
         vehicle_fill = PatternFill(start_color=color_hex, end_color=color_hex, fill_type="solid")
 
         for node_idx in route:
