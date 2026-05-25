@@ -560,3 +560,7 @@ address,lat,lng,formatted_address,status,cached_at
 "95-035 Sierpów, Polska",52.0175376,19.2478694,"95-035 Sierpów, Poland",OK,2026-05-19T10:17:20.112181
 "24-130 Chrząchów, Polska",51.4155556,22.122513,"24-130 Chrząchów, Poland",OK,2026-05-19T10:17:20.262671
 "Stropkov, Polska",51.919438,19.145136,Poland,OK,2026-05-20T11:01:15.179828
+"36-200 Brzozów, Polska",49.69427,22.01936,"Brzozów, Poland",OK,2026-05-25T11:37:06.156001
+"45-434 Opole, Polska",50.6696932,17.9861221,"45-434 Opole, Poland",OK,2026-05-25T11:37:06.298610
+"87-410 Kowalewo Pomorskie, Polska",53.15467,18.89802,"87-410 Kowalewo Pomorskie, Poland",OK,2026-05-25T11:37:06.416834
+"56-400 Oleśnica, Polska",51.2134346,17.3898504,"Oleśnica, Poland",OK,2026-05-25T11:37:06.554245
