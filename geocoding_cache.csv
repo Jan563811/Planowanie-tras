@@ -594,3 +594,5 @@ address,lat,lng,formatted_address,status,cached_at
 "21-533 Rossosz, Polska",51.8378851,23.101683,"21-533 Rossosz, Poland",OK,2026-06-01T12:33:47.809761
 "32-600 Zaborze, Polska",50.0216163,19.2408601,"32-600 Zaborze, Poland",OK,2026-06-01T12:33:47.919412
 "32-700 Bochnia, Polska",49.96845769999999,20.4303285,"32-700 Bochnia, Poland",OK,2026-06-01T12:33:48.028802
+"32-084 Mników, Polska",50.0598347,19.7212303,"Mników, Poland",OK,2026-06-08T09:35:09.686075
+"0 Sanok, Polska",49.55501870000001,22.2060658,"Sanok, Poland",OK,2026-06-08T09:35:09.882866
