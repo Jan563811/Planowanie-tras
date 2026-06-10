@@ -614,3 +614,5 @@ address,lat,lng,formatted_address,status,cached_at
 "1460 Warszawa Wola Park, Polska",52.2418581,20.9311432,"Górczewska 124, 01-460 Warszawa, Poland",OK,2026-06-09T11:45:14.948422
 "26-260 Fałków, Polska",51.1346523,20.1013233,"Fałków, Poland",OK,2026-06-09T11:45:15.056984
 "5510 Konstancin-Jeziorna, Polska",52.0938717,21.117722,"Konstancin-Jeziorna, Poland",OK,2026-06-09T11:45:15.159847
+"32-010 Sulechów, Polska",50.1263152,20.1012167,"32-010 Sulechów, Poland",OK,2026-06-10T08:40:24.957478
+"55-633 Wrocław, Polska",51.10929480000001,17.0386019,"Wrocław, Poland",OK,2026-06-10T08:40:25.054474
