@@ -616,3 +616,11 @@ address,lat,lng,formatted_address,status,cached_at
 "5510 Konstancin-Jeziorna, Polska",52.0938717,21.117722,"Konstancin-Jeziorna, Poland",OK,2026-06-09T11:45:15.159847
 "32-010 Sulechów, Polska",50.1263152,20.1012167,"32-010 Sulechów, Poland",OK,2026-06-10T08:40:24.957478
 "55-633 Wrocław, Polska",51.10929480000001,17.0386019,"Wrocław, Poland",OK,2026-06-10T08:40:25.054474
+"05-330 Wałbrzych, Polska",50.7840092,16.2843553,"Wałbrzych, Poland",OK,2026-06-15T11:48:24.819797
+"04-330 Bytom, Polska",50.3483816,18.9157175,"Bytom, Poland",OK,2026-06-15T11:48:24.945872
+"04-330 Mielec, Polska",50.287063,21.4238101,"Mielec, Poland",OK,2026-06-15T11:48:25.055232
+"03-330 Zagórze, Polska",53.9680648,15.8416235,"Zagórze 3, 78-217, Poland",OK,2026-06-15T11:48:25.176484
+"04-330 Tarnów, Polska",50.5727219,16.7898197,"Tarnów 4, 57-200, Poland",OK,2026-06-15T11:48:25.312666
+"03-330 Zakopane, Polska",49.299181,19.9495621,"Zakopane, Poland",OK,2026-06-15T11:48:25.421855
+"42-674 Jaśkowice, Polska",50.4130568,18.6644555,"Jaśkowice, Poland",OK,2026-06-15T11:48:25.536398
+"02-330 TARNÓW, Polska",50.5716841,16.7887976,"Tarnów 2, 57-200, Poland",OK,2026-06-15T11:48:25.670410
