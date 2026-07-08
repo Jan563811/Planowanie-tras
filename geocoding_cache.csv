@@ -624,3 +624,6 @@ address,lat,lng,formatted_address,status,cached_at
 "03-330 Zakopane, Polska",49.299181,19.9495621,"Zakopane, Poland",OK,2026-06-15T11:48:25.421855
 "42-674 Jaśkowice, Polska",50.4130568,18.6644555,"Jaśkowice, Poland",OK,2026-06-15T11:48:25.536398
 "02-330 TARNÓW, Polska",50.5716841,16.7887976,"Tarnów 2, 57-200, Poland",OK,2026-06-15T11:48:25.670410
+"26-670 Pionki, Polska",51.4757752,21.4500545,"Pionki, Poland",OK,2026-07-08T10:41:51.052331
+"44-280 Rydułtowy, Polska",50.057879,18.4173822,"44-280 Rydułtowy, Poland",OK,2026-07-08T10:41:51.328022
+"26-008 Górno, Polska",50.8488082,20.8221799,"26-008 Górno, Poland",OK,2026-07-08T10:41:51.494828
