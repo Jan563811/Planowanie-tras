@@ -1013,7 +1013,35 @@ _XLSX_COLORS = [
 ]
 
 
-def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> bytes:
+def _route_distance_for_stop(route, dist_km_df, stop_index):
+    if dist_km_df is None:
+        return 0.0
+
+    node_idx = route[stop_index]
+    if node_idx == 0:
+        return 0.0
+
+    prev_idx = route[stop_index - 1] if stop_index > 0 else 0
+    value = dist_km_df.iloc[prev_idx, node_idx] if pd.notna(dist_km_df.iloc[prev_idx, node_idx]) else 0.0
+    return float(value)
+
+
+def _route_total_km(route, dist_km_df):
+    if dist_km_df is None or len(route) <= 1:
+        return 0.0
+
+    total = 0.0
+    for i in range(len(route) - 1):
+        frm = route[i]
+        to = route[i + 1]
+        if frm == 0 and to == 0:
+            continue
+        val = dist_km_df.iloc[frm, to] if pd.notna(dist_km_df.iloc[frm, to]) else 0.0
+        total += float(val)
+    return total
+
+
+def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps, dist_km_df=None) -> bytes:
     from openpyxl import Workbook
     from openpyxl.styles import PatternFill, Font, Border, Side, Alignment
 
@@ -1021,7 +1049,7 @@ def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> byt
     ws = wb.active
     ws.title = "Trasy"
 
-    columns = ["nr pojazdu", "Pojemnosc", "Nazwa", "adres", "liczba wózków", "przewoźnik"]
+    columns = ["nr pojazdu", "Pojemnosc", "Nazwa", "adres", "km", "liczba wózków", "przewoźnik"]
     ws.append(columns)
 
     header_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
@@ -1048,42 +1076,45 @@ def routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps) -> byt
         veh = seq_num
         cap = vehicle_caps[v_idx] if v_idx < len(vehicle_caps) else None
         total_wozki = 0
+        total_route_km = _route_total_km(route, dist_km_df)
         first_stop = True
 
         color_hex = _XLSX_COLORS[(seq_num - 1) % len(_XLSX_COLORS)]
         vehicle_fill = PatternFill(start_color=color_hex, end_color=color_hex, fill_type="solid")
 
-        for node_idx in route:
+        for stop_no, node_idx in enumerate(route):
             if node_idx == 0:
                 continue
             total_wozki += node_dem[node_idx]
+            distance_km = _route_distance_for_stop(route, dist_km_df, stop_no)
             ws.append([
                 veh if first_stop else "",
                 cap if first_stop else "",
                 node_names[node_idx],
                 node_addr[node_idx],
+                round(distance_km, 1),
                 node_dem[node_idx],
                 "",
             ])
             ws.cell(row=ws.max_row, column=1).fill = vehicle_fill
             first_stop = False
 
-        # szara linia podsumowująca — SUMA w kolumnie adres (4), wyrównana do prawej
-        ws.append([veh, "", "", "SUMA", total_wozki, ""])
+        ws.append([veh, "", "", "SUMA", round(total_route_km, 1), total_wozki, ""])
         summary_row_idx = ws.max_row
-        for col in range(1, 6):
+        for col in range(1, 7):
             cell = ws.cell(row=summary_row_idx, column=col)
             cell.fill = summary_fill
             cell.font = bold_font
             cell.border = thick_bottom
         ws.cell(row=summary_row_idx, column=4).alignment = right_align
+        ws.cell(row=summary_row_idx, column=5).alignment = right_align
 
     output = BytesIO()
     wb.save(output)
     return output.getvalue()
 
 
-def routes_to_word_bytes(routes, nodes, vehicle_ids, vehicle_caps, dur_s_matrix, service_time_s) -> bytes:
+def routes_to_word_bytes(routes, nodes, vehicle_ids, vehicle_caps, dur_s_matrix, service_time_s, dist_km_df=None) -> bytes:
     doc = Document()
     doc.add_heading("Planowanie tras Plantpol", level=1)
 
@@ -1108,25 +1139,38 @@ def routes_to_word_bytes(routes, nodes, vehicle_ids, vehicle_caps, dur_s_matrix,
         )
 
         route_times = calc_arrival_departure_for_route(route, dur_s_matrix, service_time_s)
+        total_route_km = _route_total_km(route, dist_km_df)
 
-        table = doc.add_table(rows=1, cols=5)
+        table = doc.add_table(rows=1, cols=6)
         table.style = "Table Grid"
 
         hdr = table.rows[0].cells
         hdr[0].text = "Numer przystanku"
         hdr[1].text = "Nazwa"
         hdr[2].text = "Adres"
-        hdr[3].text = "Ilość wózków"
-        hdr[4].text = "Godzina przyjazdu i wyjazdu"
+        hdr[3].text = "km"
+        hdr[4].text = "Ilość wózków"
+        hdr[5].text = "Godzina przyjazdu i wyjazdu"
 
         for stop_no, node_idx in enumerate(route):
+            if node_idx == 0:
+                continue
             arrival, departure = route_times[stop_no]
             row = table.add_row().cells
             row[0].text = str(stop_no)
             row[1].text = str(node_names[node_idx])
             row[2].text = str(node_addr[node_idx])
-            row[3].text = str(node_dem[node_idx])
-            row[4].text = f"{fmt_hhmm(arrival)} - {fmt_hhmm(departure)}"
+            row[3].text = f"{_route_distance_for_stop(route, dist_km_df, stop_no):.1f}"
+            row[4].text = str(node_dem[node_idx])
+            row[5].text = f"{fmt_hhmm(arrival)} - {fmt_hhmm(departure)}"
+
+        total_row = table.add_row().cells
+        total_row[0].text = "SUMA"
+        total_row[1].text = ""
+        total_row[2].text = ""
+        total_row[3].text = f"{total_route_km:.1f}"
+        total_row[4].text = str(used_capacity)
+        total_row[5].text = ""
 
         doc.add_paragraph("")
 
@@ -1395,7 +1439,7 @@ with tab_result:
             service_time_s
         )
 
-        xlsx_bytes = routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps)
+        xlsx_bytes = routes_to_styled_xlsx_bytes(routes, nodes, vehicle_ids, vehicle_caps, dist_km_df)
         st.download_button(
             "Pobierz wynik tras XLSX",
             data=xlsx_bytes,
@@ -1410,7 +1454,8 @@ with tab_result:
             vehicle_ids,
             vehicle_caps,
             dur_s_matrix,
-            service_time_s
+            service_time_s,
+            dist_km_df
         )
         st.download_button(
             "Pobierz wynik tras Word",
