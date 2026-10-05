@@ -1194,27 +1194,16 @@ def build_map_html(routes, nodes, vehicle_ids) -> str:
     addrs = nodes["address"].tolist()
 
     valid = [(la, ln) for la, ln in zip(lats, lngs) if la is not None and ln is not None]
-    if not valid:
-        center_lat, center_lng = 52.0, 19.0
-    else:
-        center_lat = sum(x[0] for x in valid) / len(valid)
-        center_lng = sum(x[1] for x in valid) / len(valid)
+    center_lat = sum(x[0] for x in valid) / len(valid)
+    center_lng = sum(x[1] for x in valid) / len(valid)
 
-    # Używamy standardowego, bez-kluczowego layeru OpenStreetMap.
-    # Pozbywa się komunikatu o braku API key na mapie.
-    m = folium.Map(
-        location=[center_lat, center_lng],
-        zoom_start=7,
-        tiles="OpenStreetMap",
-        control_scale=True,
-    )
+    m = folium.Map(location=[center_lat, center_lng], zoom_start=7, tiles="CartoDB positron")
 
-    if len(lats) > 0 and len(lngs) > 0 and lats[0] is not None and lngs[0] is not None:
-        folium.Marker(
-            location=[lats[0], lngs[0]],
-            tooltip="Plantpol – baza",
-            icon=folium.Icon(color="black", icon="home", prefix="fa"),
-        ).add_to(m)
+    folium.Marker(
+        location=[lats[0], lngs[0]],
+        tooltip="Plantpol – baza",
+        icon=folium.Icon(color="black", icon="home", prefix="fa"),
+    ).add_to(m)
 
     for v_idx, route in enumerate(routes):
         if len(route) <= 2:
