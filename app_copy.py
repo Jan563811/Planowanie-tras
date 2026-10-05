@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import hashlib
 import time
@@ -367,36 +368,111 @@ def safe_int(x, default=0) -> int:
 # =========================
 # Helpers: Google APIs
 # =========================
-def geocode_cache_key(address: str) -> str:
-    """Generuj klucz cache'u dla adresu"""
-    raw = address.lower().strip().encode("utf-8")
+def normalize_address_for_cache(address: str) -> str:
+    """Uprość adres do klucza typu: kod + miasto, bez resetu istniejącego cache."""
+    if address is None:
+        return ""
+
+    s = str(address).strip().lower()
+    s = s.replace(".", " ")
+    s = re.sub(r"\s+", " ", s)
+    s = re.sub(r"[^a-ząćęłńóśźż0-9\s,/-]", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+
+    if not s:
+        return ""
+
+    # Najpierw spróbuj wyciągnąć kod pocztowy + miasto, bo to jest stabilny klucz.
+    m = re.search(r"(\d{2}-\d{3})\s*[-, ]*\s*([a-ząćęłńóśźż0-9\s-]+)", s)
+    if m:
+        code = m.group(1)
+        city = re.sub(r"\s+", " ", m.group(2)).strip()
+        if city:
+            return f"{code}|{city}"
+
+    # Fallback: najpierw dajemy stabilny, krótki klucz na podstawie wyrażeń z adresu.
+    # Nie resetujemy danych, tylko rozszerzamy kompatybilność z dawnym cache.
+    return s
+
+
+def legacy_geocode_cache_key(address: str) -> str:
+    """Stary sposób generowania klucza, zachowany dla kompatybilności z istniejącym cache."""
+    raw = str(address).lower().strip().encode("utf-8")
     return hashlib.sha256(raw).hexdigest()
 
 
+def geocode_cache_key(address: str) -> str:
+    """Generuj klucz cache'u dla adresu, ale zachowaj kompatybilność z istniejącym cache."""
+    normalized = normalize_address_for_cache(address)
+    raw = str(address).lower().strip().encode("utf-8")
+    key_base = normalized if normalized else str(address).lower().strip()
+    return hashlib.sha256(key_base.encode("utf-8")).hexdigest()
+
+
 def geocode_address(address: str):
-    cache_key = geocode_cache_key(address)
-    cache_file = os.path.join(GEOCODING_CACHE_DIR, f"{cache_key}.json")
+    normalized_key = geocode_cache_key(address)
+    legacy_key = legacy_geocode_cache_key(address)
+    cache_file = os.path.join(GEOCODING_CACHE_DIR, f"{normalized_key}.json")
+    legacy_cache_file = os.path.join(GEOCODING_CACHE_DIR, f"{legacy_key}.json")
 
-    # 1. Lokalny JSON cache
-    if os.path.exists(cache_file):
-        with open(cache_file, "r", encoding="utf-8") as f:
-            cached = json.load(f)
-        return cached["lat"], cached["lng"], cached["formatted"], cached["status"], "lokalny JSON"
+    # 1. Lokalny JSON cache (nowy i stary klucz, aby nie tracić istniejących danych)
+    for candidate in [cache_file, legacy_cache_file]:
+        if os.path.exists(candidate):
+            with open(candidate, "r", encoding="utf-8") as f:
+                cached = json.load(f)
+            return cached["lat"], cached["lng"], cached["formatted"], cached["status"], "lokalny JSON"
 
-    # 2. CSV cache z GitHub (session_state)
-    if address in st.session_state["geocoding_cache_df"]["address"].values:
-        row = st.session_state["geocoding_cache_df"][
-            st.session_state["geocoding_cache_df"]["address"] == address
-        ].iloc[0]
-        cache_data = {
-            "lat": row["lat"],
-            "lng": row["lng"],
-            "formatted": row["formatted_address"],
-            "status": row["status"]
-        }
-        with open(cache_file, "w", encoding="utf-8") as f:
-            json.dump(cache_data, f)
-        return row["lat"], row["lng"], row["formatted_address"], row["status"], "GitHub CSV"
+    # 2. CSV cache z GitHub (session_state): porównujemy po znormalizowanym adresie, nie po surowym stringu
+    df = st.session_state["geocoding_cache_df"]
+    if "address" in df.columns:
+        normalized_target = normalize_address_for_cache(address)
+        if normalized_target:
+            matched = df[df["address"].map(lambda x: normalize_address_for_cache(x) == normalized_target)]
+            if not matched.empty:
+                row = matched.iloc[0]
+                cache_data = {
+                    "lat": row["lat"],
+                    "lng": row["lng"],
+                    "formatted": row["formatted_address"],
+                    "status": row["status"]
+                }
+                with open(cache_file, "w", encoding="utf-8") as f:
+                    json.dump(cache_data, f)
+                return row["lat"], row["lng"], row["formatted_address"], row["status"], "GitHub CSV"
+
+    # 3. Google Geocoding API
+    url = "https://maps.googleapis.com/maps/api/geocode/json"
+    params = {"address": address, "key": API_KEY}
+    r = requests.get(url, params=params, timeout=25)
+    data = r.json()
+
+    if data.get("status") == "OK" and data.get("results"):
+        loc = data["results"][0]["geometry"]["location"]
+        formatted = data["results"][0].get("formatted_address", "")
+        lat, lng, status = loc["lat"], loc["lng"], "OK"
+    else:
+        lat, lng, formatted, status = None, None, "", data.get("status", "UNKNOWN")
+
+    cache_data = {"lat": lat, "lng": lng, "formatted": formatted, "status": status}
+    with open(cache_file, "w", encoding="utf-8") as f:
+        json.dump(cache_data, f)
+
+    # Zostawiamy stary plik, aby nie tracić istniejącego cache, tylko zapisujemy nowy wariant.
+    new_row = pd.DataFrame([{
+        "address": address,
+        "lat": lat,
+        "lng": lng,
+        "formatted_address": formatted,
+        "status": status,
+        "cached_at": datetime.now().isoformat()
+    }])
+    st.session_state["geocoding_cache_df"] = pd.concat(
+        [st.session_state["geocoding_cache_df"], new_row],
+        ignore_index=True
+    )
+    st.session_state["geocoding_updates"].add(address)
+
+    return lat, lng, formatted, status, "Google API"
 
     # 3. Google Geocoding API
     url = "https://maps.googleapis.com/maps/api/geocode/json"
