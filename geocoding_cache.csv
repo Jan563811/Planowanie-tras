@@ -750,3 +750,76 @@ address,lat,lng,formatted_address,status,cached_at
 "47-364 Dobra, Polska",50.0749385,18.2080179,"Ochotnicza Straż Pożarna Henkel Polska S.A., Dobra, Studzienna, Racibórz, powiat raciborski, województwo śląskie, 47-400, Polska",OK,2026-10-08T15:03:26.092560
 "48-130 Kietrz, Polska",50.0673219,17.9711818,"48-130, Kietrz, gmina Kietrz, powiat głubczycki, województwo opolskie, Polska",OK,2026-10-08T15:03:27.812087
 "92-005 Łódź, Polska",51.7802056,19.5351718,"92-005, Łódź-Widzew, Łódź, województwo łódzkie, Polska",OK,2026-10-08T15:03:29.953113
+"00-000 Katowice, Polska",50.2464431,18.9903243,"Kopalnia Węgla Kamiennego Wujek (w likwidacji), Załęska Hałda, Załęska Hałda-Brynów, Katowice, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, 40-598, Polska",OK,2026-10-08T15:10:51.815373
+"00-000 Usti nad Orlici, Polska",,,,ZERO_RESULTS,2026-10-08T15:10:53.769557
+"97-310 Jarosty, Polska",,,,ZERO_RESULTS,2026-10-08T15:10:55.831255
+"00-000 Tori vald, Polska",,,,ZERO_RESULTS,2026-10-08T15:10:57.802120
+"00-000 Neveronys, Polska",,,,ZERO_RESULTS,2026-10-08T15:10:59.746355
+"00-000 w.PUSKELNIAI,MARIJAMPOLE, Polska",,,,ZERO_RESULTS,2026-10-08T15:11:02.021736
+"00-000 Raunas nov, Polska",,,,ZERO_RESULTS,2026-10-08T15:11:04.288694
+"26-640 Skaryszew, Polska",51.3148367,21.247528,"26-640, Skaryszew, gmina Skaryszew, powiat radomski, województwo mazowieckie, Polska",OK,2026-10-08T15:11:05.991313
+"05-825 Grodzisk Mazowiecki, Polska",52.1167383,20.6285129,"Raben Polska Sp. z o.o., Jordanowice, Grodzisk Mazowiecki, gmina Grodzisk Mazowiecki, powiat grodziski, województwo mazowieckie, 05-825, Polska",OK,2026-10-08T15:11:07.772008
+"42-202 Częstochowa, Polska",50.8026785,19.1126313,"42-202, Trzech Wieszczów, Częstochowa, województwo śląskie, Polska",OK,2026-10-08T15:11:09.638648
+"43-516 Zabrzeg, Polska",49.9116993,18.9449919,"43-516, Zabrzeg, gmina Czechowice-Dziedzice, powiat bielski, województwo śląskie, Polska",OK,2026-10-08T15:11:11.805580
+"42-221 Częstochowa, Polska",50.8363315,19.0709909,"42-221, Grabówka, Częstochowa, województwo śląskie, Polska",OK,2026-10-08T15:11:13.999040
+"76-200 Siemianice, Polska",54.4977664,17.0605299,"Siemianice, gmina Redzikowo, powiat słupski, województwo pomorskie, Polska",OK,2026-10-08T15:11:15.969096
+"76-015 Cewlino, Polska",54.12511,16.25096,"Cewlino, gmina Manowo, powiat koszaliński, województwo zachodniopomorskie, 76-015, Polska",OK,2026-10-08T15:11:18.044747
+"78-230 Karlino, Polska",54.041656,15.8547762,"78-230, gmina Karlino, powiat białogardzki, województwo zachodniopomorskie, Polska",OK,2026-10-08T15:11:19.674254
+"76-003 Sianów, Polska",54.2697357,16.2747601,"76-003, gmina Sianów, powiat koszaliński, województwo zachodniopomorskie, Polska",OK,2026-10-08T15:11:21.423365
+"71-030 Szczecin, Polska",53.4228531,14.4845362,"71-030, Gumieńce, Zachód, Szczecin, województwo zachodniopomorskie, Polska",OK,2026-10-08T15:11:23.027739
+"71-027 Szczecin, Polska",53.4166892,14.4962735,"71-027, Gumieńce, Zachód, Szczecin, województwo zachodniopomorskie, Polska",OK,2026-10-08T15:11:25.296601
+"72-320 Trzebiatów, Polska",54.0635749,15.2737352,"72-320, Trzebiatów, gmina Trzebiatów, powiat gryficki, województwo zachodniopomorskie, Polska",OK,2026-10-08T15:11:27.662351
+"72-300 Borzyszewo, Polska",53.90158,15.16558,"Borzyszewo, gmina Gryfice, powiat gryficki, województwo zachodniopomorskie, 72-300, Polska",OK,2026-10-08T15:11:30.128624
+"70-847 Szczecin, Polska",53.4106808,14.7064721,"70-847, Dąbie, Prawobrzeże, Szczecin, województwo zachodniopomorskie, Polska",OK,2026-10-08T15:11:32.495715
+"72-005 Przecław, Polska",50.1939186,21.4798564,"Przecław, gmina Przecław, powiat mielecki, województwo podkarpackie, 39-320, Polska",OK,2026-10-08T15:11:34.823197
+"78-650 Mirosławiec, Polska",53.3404056,16.1124766,"78-650, gmina Mirosławiec, powiat wałecki, województwo zachodniopomorskie, Polska",OK,2026-10-08T15:11:37.261233
+"64-510 Nowa Wieś, Polska",52.5158165,16.5776404,"Hochland Polska sp. z o.o., Nowa Wieś, Kaźmierz, gmina Kaźmierz, powiat szamotulski, województwo wielkopolskie, Polska",OK,2026-10-08T15:11:39.636474
+"66-435 Krzeszyce, Polska",52.5915335,15.0169602,"66-435, gmina Krzeszyce, powiat sulęciński, województwo lubuskie, Polska",OK,2026-10-08T15:11:41.655321
+"67-200 Serby, Polska",51.6836433,16.1113322,"Serby, gmina Głogów, powiat głogowski, województwo dolnośląskie, Polska",OK,2026-10-08T15:11:43.812227
+"67-410 Sława, Polska",51.8805341,16.0606329,"67-410, Sława, gmina Sława, powiat wschowski, województwo lubuskie, Polska",OK,2026-10-08T15:11:46.341981
+"56-400 Świerzna, Polska",51.1586325,17.4250025,"Poczta Polska, 396, Świerzna, gmina Oleśnica, powiat oleśnicki, województwo dolnośląskie, 56-400, Polska",OK,2026-10-08T15:11:48.495912
+"51-180 Wrocław, Polska",51.1754268,17.0086695,"51-180, Widawa, Wrocław, województwo dolnośląskie, Polska",OK,2026-10-08T15:11:50.679732
+"55-330 Wilkszyn, Polska",51.1912884,16.8652332,"Wilkszyn, gmina Miękinia, powiat średzki, województwo dolnośląskie, Polska",OK,2026-10-08T15:11:53.331772
+"11-001 Dywity, Polska",53.8604413,20.4873989,"11-001, gmina Dywity, powiat olsztyński, województwo warmińsko-mazurskie, Polska",OK,2026-10-08T15:11:55.509026
+"84-239 Bolszewo, Polska",54.6189967,18.175897,"84-239, Bolszewo, gmina Wejherowo, powiat wejherowski, województwo pomorskie, Polska",OK,2026-10-08T15:11:57.690151
+"82-300 Raczki Elbląskie, Polska",,,,ZERO_RESULTS,2026-10-08T15:11:59.784043
+"80-283 Gdańsk, Polska",54.356777,18.5587011,"80-283, Brętowo, Gdańsk, województwo pomorskie, Polska",OK,2026-10-08T15:12:01.989741
+"83-332 Mezowo k/Kartuz, Polska",,,,ZERO_RESULTS,2026-10-08T15:12:04.196227
+"82-230 Nowy  Staw, Polska",54.1324518,19.0346825,"82-230, Dębina, gmina Nowy Staw, powiat malborski, województwo pomorskie, Polska",OK,2026-10-08T15:12:06.238510
+"83-031 Łęgowo, Polska",54.2151398,18.6456688,"83-031, Łęgowo, gmina Pruszcz Gdański, powiat gdański, województwo pomorskie, Polska",OK,2026-10-08T15:12:08.386263
+"83-032 Pszczółki, Polska",54.1761085,18.6875526,"83-032, Pszczółki, gmina Pszczółki, powiat gdański, województwo pomorskie, Polska",OK,2026-10-08T15:12:10.606652
+"81-002 Gdynia, Polska",54.5454677,18.4439407,"81-002, Cisowa, Gdynia, województwo pomorskie, Polska",OK,2026-10-08T15:12:12.495945
+"83-010 Straszyn, Polska",54.2657843,18.5781558,"83-010, Straszyn, gmina Pruszcz Gdański, powiat gdański, województwo pomorskie, Polska",OK,2026-10-08T15:12:14.101810
+"80-282 Gdańsk, Polska",54.3644272,18.571793,"80-282, Brętowo, Gdańsk, województwo pomorskie, Polska",OK,2026-10-08T15:12:16.380279
+"14-400 Pasłęk, Polska",54.0576835,19.6669515,"14-400, Pasłęk, gmina Pasłęk, powiat elbląski, województwo warmińsko-mazurskie, Polska",OK,2026-10-08T15:12:18.112266
+"86-320 Łasin, Polska",53.5277658,19.0960505,"86-320, gmina Łasin, powiat grudziądzki, województwo kujawsko-pomorskie, Polska",OK,2026-10-08T15:12:19.818137
+"14-411 Rychliki, Polska",53.9865523,19.5066954,"14-411, gmina Rychliki, powiat elbląski, województwo warmińsko-mazurskie, Polska",OK,2026-10-08T15:12:21.500323
+"82-500 Kwidzyn, Polska",53.7412682,18.9425259,"82-500, Kwidzyn, powiat kwidzyński, województwo pomorskie, Polska",OK,2026-10-08T15:12:23.257162
+"83-430 Bartoszylas, Polska",,,,ZERO_RESULTS,2026-10-08T15:12:25.444503
+"83-332 Dzierżążno, Polska",54.3170766,18.266868,"83-332, Dzierżążno, gmina Kartuzy, powiat kartuski, województwo pomorskie, Polska",OK,2026-10-08T15:12:27.043143
+"89-620 Chojnice, Polska",53.6932363,17.6176935,"89-620, gmina Chojnice, powiat chojnicki, województwo pomorskie, Polska",OK,2026-10-08T15:12:29.364424
+"83-207 Kokoszkowy, Polska",54.0013564,18.5337335,"83-207, Kokoszkowy, gmina Starogard Gdański, powiat starogardzki, województwo pomorskie, Polska",OK,2026-10-08T15:12:31.133800
+"87-400 Wrocki, Polska",53.21344,19.17303,"Wrocki, gmina Golub-Dobrzyń, powiat golubsko-dobrzyński, województwo kujawsko-pomorskie, 87-423, Polska",OK,2026-10-08T15:12:32.794100
+"87-148 Turzno, Polska",53.1056869,18.7358654,"Turzno, gmina Łysomice, powiat toruński, województwo kujawsko-pomorskie, 87-148, Polska",OK,2026-10-08T15:12:34.766525
+"87-134 Zławieś Wielka, Polska",53.07175,18.4030371,"87-134, Gutowo, gmina Zławieś Wielka, powiat toruński, województwo kujawsko-pomorskie, Polska",OK,2026-10-08T15:12:36.392091
+"85-542 Bydgoszcz, Polska",53.1504654,17.9718722,"85-542, Jachcice, Bydgoszcz, województwo kujawsko-pomorskie, Polska",OK,2026-10-08T15:12:38.169369
+"89-500 Tuchola, Polska",53.5848394,17.8653033,"89-500, Tuchola, gmina Tuchola, powiat tucholski, województwo kujawsko-pomorskie, Polska",OK,2026-10-08T15:12:40.523187
+"87-214 Płużnica, Polska",53.3135938,18.7975481,"87-214, gmina Płużnica, powiat wąbrzeski, województwo kujawsko-pomorskie, Polska",OK,2026-10-08T15:12:42.814669
+"85-880 Bydgoszcz, Polska",53.1029368,18.1156106,"85-880, Łęgnowo-Wieś, Bydgoszcz, województwo kujawsko-pomorskie, Polska",OK,2026-10-08T15:12:44.505416
+"87-720 Ciechocinek, Polska",52.8762078,18.7932057,"87-720, Ciechocinek, powiat aleksandrowski, województwo kujawsko-pomorskie, Polska",OK,2026-10-08T15:12:46.319261
+"88-220 Osięciny, Polska",52.6421444,18.7234418,"88-220, Osięciny, gmina Osięciny, powiat radziejowski, województwo kujawsko-pomorskie, Polska",OK,2026-10-08T15:12:48.003581
+"58-520 Radomierz, Polska",50.8996352,15.877387,"Thom-Polska Sp. z o.o., Wrocławska, Maciejowa, Radomierz, gmina Janowice Wielkie, powiat karkonoski, województwo dolnośląskie, 58-500, Polska",OK,2026-10-08T15:12:50.019048
+"58-514 Jelenia Góra, Polska",50.8833881,15.6987059,"Sikla Polska Sp. z o.o., Cieplice Śląskie-Zdrój, Jelenia Góra, województwo dolnośląskie, Polska",OK,2026-10-08T15:12:51.799592
+"16-080 Tykocin, Polska",53.1854146,22.7741451,"16-080, Tykocin, gmina Tykocin, powiat białostocki, województwo podlaskie, Polska",OK,2026-10-08T15:12:53.832403
+"16-402 Suwałki, Polska",54.0968074,22.9306741,"16-402, Suwałki, województwo podlaskie, Polska",OK,2026-10-08T15:12:55.836260
+"17-200 Hajnówka, Polska",52.7406115,23.5771515,"17-200, Hajnówka, powiat hajnowski, województwo podlaskie, Polska",OK,2026-10-08T15:12:57.597926
+"18-421 Piątnica, Polska",53.2068894,22.1500282,"18-421, Jeziorko, gmina Piątnica, powiat łomżyński, województwo podlaskie, Polska",OK,2026-10-08T15:12:59.674047
+"15-535 Białystok, Polska",53.1103929,23.185863,"15-535, Dojlidy, Białystok, województwo podlaskie, Polska",OK,2026-10-08T15:13:01.394172
+"15-167 Białystok, Polska",53.1580744,23.1867339,"15-167, Jaroszówka, Białystok, województwo podlaskie, Polska",OK,2026-10-08T15:13:02.991538
+"21-411 Świderki, Polska",51.8456804,22.3386556,"Świderki, gmina Wojcieszków, powiat łukowski, województwo lubelskie, 21-411, Polska",OK,2026-10-08T15:13:04.906821
+"21-400 Sięciaszka Pierwsza, Polska",51.9256728,22.3131867,"Sięciaszka Pierwsza, gmina Łuków, powiat łukowski, województwo lubelskie, 21-400, Polska",OK,2026-10-08T15:13:06.617137
+"08-504 Ułęż, Polska",51.5960951,22.1047575,"08-504, Ułęż, gmina Ułęż, powiat rycki, województwo lubelskie, Polska",OK,2026-10-08T15:13:08.762681
+"24-130 Końskowola, Polska",51.4090458,22.0674646,"24-130, Końskowola, gmina Końskowola, powiat puławski, województwo lubelskie, Polska",OK,2026-10-08T15:13:10.554565
+"21-007 Mełgiew, Polska",51.2249679,22.7696697,"21-007, Mełgiew, gmina Mełgiew, powiat świdnicki, województwo lubelskie, Polska",OK,2026-10-08T15:13:12.737986
+"20-728 Lublin, Polska",51.2312679,22.495163,"20-728, Węglin Południowy, Lublin, województwo lubelskie, Polska",OK,2026-10-08T15:13:14.332307
+"24-160 Wąwolnica, Polska",51.3060406,22.1222658,"24-160, Bartłomiejowice, gmina Wąwolnica, powiat puławski, województwo lubelskie, Polska",OK,2026-10-08T15:13:16.621379
