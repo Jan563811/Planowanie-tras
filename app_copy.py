@@ -65,7 +65,7 @@ with col2:
     )
 st.markdown("---")
 
-API_KEY = st.secrets["GOOGLE_MAPS_API_KEY"]
+API_KEY = st.secrets.get("GOOGLE_MAPS_API_KEY", "")
 
 # Limit testowy (punkty)
 MAX_POINTS = 150
@@ -79,6 +79,10 @@ os.makedirs(GEOCODING_CACHE_DIR, exist_ok=True)
 
 # CSV cache dla Streamlit Cloud
 GEOCODING_CSV_PATH = "geocoding_cache.csv"
+NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
+OSRM_TABLE_URL = "https://router.project-osrm.org/table/v1/driving"
+OSM_USER_AGENT = "PlantpolRoutePlanner/1.0 (route planning application)"
+_last_nominatim_request_at = 0.0
 
 
 # =========================
@@ -244,6 +248,20 @@ with tpl_col2:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True,
     )
+
+st.markdown("### Źródła geokodowania i tras")
+selected_api_provider = st.selectbox(
+    "Dostawca API",
+    ["Google Maps", "OpenStreetMap (bezpłatne)"],
+    key="routing_api_provider",
+)
+API_PROVIDER = "osm" if selected_api_provider.startswith("OpenStreetMap") else "google"
+st.caption(
+    "OpenStreetMap korzysta z publicznych usług Nominatim i OSRM: bez klucza API, "
+    "bez gwarancji dostępności i z ograniczeniami użycia. Geokodowanie: maks. 1 nowe zapytanie/s. "
+    "[Zasady Nominatim](https://operations.osmfoundation.org/policies/nominatim/). "
+    "Dane mapowe: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright)."
+)
 
 st.markdown("### Parametry planowania")
 
@@ -440,18 +458,41 @@ def geocode_address(address: str):
                     json.dump(cache_data, f)
                 return row["lat"], row["lng"], row["formatted_address"], row["status"], "GitHub CSV"
 
-    # 3. Google Geocoding API
-    url = "https://maps.googleapis.com/maps/api/geocode/json"
-    params = {"address": address, "key": API_KEY}
-    r = requests.get(url, params=params, timeout=25)
-    data = r.json()
-
-    if data.get("status") == "OK" and data.get("results"):
-        loc = data["results"][0]["geometry"]["location"]
-        formatted = data["results"][0].get("formatted_address", "")
-        lat, lng, status = loc["lat"], loc["lng"], "OK"
+    if API_PROVIDER == "osm":
+        global _last_nominatim_request_at
+        wait_s = 1.05 - (time.monotonic() - _last_nominatim_request_at)
+        if wait_s > 0:
+            time.sleep(wait_s)
+        r = requests.get(
+            NOMINATIM_URL,
+            params={"q": address, "format": "jsonv2", "limit": 1, "countrycodes": "pl"},
+            headers={"User-Agent": OSM_USER_AGENT},
+            timeout=25,
+        )
+        r.raise_for_status()
+        _last_nominatim_request_at = time.monotonic()
+        results = r.json()
+        if results:
+            result = results[0]
+            lat, lng = float(result["lat"]), float(result["lon"])
+            formatted, status = result.get("display_name", ""), "OK"
+        else:
+            lat, lng, formatted, status = None, None, "", "ZERO_RESULTS"
+        source = "Nominatim (OpenStreetMap)"
     else:
-        lat, lng, formatted, status = None, None, "", data.get("status", "UNKNOWN")
+        # Google Geocoding API
+        url = "https://maps.googleapis.com/maps/api/geocode/json"
+        params = {"address": address, "key": API_KEY}
+        r = requests.get(url, params=params, timeout=25)
+        data = r.json()
+
+        if data.get("status") == "OK" and data.get("results"):
+            loc = data["results"][0]["geometry"]["location"]
+            formatted = data["results"][0].get("formatted_address", "")
+            lat, lng, status = loc["lat"], loc["lng"], "OK"
+        else:
+            lat, lng, formatted, status = None, None, "", data.get("status", "UNKNOWN")
+        source = "Google API"
 
     cache_data = {"lat": lat, "lng": lng, "formatted": formatted, "status": status}
     with open(cache_file, "w", encoding="utf-8") as f:
@@ -472,7 +513,7 @@ def geocode_address(address: str):
     )
     st.session_state["geocoding_updates"].add(address)
 
-    return lat, lng, formatted, status, "Google API"
+    return lat, lng, formatted, status, source
 
     # 3. Google Geocoding API
     url = "https://maps.googleapis.com/maps/api/geocode/json"
@@ -514,6 +555,31 @@ def save_geocoding_to_csv():
     return True
 
 
+def merge_geocoding_cache_frames(remote_df: pd.DataFrame, local_df: pd.DataFrame) -> pd.DataFrame:
+    """Dodaj brakujące lokalne adresy, zachowując wszystkie wiersze z GitHub."""
+    if remote_df.empty:
+        return local_df.copy()
+    if local_df.empty or "address" not in remote_df.columns or "address" not in local_df.columns:
+        return remote_df.copy()
+
+    remote_keys = {
+        normalize_address_for_cache(address)
+        for address in remote_df["address"]
+        if normalize_address_for_cache(address)
+    }
+    additions = []
+    for row in local_df.to_dict("records"):
+        key = normalize_address_for_cache(row.get("address", ""))
+        if not key or key not in remote_keys:
+            additions.append(row)
+            if key:
+                remote_keys.add(key)
+
+    if not additions:
+        return remote_df.copy()
+    return pd.concat([remote_df, pd.DataFrame(additions)], ignore_index=True)
+
+
 def update_geocoding_csv_github():
     """Commitnij zaktualizowany CSV do GitHub"""
     if not GITHUB_AVAILABLE:
@@ -533,28 +599,35 @@ def update_geocoding_csv_github():
         g = Github(st.secrets["GITHUB_TOKEN"])
         repo = g.get_repo(st.secrets["GITHUB_REPO"])
         
-        # Przygotuj zawartość CSV
-        csv_content = st.session_state["geocoding_cache_df"].to_csv(index=False)
-        
+        local_df = st.session_state["geocoding_cache_df"]
+        if os.path.exists(GEOCODING_CSV_PATH):
+            disk_df = pd.read_csv(GEOCODING_CSV_PATH)
+            local_df = merge_geocoding_cache_frames(local_df, disk_df)
         try:
-            # Pobierz istniejący plik
             file = repo.get_contents(GEOCODING_CSV_PATH)
-            # Update istniejącego pliku
+            from io import StringIO
+            remote_csv = file.decoded_content.decode("utf-8")
+            remote_df = pd.read_csv(StringIO(remote_csv))
+            merged_df = merge_geocoding_cache_frames(remote_df, local_df)
+            csv_content = merged_df.to_csv(index=False)
             repo.update_file(
                 GEOCODING_CSV_PATH,
                 f"Auto: Update geocoding cache ({num_updates} nowych adresów)",
                 csv_content,
                 file.sha
             )
-        except:
-            # Utwórz nowy plik
+        except Exception as error:
+            if getattr(error, "status", None) != 404:
+                raise
+            merged_df = local_df.copy()
+            csv_content = merged_df.to_csv(index=False)
             repo.create_file(
                 GEOCODING_CSV_PATH,
                 "Auto: Create geocoding cache",
                 csv_content
             )
         
-        # Zapisz lokalnie
+        st.session_state["geocoding_cache_df"] = merged_df
         save_geocoding_to_csv()
         
         # Wyczyść tracker zmian
@@ -568,7 +641,8 @@ def update_geocoding_csv_github():
 
 
 def dm_pair_key(lat_o: float, lng_o: float, lat_d: float, lng_d: float) -> str:
-    raw = f"{lat_o:.7f},{lng_o:.7f}|{lat_d:.7f},{lng_d:.7f}".encode()
+    pair = f"{lat_o:.7f},{lng_o:.7f}|{lat_d:.7f},{lng_d:.7f}"
+    raw = (f"{API_PROVIDER}|{pair}" if API_PROVIDER != "google" else pair).encode()
     return hashlib.sha256(raw).hexdigest()
 
 
@@ -580,20 +654,28 @@ def push_pairs_cache_to_github(pairs: dict, n_new: int):
     try:
         g = Github(st.secrets["GITHUB_TOKEN"])
         repo = g.get_repo(st.secrets["GITHUB_REPO"])
-        content = json.dumps(pairs)
         try:
             existing = repo.get_contents(DM_PAIRS_CACHE_PATH)
+            remote_pairs = json.loads(existing.decoded_content.decode("utf-8"))
+            merged_pairs = {**pairs, **remote_pairs}
+            content = json.dumps(merged_pairs)
             repo.update_file(
                 DM_PAIRS_CACHE_PATH,
                 f"Auto: Update DM pairs cache (+{n_new} par)",
                 content, existing.sha,
             )
-        except Exception:
+        except Exception as error:
+            if getattr(error, "status", None) != 404:
+                raise
+            merged_pairs = dict(pairs)
+            content = json.dumps(merged_pairs)
             repo.create_file(DM_PAIRS_CACHE_PATH, "Auto: Create DM pairs cache", content)
+        pairs.clear()
+        pairs.update(merged_pairs)
         with open(DM_PAIRS_CACHE_PATH, "w", encoding="utf-8") as f:
             f.write(content)
-    except Exception:
-        pass
+    except Exception as error:
+        st.warning(f"Nie udało się zaktualizować cache par na GitHubie: {error}")
 
 
 def format_latlng(lat, lng) -> str:
@@ -637,6 +719,40 @@ def distance_matrix_google(origins, destinations, mode="driving"):
     return dist_m, dur_s
 
 
+def distance_matrix_osrm(origins, destinations):
+    coordinates = origins + destinations
+    osrm_coordinates = []
+    for point in coordinates:
+        lat, lng = map(float, point.split(","))
+        osrm_coordinates.append(f"{lng:.7f},{lat:.7f}")
+
+    source_indices = ";".join(str(index) for index in range(len(origins)))
+    destination_indices = ";".join(
+        str(len(origins) + index) for index in range(len(destinations))
+    )
+    coordinates_path = ";".join(osrm_coordinates)
+    url = f"{OSRM_TABLE_URL}/{coordinates_path}"
+    response = requests.get(
+        url,
+        params={
+            "sources": source_indices,
+            "destinations": destination_indices,
+            "annotations": "distance,duration",
+        },
+        timeout=60,
+    )
+    data = response.json()
+    if response.status_code >= 400 or data.get("code") != "Ok":
+        raise RuntimeError(f"OSRM table error: {data.get('code')} / {data.get('message', '')}")
+    return data["distances"], data["durations"]
+
+
+def distance_matrix(origins, destinations, mode="driving"):
+    if API_PROVIDER == "osm":
+        return distance_matrix_osrm(origins, destinations)
+    return distance_matrix_google(origins, destinations, mode=mode)
+
+
 def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05):
     n = len(points_latlng)
     coords = [tuple(map(float, p.split(","))) for p in points_latlng]
@@ -648,7 +764,7 @@ def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05):
     )
 
     if missing_count == 0:
-        st.info(f"Macierz: wszystkie {n*(n-1)} par w cache — bez zapytań do Google API")
+        st.info(f"Macierz: wszystkie {n*(n-1)} par w cache — bez zapytań do {selected_api_provider}")
         dist = [[0]*n for _ in range(n)]
         dur  = [[0]*n for _ in range(n)]
         for i in range(n):
@@ -660,7 +776,7 @@ def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05):
                 dur[i][j]  = e.get("t")
         return dist, dur, True
 
-    st.warning(f"Macierz: brakuje {missing_count} par w cache — pobieranie z Google Distance Matrix API")
+    st.warning(f"Macierz: brakuje {missing_count} par w cache — pobieranie z {selected_api_provider}")
 
     for batch_size in [10, 8, 5, 4, 2]:
         try:
@@ -685,7 +801,7 @@ def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05):
             for call_no, (ob, db) in enumerate(batches_to_fetch, 1):
                 origins      = [points_latlng[i] for i in ob]
                 destinations = [points_latlng[j] for j in db]
-                dist_m, dur_s = distance_matrix_google(origins, destinations, mode=mode)
+                dist_m, dur_s = distance_matrix(origins, destinations, mode=mode)
 
                 for oi, i in enumerate(ob):
                     for dj, j in enumerate(db):
@@ -719,7 +835,7 @@ def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05):
             return dist, dur, False
 
         except RuntimeError as e:
-            if "MAX_ELEMENTS_EXCEEDED" in str(e):
+            if "MAX_ELEMENTS_EXCEEDED" in str(e) or "TooBig" in str(e):
                 st.warning(f"MAX_ELEMENTS_EXCEEDED dla batch={batch_size}. Zmniejszam batch…")
                 continue
             raise
@@ -1379,7 +1495,12 @@ with tab_result:
         geo_txt = st.empty()
 
         lats, lngs, formatted, statuses = [], [], [], []
-        geo_sources = {"lokalny JSON": 0, "GitHub CSV": 0, "Google API": 0}
+        geo_sources = {
+            "lokalny JSON": 0,
+            "GitHub CSV": 0,
+            "Google API": 0,
+            "Nominatim (OpenStreetMap)": 0,
+        }
         total = len(points_df)
         for i, addr in enumerate(points_df["adres"]):
             lat, lng, fmt, status, source = geocode_address(addr)
@@ -1399,7 +1520,8 @@ with tab_result:
             f"Geokodowanie — źródła: "
             f"{geo_sources['lokalny JSON']} z lokalnego cache | "
             f"{geo_sources['GitHub CSV']} z GitHub CSV | "
-            f"{geo_sources['Google API']} nowych z Google API"
+            f"{geo_sources['Google API']} nowych z Google API | "
+            f"{geo_sources['Nominatim (OpenStreetMap)']} nowych z Nominatim"
         )
 
         points_df["latitude"] = lats
