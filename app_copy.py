@@ -92,18 +92,32 @@ _last_nominatim_request_at = 0.0
 def decode_github_file_content(file_obj):
     """Zabezpiecza się przed GitHub API, które czasem zwraca encoding='none' dla pliku tekstowego."""
     try:
-        encoding = getattr(file_obj, "encoding", None)
-        content = getattr(file_obj, "content", None)
-        if isinstance(content, str):
-            if encoding == "base64":
-                return base64.b64decode(content)
-            if encoding in (None, "none"):
-                return content.encode("utf-8")
         if hasattr(file_obj, "decoded_content"):
             try:
-                return file_obj.decoded_content
+                decoded = file_obj.decoded_content
+                if isinstance(decoded, (bytes, bytearray)):
+                    return bytes(decoded)
             except Exception:
                 pass
+
+        encoding = getattr(file_obj, "encoding", None)
+        content = getattr(file_obj, "content", None)
+        if content is None:
+            return b""
+        if isinstance(content, (bytes, bytearray)):
+            return bytes(content)
+        if isinstance(content, str):
+            text = content.strip()
+            if not text:
+                return b""
+            if encoding == "base64":
+                try:
+                    return base64.b64decode(text)
+                except Exception:
+                    return text.encode("utf-8")
+            if encoding in (None, "none"):
+                return text.encode("utf-8")
+            return content.encode("utf-8")
     except Exception:
         pass
     raise ValueError("Nie udało się odczytać treści pliku z GitHub: brak obsługiwanego formatu encodowania")
@@ -119,7 +133,10 @@ def load_pairs_cache_from_github() -> dict:
         g = Github(st.secrets["GITHUB_TOKEN"])
         repo = g.get_repo(st.secrets["GITHUB_REPO"])
         file = repo.get_contents(DM_PAIRS_CACHE_PATH)
-        return json.loads(decode_github_file_content(file).decode("utf-8"))
+        raw = decode_github_file_content(file)
+        if not raw.strip():
+            return {}
+        return json.loads(raw.decode("utf-8"))
     except Exception:
         return {}
 
@@ -138,12 +155,14 @@ def load_geocoding_from_github():
         
         try:
             file = repo.get_contents(GEOCODING_CSV_PATH)
-            csv_content = decode_github_file_content(file).decode("utf-8")
+            raw = decode_github_file_content(file)
+            if not raw.strip():
+                return pd.DataFrame(columns=["address", "lat", "lng", "formatted_address", "status", "cached_at"])
             from io import StringIO
-            return pd.read_csv(StringIO(csv_content))
-        except:
+            return pd.read_csv(StringIO(raw.decode("utf-8")))
+        except Exception:
             return None
-    except:
+    except Exception:
         return None
 
 
@@ -627,8 +646,11 @@ def update_geocoding_csv_github():
         try:
             file = repo.get_contents(GEOCODING_CSV_PATH)
             from io import StringIO
-            remote_csv = decode_github_file_content(file).decode("utf-8")
-            remote_df = pd.read_csv(StringIO(remote_csv))
+            remote_raw = decode_github_file_content(file)
+            if not remote_raw.strip():
+                remote_df = pd.DataFrame(columns=["address", "lat", "lng", "formatted_address", "status", "cached_at"])
+            else:
+                remote_df = pd.read_csv(StringIO(remote_raw.decode("utf-8")))
             merged_df = merge_geocoding_cache_frames(remote_df, local_df)
             csv_content = merged_df.to_csv(index=False)
             repo.update_file(
@@ -677,7 +699,11 @@ def push_pairs_cache_to_github(pairs: dict, n_new: int):
         repo = g.get_repo(st.secrets["GITHUB_REPO"])
         try:
             existing = repo.get_contents(DM_PAIRS_CACHE_PATH)
-            remote_pairs = json.loads(decode_github_file_content(existing).decode("utf-8"))
+            raw = decode_github_file_content(existing)
+            if not raw.strip():
+                remote_pairs = {}
+            else:
+                remote_pairs = json.loads(raw.decode("utf-8"))
             merged_pairs = {**pairs, **remote_pairs}
             content = json.dumps(merged_pairs)
             repo.update_file(
