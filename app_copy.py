@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import base64
 import hashlib
 import time
 from typing import List
@@ -88,6 +89,26 @@ _last_nominatim_request_at = 0.0
 # =========================
 # Helper: Geocoding GitHub cache
 # =========================
+def decode_github_file_content(file_obj):
+    """Zabezpiecza się przed GitHub API, które czasem zwraca encoding='none' dla pliku tekstowego."""
+    try:
+        encoding = getattr(file_obj, "encoding", None)
+        content = getattr(file_obj, "content", None)
+        if isinstance(content, str):
+            if encoding == "base64":
+                return base64.b64decode(content)
+            if encoding in (None, "none"):
+                return content.encode("utf-8")
+        if hasattr(file_obj, "decoded_content"):
+            try:
+                return file_obj.decoded_content
+            except Exception:
+                pass
+    except Exception:
+        pass
+    raise ValueError("Nie udało się odczytać treści pliku z GitHub: brak obsługiwanego formatu encodowania")
+
+
 def load_pairs_cache_from_github() -> dict:
     """Załaduj cache par dystansów z GitHub"""
     if not GITHUB_AVAILABLE:
@@ -98,7 +119,7 @@ def load_pairs_cache_from_github() -> dict:
         g = Github(st.secrets["GITHUB_TOKEN"])
         repo = g.get_repo(st.secrets["GITHUB_REPO"])
         file = repo.get_contents(DM_PAIRS_CACHE_PATH)
-        return json.loads(file.decoded_content.decode("utf-8"))
+        return json.loads(decode_github_file_content(file).decode("utf-8"))
     except Exception:
         return {}
 
@@ -117,7 +138,7 @@ def load_geocoding_from_github():
         
         try:
             file = repo.get_contents(GEOCODING_CSV_PATH)
-            csv_content = file.decoded_content.decode("utf-8")
+            csv_content = decode_github_file_content(file).decode("utf-8")
             from io import StringIO
             return pd.read_csv(StringIO(csv_content))
         except:
@@ -606,7 +627,7 @@ def update_geocoding_csv_github():
         try:
             file = repo.get_contents(GEOCODING_CSV_PATH)
             from io import StringIO
-            remote_csv = file.decoded_content.decode("utf-8")
+            remote_csv = decode_github_file_content(file).decode("utf-8")
             remote_df = pd.read_csv(StringIO(remote_csv))
             merged_df = merge_geocoding_cache_frames(remote_df, local_df)
             csv_content = merged_df.to_csv(index=False)
@@ -656,7 +677,7 @@ def push_pairs_cache_to_github(pairs: dict, n_new: int):
         repo = g.get_repo(st.secrets["GITHUB_REPO"])
         try:
             existing = repo.get_contents(DM_PAIRS_CACHE_PATH)
-            remote_pairs = json.loads(existing.decoded_content.decode("utf-8"))
+            remote_pairs = json.loads(decode_github_file_content(existing).decode("utf-8"))
             merged_pairs = {**pairs, **remote_pairs}
             content = json.dumps(merged_pairs)
             repo.update_file(
