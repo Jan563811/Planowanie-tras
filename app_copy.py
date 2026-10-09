@@ -90,36 +90,38 @@ _last_nominatim_request_at = 0.0
 # Helper: Geocoding GitHub cache
 # =========================
 def decode_github_file_content(file_obj):
-    """Zabezpiecza się przed GitHub API, które czasem zwraca encoding='none' dla pliku tekstowego."""
+    """Czyta zawartość pliku z GitHub bez wywoływania `decoded_content` przy `encoding='none'`."""
     try:
-        if hasattr(file_obj, "decoded_content"):
+        raw_data = getattr(file_obj, "_rawData", {}) or {}
+        if isinstance(raw_data, dict):
+            encoding = raw_data.get("encoding")
+            content = raw_data.get("content")
+            if isinstance(content, str):
+                text = content.strip()
+                if not text:
+                    return b""
+                if encoding == "base64":
+                    try:
+                        return base64.b64decode(text)
+                    except Exception:
+                        return text.encode("utf-8")
+                if encoding in (None, "none"):
+                    return text.encode("utf-8")
+                return content.encode("utf-8")
+
+        if hasattr(file_obj, "_content"):
             try:
-                decoded = file_obj.decoded_content
-                if isinstance(decoded, (bytes, bytearray)):
-                    return bytes(decoded)
+                content_value = getattr(file_obj, "_content", None)
+                if isinstance(content_value, str):
+                    text = content_value.strip()
+                    if text:
+                        return text.encode("utf-8")
             except Exception:
                 pass
 
-        encoding = getattr(file_obj, "encoding", None)
-        content = getattr(file_obj, "content", None)
-        if content is None:
-            return b""
-        if isinstance(content, (bytes, bytearray)):
-            return bytes(content)
-        if isinstance(content, str):
-            text = content.strip()
-            if not text:
-                return b""
-            if encoding == "base64":
-                try:
-                    return base64.b64decode(text)
-                except Exception:
-                    return text.encode("utf-8")
-            if encoding in (None, "none"):
-                return text.encode("utf-8")
-            return content.encode("utf-8")
     except Exception:
         pass
+
     raise ValueError("Nie udało się odczytać treści pliku z GitHub: brak obsługiwanego formatu encodowania")
 
 
