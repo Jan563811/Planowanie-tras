@@ -687,8 +687,7 @@ def update_geocoding_csv_github():
 
 def dm_pair_key(lat_o: float, lng_o: float, lat_d: float, lng_d: float) -> str:
     pair = f"{lat_o:.7f},{lng_o:.7f}|{lat_d:.7f},{lng_d:.7f}"
-    raw = (f"{API_PROVIDER}|{pair}" if API_PROVIDER != "google" else pair).encode()
-    return hashlib.sha256(raw).hexdigest()
+    return hashlib.sha256(pair.encode()).hexdigest()
 
 
 def push_pairs_cache_to_github(pairs: dict, n_new: int):
