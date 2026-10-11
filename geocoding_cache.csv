@@ -824,3 +824,28 @@ address,lat,lng,formatted_address,status,cached_at
 "20-728 Lublin, Polska",51.2312679,22.495163,"20-728, Węglin Południowy, Lublin, województwo lubelskie, Polska",OK,2026-10-08T15:13:14.332307
 "24-160 Wąwolnica, Polska",51.3060406,22.1222658,"24-160, Bartłomiejowice, gmina Wąwolnica, powiat puławski, województwo lubelskie, Polska",OK,2026-10-08T15:13:16.621379
 ", Polska",52.215933,19.134422,Polska,OK,2026-10-09T09:08:54.310182
+"39-217 Grabiny, Polska",50.0434589,21.3248378,"39-217, Grabiny, gmina Czarna, powiat dębicki, województwo podkarpackie, Polska",OK,2026-10-11T16:12:40.598599
+"33-230 Szczucin, Polska",50.306092,21.0892228,"33-230, Szczucin, gmina Szczucin, powiat dąbrowski, województwo małopolskie, Polska",OK,2026-10-11T16:12:41.890247
+"33-111 Koszyce Wielkie, Polska",49.9770011,20.9380278,"33-111, Koszyce Wielkie, gmina Tarnów, powiat tarnowski, województwo małopolskie, Polska",OK,2026-10-11T16:12:43.503099
+"33-103 Tarnów, Polska",50.0676892,20.9808456,"33-103, Pawęzów, gmina Lisia Góra, powiat tarnowski, województwo małopolskie, Polska",OK,2026-10-11T16:12:45.237092
+"00-000 Veľká Lomnica, Polska",,,,ZERO_RESULTS,2026-10-11T16:12:46.620917
+"00-000 Roźnava, Polska",,,,ZERO_RESULTS,2026-10-11T16:12:47.974819
+"16-001 Ignatki, Polska",53.0693617,23.1014458,"Ignatki, gmina Juchnowiec Kościelny, powiat białostocki, województwo podlaskie, 16-005, Polska",OK,2026-10-11T16:12:49.579228
+"43-340 Kozy, Polska",49.8449992,19.1423371,"43-340, Kozy, gmina Kozy, powiat bielski, województwo śląskie, Polska",OK,2026-10-11T16:12:51.186099
+"37-500 Wierzbna, Polska",50.6656368,17.2747772,"Wierzbna, gmina Grodków, powiat brzeski, województwo opolskie, Polska",OK,2026-10-11T16:12:52.796920
+"62-700 Turek, Polska",52.0134074,18.4990197,"62-700, Turek, powiat turecki, województwo wielkopolskie, Polska",OK,2026-10-11T16:12:54.346748
+"34-381 Radziechowy, Polska",49.6430192,19.1358573,"34-381, Radziechowy, gmina Radziechowy-Wieprz, powiat żywiecki, województwo śląskie, Polska",OK,2026-10-11T16:12:55.547988
+"00-000 TALSI, Polska",,,,ZERO_RESULTS,2026-10-11T16:12:57.313805
+"00-000 Jogeva maakond, Polska",,,,ZERO_RESULTS,2026-10-11T16:12:59.345809
+"00-000 Cicinai, Polska",,,,ZERO_RESULTS,2026-10-11T16:13:01.072772
+"14-204 Rudzienice, Polska",53.6275471,19.6664709,"14-204, Rudzienice-Kałdunki, Rudzienice, gmina Iława, powiat iławski, województwo warmińsko-mazurskie, Polska",OK,2026-10-11T16:13:02.662663
+"26-026 Bilcza, Polska",50.7873121,20.6198282,"Bilcza, gmina Morawica, powiat kielecki, województwo świętokrzyskie, Polska",OK,2026-10-11T16:13:03.970788
+"28-133 Pacanów, Polska",50.3697834,21.042578,"28-133, Słupia, gmina Pacanów, powiat buski, województwo świętokrzyskie, Polska",OK,2026-10-11T16:13:05.702001
+"25-330 Kielce, Polska",50.8658801,20.670219,"25-330, Kielce, województwo świętokrzyskie, Polska",OK,2026-10-11T16:13:07.435267
+"26-021 Daleszyce, Polska",50.7874772,20.7699747,"26-021, Kranów, gmina Daleszyce, powiat kielecki, województwo świętokrzyskie, Polska",OK,2026-10-11T16:13:08.792471
+"16-300 Żarnowo Drugie, Polska",53.8342117,22.8897622,"Żarnowo Drugie, gmina Augustów, powiat augustowski, województwo podlaskie, Polska",OK,2026-10-11T16:13:10.431988
+"21-104 Niedźwiada, Polska",51.5160266,22.7004302,"21-104, Tarło, gmina Niedźwiada, powiat lubartowski, województwo lubelskie, Polska",OK,2026-10-11T16:13:12.162322
+"36-020 Tyczyn, Polska",49.9561937,22.0489828,"36-020, Tyczyn, gmina Tyczyn, powiat rzeszowski, województwo podkarpackie, Polska",OK,2026-10-11T16:13:13.780281
+"74-505 Mieszkowice, Polska",52.7840834,14.479232,"74-505, Mieszkowice, gmina Mieszkowice, powiat gryfiński, województwo zachodniopomorskie, Polska",OK,2026-10-11T16:13:15.004765
+"66-460 Witnica, Polska",52.6699284,14.8951899,"66-460, Witnica, gmina Witnica, powiat gorzowski, województwo lubuskie, Polska",OK,2026-10-11T16:13:16.256106
+"66-415 Kłodawa, Polska",52.7953415,15.2332157,"66-415, Kłodawa, gmina Kłodawa, powiat gorzowski, województwo lubuskie, Polska",OK,2026-10-11T16:13:17.836096
