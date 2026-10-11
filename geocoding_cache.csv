@@ -912,3 +912,43 @@ address,lat,lng,formatted_address,status,cached_at
 "37-716 Orły, Polska",49.8721225,22.8260206,"37-716, Małkowice, gmina Orły, powiat przemyski, województwo podkarpackie, Polska",OK,2026-10-11T20:40:30.376855
 "33-322 Korzenna, Polska",49.6877692,20.8248969,"33-322, Łyczana, gmina Korzenna, powiat nowosądecki, województwo małopolskie, Polska",OK,2026-10-11T20:40:31.777275
 "39-126 Zagorzyce, Polska",50.0141213,21.6741025,"39-126, Zagorzyce, gmina Sędziszów Małopolski, powiat ropczycko-sędziszowski, województwo podkarpackie, Polska",OK,2026-10-11T20:40:33.618979
+"23-212 Rudnik Szlachecki, Polska",50.963654,22.323872,"Rudnik Szlachecki, gmina Wilkołaz, powiat kraśnicki, województwo lubelskie, Polska",OK,2026-10-11T20:56:13.513527
+"21-150 Kock, Polska",51.6400173,22.4372329,"21-150, Kock, gmina Kock, powiat lubartowski, województwo lubelskie, Polska",OK,2026-10-11T20:56:14.745080
+"22-413 Nielisz, Polska",50.8057474,23.0580804,"22-413, Nielisz, gmina Nielisz, powiat zamojski, województwo lubelskie, Polska",OK,2026-10-11T20:56:16.077743
+"23-100 Bychawa, Polska",51.0064818,22.5415048,"23-100, Bychawa, gmina Bychawa, powiat lubelski, województwo lubelskie, Polska",OK,2026-10-11T20:56:17.702236
+"21-013 Puchaczów, Polska",51.2935341,22.9972703,"21-013, Brzeziny, gmina Puchaczów, powiat łęczyński, województwo lubelskie, Polska",OK,2026-10-11T20:56:19.001714
+"23-107 Strzyżewice, Polska",51.075343,22.4693654,"23-107, Bystrzyca Stara, gmina Strzyżewice, powiat lubelski, województwo lubelskie, Polska",OK,2026-10-11T20:56:20.648859
+"21-008 Płouszowice-Kolonia, Polska",51.2669215,22.4159817,"Płouszowice-Kolonia, gmina Jastków, powiat lubelski, województwo lubelskie, Polska",OK,2026-10-11T20:56:21.930710
+"08-503 Nowodwór, Polska",51.6591548,22.1047008,"08-503, Borki, gmina Nowodwór, powiat rycki, województwo lubelskie, Polska",OK,2026-10-11T20:56:23.090820
+"21-008 Tomaszowice, Polska",51.2813798,22.3820946,"Tomaszowice, gmina Jastków, powiat lubelski, województwo lubelskie, Polska",OK,2026-10-11T20:56:24.724750
+"20-030 Motycz, Polska",51.2395618,22.3812812,"Motycz, gmina Konopnica, powiat lubelski, województwo lubelskie, Polska",OK,2026-10-11T20:56:26.311958
+"08-550 KŁOCZEW, Polska",51.730734,21.9684019,"08-550, Kłoczew, gmina Kłoczew, powiat rycki, województwo lubelskie, Polska",OK,2026-10-11T20:56:27.953221
+"32-840 Zakliczyn, Polska",49.85062,20.7995604,"32-840, Zakliczyn, gmina Zakliczyn, powiat tarnowski, województwo małopolskie, Polska",OK,2026-10-11T20:56:29.500791
+"64-700 Śmieszkowo, Polska",,,,ZERO_RESULTS,2026-10-11T20:56:30.874178
+"62-095 Mściszewo, Polska",,,,ZERO_RESULTS,2026-10-11T20:56:32.615756
+"64-410 Sieraków Wlkp., Polska",52.6459314,16.0893366,"64-410, Sieraków, gmina Sieraków, powiat międzychodzki, województwo wielkopolskie, Polska",OK,2026-10-11T20:56:34.181349
+"64-541 Podrzewie, Polska",,,,ZERO_RESULTS,2026-10-11T20:56:35.426987
+"86-050 Solec Kujawski, Polska",53.0724321,18.2246891,"86-050, Solec Kujawski, gmina Solec Kujawski, powiat bydgoski, województwo kujawsko-pomorskie, Polska",OK,2026-10-11T20:56:37.024501
+"87-700 Aleksandrów kujawski, Polska",52.8667184,18.6950563,"87-700, Aleksandrów Kujawski, powiat aleksandrowski, województwo kujawsko-pomorskie, Polska",OK,2026-10-11T20:56:38.276265
+"87-148 Łysomice, Polska",53.095208,18.6449013,"87-148, gmina Łysomice, powiat toruński, województwo kujawsko-pomorskie, Polska",OK,2026-10-11T20:56:39.874775
+"87-801 Szpetal Górny, Polska",52.6832431,19.1000007,"Szpetal Górny, gmina Fabianki, powiat włocławski, województwo kujawsko-pomorskie, Polska",OK,2026-10-11T20:56:41.493709
+"87-853 Nowa Wieś, Polska",50.457263,20.82771,"Nowa Wieś, gmina Busko-Zdrój, powiat buski, województwo świętokrzyskie, Polska",OK,2026-10-11T20:56:44.258386
+"88-320 Strzelno, Polska",52.6326845,18.1776528,"88-320, Strzelno, gmina Strzelno, powiat mogileński, województwo kujawsko-pomorskie, Polska",OK,2026-10-11T20:56:45.846856
+"64-020 Czempiń, Polska",52.1410998,16.7523376,"64-020, Czempiń, gmina Czempiń, powiat kościański, województwo wielkopolskie, Polska",OK,2026-10-11T20:56:47.438913
+"61-312 Poznań, Polska",52.3581381,17.0112993,"61-312, Szczepankowo, Szczepankowo-Spławie-Krzesinki, Poznań, województwo wielkopolskie, Polska",OK,2026-10-11T20:56:48.772832
+"62-081 Przeźmierowo, Polska",52.4320102,16.7823746,"62-081, Przeźmierowo, gmina Tarnowo Podgórne, powiat poznański, województwo wielkopolskie, Polska",OK,2026-10-11T20:56:50.068290
+"64-111 Lipno, Polska",51.9198855,16.5703517,"64-111, gmina Lipno, powiat leszczyński, województwo wielkopolskie, Polska",OK,2026-10-11T20:56:52.621373
+"64-050 Wielichowo, Polska",52.1273484,16.3476438,"64-050, gmina Wielichowo, powiat grodziski, województwo wielkopolskie, Polska",OK,2026-10-11T20:56:54.185809
+"64-000 Kościan, Polska",52.0807864,16.6583675,"64-000, gmina Kościan, powiat kościański, województwo wielkopolskie, Polska",OK,2026-10-11T20:56:55.756966
+"63-233 Jaraczewo, Polska",51.9555297,17.3424979,"63-233, gmina Jaraczewo, powiat jarociński, województwo wielkopolskie, Polska",OK,2026-10-11T20:56:57.320393
+"64-962 Sypniewo, Polska",53.3706447,17.3257578,"Poczta Polska, 29 Stycznia, Sypniewo, gmina Więcbork, powiat sępoleński, województwo kujawsko-pomorskie, 89-422, Polska",OK,2026-10-11T20:56:58.616968
+"62-130 Gołańcz, Polska",52.9454336,17.3074803,"62-130, Gołańcz, gmina Gołańcz, powiat wągrowiecki, województwo wielkopolskie, Polska",OK,2026-10-11T20:56:59.801505
+"96-214 Cielądz, Polska",51.6971113,20.3417666,"96-214, gmina Cielądz, powiat rawski, województwo łódzkie, Polska",OK,2026-10-11T20:57:01.439943
+"62-635 Przedecz, Polska",52.3373507,18.9198356,"62-635, gmina Przedecz, powiat kolski, województwo wielkopolskie, Polska",OK,2026-10-11T20:57:03.040522
+"99-122 Góra Św. Małgorzaty, Polska",52.0617733,19.3228818,"99-122, Góra Świętej Małgorzaty, gmina Góra Świętej Małgorzaty, powiat łęczycki, województwo łódzkie, Polska",OK,2026-10-11T20:57:04.676246
+"41-404 Mysłowice, Polska",50.2051901,19.1343807,"41-404, Mysłowice, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-11T20:57:06.277312
+"43-176 Gostyń, Polska",50.1083779,18.867223,"43-176, Gostyń, gmina Wyry, powiat mikołowski, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-11T20:57:07.618274
+"43-520 Mnich, Polska",,,,ZERO_RESULTS,2026-10-11T20:57:09.362927
+"26-026 Morawica, Polska",50.7507134,20.6155184,"26-026, Brzeziny, gmina Morawica, powiat kielecki, województwo świętokrzyskie, Polska",OK,2026-10-11T20:57:11.103973
+"26-337 Aleksandrów, Polska",51.2720719,19.9717606,"26-337, Aleksandrów, gmina Aleksandrów, powiat piotrkowski, województwo łódzkie, Polska",OK,2026-10-11T20:57:12.840036
+"97-425 Zelów, Polska",51.4711813,19.2224298,"97-425, Zelów, gmina Zelów, powiat bełchatowski, województwo łódzkie, Polska",OK,2026-10-11T20:57:14.437794
