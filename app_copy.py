@@ -540,7 +540,6 @@ def geocode_address(address: str):
     with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(cache_data, f)
 
-    # Zostawiamy stary plik, aby nie tracić istniejącego cache, tylko zapisujemy nowy wariant.
     new_row = pd.DataFrame([{
         "address": address,
         "lat": lat,
@@ -556,39 +555,6 @@ def geocode_address(address: str):
     st.session_state["geocoding_updates"].add(address)
 
     return lat, lng, formatted, status, source
-
-    # 3. Google Geocoding API
-    url = "https://maps.googleapis.com/maps/api/geocode/json"
-    params = {"address": address, "key": API_KEY}
-    r = requests.get(url, params=params, timeout=25)
-    data = r.json()
-
-    if data.get("status") == "OK" and data.get("results"):
-        loc = data["results"][0]["geometry"]["location"]
-        formatted = data["results"][0].get("formatted_address", "")
-        lat, lng, status = loc["lat"], loc["lng"], "OK"
-    else:
-        lat, lng, formatted, status = None, None, "", data.get("status", "UNKNOWN")
-
-    cache_data = {"lat": lat, "lng": lng, "formatted": formatted, "status": status}
-    with open(cache_file, "w", encoding="utf-8") as f:
-        json.dump(cache_data, f)
-
-    new_row = pd.DataFrame([{
-        "address": address,
-        "lat": lat,
-        "lng": lng,
-        "formatted_address": formatted,
-        "status": status,
-        "cached_at": datetime.now().isoformat()
-    }])
-    st.session_state["geocoding_cache_df"] = pd.concat(
-        [st.session_state["geocoding_cache_df"], new_row],
-        ignore_index=True
-    )
-    st.session_state["geocoding_updates"].add(address)
-
-    return lat, lng, formatted, status, "Google API"
 
 
 def save_geocoding_to_csv():
@@ -623,64 +589,41 @@ def merge_geocoding_cache_frames(remote_df: pd.DataFrame, local_df: pd.DataFrame
 
 
 def update_geocoding_csv_github():
-    """Commitnij zaktualizowany CSV do GitHub"""
+    """Commitnij zaktualizowany CSV do GitHub."""
     if not GITHUB_AVAILABLE:
         return False, "PyGithub nie zainstalowany"
-    
+
     if "GITHUB_TOKEN" not in st.secrets:
         return False, "GITHUB_TOKEN nie znaleziony w secrets"
-    
+
     if "GITHUB_REPO" not in st.secrets:
         return False, "GITHUB_REPO nie znaleziony w secrets (format: user/repo)"
-    
+
     try:
-        # Zapamiętaj liczbę zmian
-        num_updates = len(st.session_state['geocoding_updates'])
-        
-        # Zaloguj do GitHub
+        num_updates = len(st.session_state["geocoding_updates"])
         g = Github(st.secrets["GITHUB_TOKEN"])
         repo = g.get_repo(st.secrets["GITHUB_REPO"])
-        
-        local_df = st.session_state["geocoding_cache_df"]
-        if os.path.exists(GEOCODING_CSV_PATH):
-            disk_df = pd.read_csv(GEOCODING_CSV_PATH)
-            local_df = merge_geocoding_cache_frames(local_df, disk_df)
+        csv_content = st.session_state["geocoding_cache_df"].to_csv(index=False)
+
         try:
             file = repo.get_contents(GEOCODING_CSV_PATH)
-            from io import StringIO
-            remote_raw = decode_github_file_content(file)
-            if not remote_raw.strip():
-                remote_df = pd.DataFrame(columns=["address", "lat", "lng", "formatted_address", "status", "cached_at"])
-            else:
-                remote_df = pd.read_csv(StringIO(remote_raw.decode("utf-8")))
-            merged_df = merge_geocoding_cache_frames(remote_df, local_df)
-            csv_content = merged_df.to_csv(index=False)
             repo.update_file(
                 GEOCODING_CSV_PATH,
                 f"Auto: Update geocoding cache ({num_updates} nowych adresów)",
                 csv_content,
-                file.sha
+                file.sha,
             )
-        except Exception as error:
-            if getattr(error, "status", None) != 404:
-                raise
-            merged_df = local_df.copy()
-            csv_content = merged_df.to_csv(index=False)
+        except Exception:
             repo.create_file(
                 GEOCODING_CSV_PATH,
                 "Auto: Create geocoding cache",
-                csv_content
+                csv_content,
             )
-        
-        st.session_state["geocoding_cache_df"] = merged_df
+
         save_geocoding_to_csv()
-        
-        # Wyczyść tracker zmian
         st.session_state["geocoding_updates"].clear()
-        
         return True, f"✅ Commitnięto {num_updates} nowych adresów do GitHub"
-    
-    
+
     except Exception as e:
         return False, f"❌ Błąd commitowania: {str(e)}"
 
@@ -692,38 +635,29 @@ def dm_pair_key(lat_o: float, lng_o: float, lat_d: float, lng_d: float) -> str:
 
 def push_pairs_cache_to_github(pairs: dict, n_new: int):
     if not GITHUB_AVAILABLE:
-        return
+        return False
     if "GITHUB_TOKEN" not in st.secrets or "GITHUB_REPO" not in st.secrets:
-        return
+        return False
     try:
         g = Github(st.secrets["GITHUB_TOKEN"])
         repo = g.get_repo(st.secrets["GITHUB_REPO"])
+        content = json.dumps(pairs)
         try:
             existing = repo.get_contents(DM_PAIRS_CACHE_PATH)
-            raw = decode_github_file_content(existing)
-            if not raw.strip():
-                remote_pairs = {}
-            else:
-                remote_pairs = json.loads(raw.decode("utf-8"))
-            merged_pairs = {**pairs, **remote_pairs}
-            content = json.dumps(merged_pairs)
             repo.update_file(
                 DM_PAIRS_CACHE_PATH,
                 f"Auto: Update DM pairs cache (+{n_new} par)",
-                content, existing.sha,
+                content,
+                existing.sha,
             )
-        except Exception as error:
-            if getattr(error, "status", None) != 404:
-                raise
-            merged_pairs = dict(pairs)
-            content = json.dumps(merged_pairs)
+        except Exception:
             repo.create_file(DM_PAIRS_CACHE_PATH, "Auto: Create DM pairs cache", content)
-        pairs.clear()
-        pairs.update(merged_pairs)
         with open(DM_PAIRS_CACHE_PATH, "w", encoding="utf-8") as f:
             f.write(content)
+        return True
     except Exception as error:
         st.warning(f"Nie udało się zaktualizować cache par na GitHubie: {error}")
+        return False
 
 
 def format_latlng(lat, lng) -> str:
@@ -868,8 +802,11 @@ def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05):
 
             pairs.update(new_pairs)
             st.session_state["dm_pairs_cache"] = pairs
-            push_pairs_cache_to_github(pairs, len(new_pairs))
-            st.success(f"Macierz: pobrano {len(new_pairs)} nowych par, cache zaktualizowany")
+            cache_synced = push_pairs_cache_to_github(pairs, len(new_pairs))
+            if cache_synced:
+                st.success(f"Macierz: pobrano {len(new_pairs)} nowych par, cache zaktualizowany")
+            else:
+                st.warning("Macierz pobrano, ale zapis cache na GitHubie nie został potwierdzony.")
 
             dist = [[0]*n for _ in range(n)]
             dur  = [[0]*n for _ in range(n)]
