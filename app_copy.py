@@ -735,9 +735,14 @@ def distance_matrix(origins, destinations, mode="driving"):
     return distance_matrix_google(origins, destinations, mode=mode)
 
 
-def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05):
+def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05, postcodes=None):
     n = len(points_latlng)
     coords = [tuple(map(float, p.split(","))) for p in points_latlng]
+    if postcodes is None:
+        postcodes = [""] * n
+    elif len(postcodes) != n:
+        raise ValueError("Liczba kodów pocztowych musi odpowiadać liczbie punktów macierzy.")
+
     pairs = st.session_state.get("dm_pairs_cache", {})
 
     missing_count = sum(
@@ -791,6 +796,8 @@ def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05):
                             new_pairs[dm_pair_key(*coords[i], *coords[j])] = {
                                 "d": dist_m[oi][dj],
                                 "t": dur_s[oi][dj],
+                                "kod_a": postcodes[i],
+                                "kod_b": postcodes[j],
                             }
 
                 pb.progress(int(call_no / total_calls * 100))
@@ -999,6 +1006,7 @@ def build_nodes(points_df: pd.DataFrame) -> pd.DataFrame:
         "node": "BASE",
         "name": BASE_NAME,
         "address": BASE_ADDRESS,
+        "postcode": normalize_postcode(BASE_ADDRESS.split()[0]),
         "latitude": BASE_LAT,
         "longitude": BASE_LNG,
         "demand_wozki": 0,
@@ -1015,9 +1023,10 @@ def build_nodes(points_df: pd.DataFrame) -> pd.DataFrame:
     pts["name"] = pts["name"].where(pts["name"].str.len() > 0, fallback_name)
 
     pts["address"] = pts["adres"].astype("string").fillna("").str.strip()
+    pts["postcode"] = pts["Kod"].astype("string").fillna("").str.strip().apply(normalize_postcode)
     pts["google_formatted_address"] = pts.get("formatted_address", "").astype("string").fillna("").str.strip()
 
-    pts = pts[["node", "name", "address", "google_formatted_address", "latitude", "longitude", "demand_wozki"]]
+    pts = pts[["node", "name", "address", "postcode", "google_formatted_address", "latitude", "longitude", "demand_wozki"]]
     nodes = pd.concat([nodes, pts], ignore_index=True)
     return nodes
 
@@ -1536,7 +1545,12 @@ with tab_result:
 
         points_latlng = [format_latlng(r.latitude, r.longitude) for r in nodes.itertuples(index=False)]
 
-        dist_m, dur_s, from_cache = build_full_matrix(points_latlng, mode="driving", sleep_s=0.05)
+        dist_m, dur_s, from_cache = build_full_matrix(
+            points_latlng,
+            mode="driving",
+            sleep_s=0.05,
+            postcodes=nodes["postcode"].tolist(),
+        )
 
         labels = nodes["node"].tolist()
         dist_km_df = pd.DataFrame(dist_m, index=labels, columns=labels) / 1000.0
