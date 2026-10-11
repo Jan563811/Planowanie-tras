@@ -849,3 +849,7 @@ address,lat,lng,formatted_address,status,cached_at
 "74-505 Mieszkowice, Polska",52.7840834,14.479232,"74-505, Mieszkowice, gmina Mieszkowice, powiat gryfiński, województwo zachodniopomorskie, Polska",OK,2026-10-11T16:13:15.004765
 "66-460 Witnica, Polska",52.6699284,14.8951899,"66-460, Witnica, gmina Witnica, powiat gorzowski, województwo lubuskie, Polska",OK,2026-10-11T16:13:16.256106
 "66-415 Kłodawa, Polska",52.7953415,15.2332157,"66-415, Kłodawa, gmina Kłodawa, powiat gorzowski, województwo lubuskie, Polska",OK,2026-10-11T16:13:17.836096
+"00-000 Brezno, Polska",,,,ZERO_RESULTS,2026-10-11T20:28:26.391101
+"00-000 Topolcany, Polska",,,,ZERO_RESULTS,2026-10-11T20:28:28.227282
+"30-236 Kraków, Polska",50.0730046,19.8540996,"30-236, Zwierzyniec, Kraków, województwo małopolskie, Polska",OK,2026-10-11T20:28:29.461937
+"32-400 Myślenice, Polska",49.8379241,19.9403093,"32-400, Myślenice, gmina Myślenice, powiat myślenicki, województwo małopolskie, Polska",OK,2026-10-11T20:28:30.769943
