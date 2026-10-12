@@ -15,7 +15,7 @@ from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
 try:
-    from github import Github
+    from github import Github, GithubException
     GITHUB_AVAILABLE = True
 except ImportError:
     GITHUB_AVAILABLE = False
@@ -644,14 +644,17 @@ def push_pairs_cache_to_github(pairs: dict, n_new: int):
         content = json.dumps(pairs)
         try:
             existing = repo.get_contents(DM_PAIRS_CACHE_PATH)
+        except GithubException as error:
+            if error.status != 404:
+                raise
+            repo.create_file(DM_PAIRS_CACHE_PATH, "Auto: Create DM pairs cache", content)
+        else:
             repo.update_file(
                 DM_PAIRS_CACHE_PATH,
                 f"Auto: Update DM pairs cache (+{n_new} par)",
                 content,
-                existing.sha,
+                sha=existing.sha,
             )
-        except Exception:
-            repo.create_file(DM_PAIRS_CACHE_PATH, "Auto: Create DM pairs cache", content)
         with open(DM_PAIRS_CACHE_PATH, "w", encoding="utf-8") as f:
             f.write(content)
         return True
