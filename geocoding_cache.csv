@@ -960,3 +960,81 @@ address,lat,lng,formatted_address,status,cached_at
 "62-840 Koźminek, Polska",51.7939658,18.3325749,"62-840, Koźminek, gmina Koźminek, powiat kaliski, województwo wielkopolskie, Polska",OK,2026-10-12T12:29:45.253287
 "40-007 Katowice, Polska",50.2613378,19.027868,"40-007, Śródmieście, Katowice, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-12T12:29:46.845199
 "Baia Sprie, Maramures, Polska",,,,ZERO_RESULTS,2026-10-12T12:29:48.422082
+"64-225 Sulechów, Polska",52.0857192,15.6256482,"BNP Paribas Polska, 2, Plac Ratuszowy, Osiedle Konstytucji 3 Maja, Sulechów, gmina Sulechów, powiat zielonogórski, województwo lubuskie, 66-100, Polska",OK,2026-10-12T13:25:39.423911
+"61-313 Kaczanowo, Polska",,,,ZERO_RESULTS,2026-10-12T13:25:40.736803
+"61-313 Śrem, Polska",52.0949715,17.0220785,"Poczta Polska, 41, Plac 20 Października, Stare Miasto, Śrem, gmina Śrem, powiat śremski, województwo wielkopolskie, 63-100, Polska",OK,2026-10-12T13:25:42.219751
+"61-313 Milcz, Polska",,,,ZERO_RESULTS,2026-10-12T13:25:43.527295
+"61-313 Rokietnica, Polska",52.5086618,16.7371818,"Poczta Polska, 11, Trakt Napoleoński, Przy Trakcie, Rokietnica, gmina Rokietnica, powiat poznański, województwo wielkopolskie, 62-090, Polska",OK,2026-10-12T13:25:44.773942
+"61-313 Golęczewo, Polska",,,,ZERO_RESULTS,2026-10-12T13:25:46.504772
+"61-313 Gowarzewo, Polska",52.3645376,17.1248794,"Chata Polska, 1, Rabowicka, Gowarzewo, gmina Kleszczewo, powiat poznański, województwo wielkopolskie, 63-004, Polska",OK,2026-10-12T13:25:47.814153
+"61-313 Gostyń, Polska",51.8886493,17.0022059,"Poczta Polska Oddział, 7, Księdza Jana Twardowskiego, Pożegowo, Gostyń, gmina Gostyń, powiat gostyński, województwo wielkopolskie, 63-800, Polska",OK,2026-10-12T13:25:49.023966
+"61-313 Wągrowiec, Polska",52.670507,17.1503152,"Poczta Polska, 3, Kościelna, Piaski, Skoki, gmina Skoki, powiat wągrowiecki, województwo wielkopolskie, 62-085, Polska",OK,2026-10-12T13:25:50.229988
+"61-313 Ryczywół, Polska",,,,ZERO_RESULTS,2026-10-12T13:25:51.972095
+"61-313 Krosno Odrzańskie, Polska",52.0539283,15.1014868,"Erste Bank Polska S.A., 21, Poznańska, Srebrna Góra, Krosno Odrzańskie, gmina Krosno Odrzańskie, powiat krośnieński, województwo lubuskie, 66-600, Polska",OK,2026-10-12T13:25:53.244138
+"61-313 Tarnowo Podgórne, Polska",52.4529668,16.7009956,"John Deere Polska Sp. z o.o., 1b, Marianów, Tarnowo Podgórne, gmina Tarnowo Podgórne, powiat poznański, województwo wielkopolskie, 62-080, Polska",OK,2026-10-12T13:25:55.265458
+"62-709 Malanów, Polska",51.9477125,18.4092241,"62-709, gmina Malanów, powiat turecki, województwo wielkopolskie, Polska",OK,2026-10-12T13:25:56.853238
+"44-285 Kornowac, Polska",50.0746618,18.3179447,"44-285, Kornowac, gmina Kornowac, powiat raciborski, województwo śląskie, Polska",OK,2026-10-12T13:25:58.435787
+"94-312 Wodzierady, Polska",,,,ZERO_RESULTS,2026-10-12T13:26:00.166868
+"94-312 Brójce, Polska",,,,ZERO_RESULTS,2026-10-12T13:26:01.527111
+"94-312 Łowicz, Polska",52.1021681,19.9315687,"BNP Paribas, Starościńska, Osiedle Kostka, Blich, Łowicz, powiat łowicki, województwo łódzkie, 99-400, Polska",OK,2026-10-12T13:26:03.020440
+"95-083 Lutomiersk, Polska",51.7622863,19.2056848,"95-083, gmina Lutomiersk, powiat pabianicki, województwo łódzkie, Polska",OK,2026-10-12T13:26:04.596703
+"42-270 Kłomnice, Polska",50.9055953,19.3662692,"42-270, gmina Kłomnice, powiat częstochowski, województwo śląskie, Polska",OK,2026-10-12T13:26:05.788685
+"87-313 Brzozie, Polska",53.3097729,19.5959441,"87-313, Brzozie, gmina Brzozie, powiat brodnicki, województwo kujawsko-pomorskie, Polska",OK,2026-10-12T13:26:07.525629
+"28-236 Rytwiany, Polska",50.5122764,21.1921662,"28-236, Tuklęcz, gmina Rytwiany, powiat staszowski, województwo świętokrzyskie, Polska",OK,2026-10-12T13:26:09.111307
+"26-067 Strawczynek, Polska",50.9412301,20.4300058,"26-067, Strawczynek, gmina Strawczyn, powiat kielecki, województwo świętokrzyskie, Polska",OK,2026-10-12T13:26:10.665001
+"42-436 Smoleń, Polska",50.438944,19.6791135,"Smoleń, gmina Pilica, powiat zawierciański, województwo śląskie, 42-436, Polska",OK,2026-10-12T13:26:12.298300
+"43-430 Skoczów, Polska",49.8083916,18.7992135,"43-430, Skoczów, gmina Skoczów, powiat cieszyński, województwo śląskie, Polska",OK,2026-10-12T13:26:13.842335
+"43-512 Bestwina, Polska",49.8987119,19.0683307,"43-512, Bestwina, gmina Bestwina, powiat bielski, województwo śląskie, Polska",OK,2026-10-12T13:26:15.442650
+"15-865 Białystok, Polska",53.1485447,23.1513432,"15-865, Białostoczek, Białystok, województwo podlaskie, Polska",OK,2026-10-12T13:26:17.024598
+"26-414 Potworów, Polska",51.5096771,20.7457589,"26-414, Grabowa, gmina Potworów, powiat przysuski, województwo mazowieckie, Polska",OK,2026-10-12T13:26:18.244119
+"30-077 Kraków, Polska",50.0322173,19.9778068,"Poczta Polska S.A. Węzeł Ekspedycyjno Rozdzielczy Kraków, Kabel, Podgórze, Kraków, województwo małopolskie, Polska",OK,2026-10-12T13:26:20.565469
+"13-306 Marzancice, Polska",,,,ZERO_RESULTS,2026-10-12T13:26:21.851148
+"11-600 Węgorzewo, Polska",54.2101159,21.7187528,"11-600, gmina Węgorzewo, powiat węgorzewski, województwo warmińsko-mazurskie, Polska",OK,2026-10-12T13:26:23.291452
+"06-521 Wiśniewo, Polska",53.0599769,20.3149487,"06-521, gmina Wiśniewo, powiat mławski, województwo mazowieckie, Polska",OK,2026-10-12T13:26:24.437932
+"02-796 Warszawa, Polska",52.1345896,21.0699613,"02-796, Ursynów, Warszawa, województwo mazowieckie, Polska",OK,2026-10-12T13:26:25.999436
+"05-304 Ładzyń, Polska",,,,ZERO_RESULTS,2026-10-12T13:26:27.726612
+"08-470 Wilga, Polska",51.8493324,21.3976559,"08-470, Osiedle Wilga, gmina Wilga, powiat garwoliński, województwo mazowieckie, Polska",OK,2026-10-12T13:26:28.928765
+"11-710 Piecki, Polska",53.7254688,21.3382706,"11-710, Piecki, gmina Piecki, powiat mrągowski, województwo warmińsko-mazurskie, Polska",OK,2026-10-12T13:26:30.119572
+"38-303 Kobylanka, Polska",53.0254799,23.6323675,"Kobylanka, gmina Michałowo, powiat białostocki, województwo podlaskie, Polska",OK,2026-10-12T13:26:31.853786
+"33-318 Gródek nad Dunajcem, Polska",49.7399046,20.7458471,"33-318, Przydonica, gmina Gródek nad Dunajcem, powiat nowosądecki, województwo małopolskie, Polska",OK,2026-10-12T13:26:33.593215
+"70-760 Szczecin, Polska",53.3781625,14.6217109,"70-760, Zdroje, Prawobrzeże, Szczecin, województwo zachodniopomorskie, Polska",OK,2026-10-12T13:26:34.810367
+"78-630 Mielęcin Wałecki, Polska",,,,ZERO_RESULTS,2026-10-12T13:26:36.553582
+"66-010 Nowogród Bobrzański, Polska",51.8030786,15.2597401,"66-010, Nowogród Bobrzański, gmina Nowogród Bobrzański, powiat zielonogórski, województwo lubuskie, Polska",OK,2026-10-12T13:26:37.880012
+"59-225 Chojnów, Polska",51.2666161,15.9269976,"59-225, Chojnów, powiat legnicki, województwo dolnośląskie, Polska",OK,2026-10-12T13:26:39.489431
+"59-630 Mirsk, Polska",50.9573234,15.3976545,"59-630, Skarbków, Mirsk, gmina Mirsk, powiat lwówecki, województwo dolnośląskie, Polska",OK,2026-10-12T13:26:40.667805
+"58-307 Wałbrzych, Polska",50.7970411,16.3077426,"58-307, Poniatów, Wałbrzych, województwo dolnośląskie, Polska",OK,2026-10-12T13:26:42.254033
+"52-437 Roztoka, Polska",49.487517,20.653287,"Polska Spółka Gazownictwa, Czarna Młaka, Rytro, gmina Rytro, powiat nowosądecki, województwo małopolskie, Polska",OK,2026-10-12T13:26:43.979439
+"52-437 Świerzna, Polska",51.1586325,17.4250025,"Poczta Polska, 396, Świerzna, gmina Oleśnica, powiat oleśnicki, województwo dolnośląskie, 56-400, Polska",OK,2026-10-12T13:26:45.583507
+"52-437 Grodków, Polska",50.698114,17.3811094,"Poczta Polska, 30, Warszawska, Grodków, gmina Grodków, powiat brzeski, województwo opolskie, 49-200, Polska",OK,2026-10-12T13:26:46.810933
+"21-025 Niemce, Polska",51.3575247,22.5657813,"21-025, Nasutów, gmina Niemce, powiat lubelski, województwo lubelskie, Polska",OK,2026-10-12T13:26:48.392931
+"64-720 Lubasz, Polska",52.8441779,16.5161584,"64-720, Lubasz, gmina Lubasz, powiat czarnkowsko-trzcianecki, województwo wielkopolskie, Polska",OK,2026-10-12T13:26:49.554384
+"61-313 Sulechów, Polska",52.086118,15.628385,"Urząd Pocztowy Sulechów 1, Aleja Wielkopolska, Sulechów, gmina Sulechów, powiat zielonogórski, województwo lubuskie, 66-100, Polska",OK,2026-10-12T13:26:51.174017
+"61-313 Kiszkowo, Polska",,,,ZERO_RESULTS,2026-10-12T13:26:53.011687
+"61-313 Oborniki, Polska",52.6451221,16.8111906,"BNP Paribas, 11, Rynek, Osiedle Leśne, Oborniki, gmina Oborniki, powiat obornicki, województwo wielkopolskie, 64-600, Polska",OK,2026-10-12T13:26:54.747202
+"61-313 Granowo, Polska",52.2218538,16.5350833,"Chata Polska, 1A, Ogrodowa, Granowo, gmina Granowo, powiat grodziski, województwo wielkopolskie, 62-066, Polska",OK,2026-10-12T13:26:56.473871
+"61-313 Leszno, Polska",51.8401,16.5905243,"Poczta Polska, 16, Aleje Jana Pawła II, Nowe Miasto, Leszno, województwo wielkopolskie, 64-100, Polska",OK,2026-10-12T13:26:57.808869
+"61-313 Strączno, Polska",,,,ZERO_RESULTS,2026-10-12T13:26:59.536763
+"61-313 Czerwonak, Polska",52.4665049,16.9814831,"DoorHan Polska, 32, Gdyńska, Czerwonak, gmina Czerwonak, powiat poznański, województwo wielkopolskie, 62-004, Polska",OK,2026-10-12T13:27:01.265890
+"61-313 Lusowo, Polska",52.4379824,16.6962194,"Hettich Polska Sp z o.o., Lusowo, gmina Tarnowo Podgórne, powiat poznański, województwo wielkopolskie, Polska",OK,2026-10-12T13:27:02.993623
+"64-150 Wijewo, Polska",51.9198313,16.2073315,"64-150, Brenno, gmina Wijewo, powiat leszczyński, województwo wielkopolskie, Polska",OK,2026-10-12T13:27:04.555035
+"98-105 Wodzierady, Polska",51.7201025,19.1408822,"98-105, gmina Wodzierady, powiat łaski, województwo łódzkie, Polska",OK,2026-10-12T13:27:05.888045
+"87-326 Bobrowo, Polska",53.2737388,19.188422,"87-326, gmina Bobrowo, powiat brodnicki, województwo kujawsko-pomorskie, Polska",OK,2026-10-12T13:27:07.219853
+"42-690 Wojska, Polska",50.4021562,18.625024,"Crédit Agricole, Wojska Polskiego, Pyskowice, powiat gliwicki, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, 44-120, Polska",OK,2026-10-12T13:27:08.671898
+"41-503 Chorzów, Polska",50.3075555,18.978006,"41-503, Chorzów Stary, Chorzów, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-12T13:27:09.919918
+"43-316 Bielsko-Biała, Polska",49.7960275,19.0290623,"43-316, Bielsko-Biała, województwo śląskie, Polska",OK,2026-10-12T13:27:11.484212
+"30-380 Kraków, Polska",50.0359769,19.8570938,"30-380, Dębniki, Kraków, województwo małopolskie, Polska",OK,2026-10-12T13:27:12.711243
+"32-310 Klucze, Polska",50.3683705,19.5818431,"32-310, Golczowice, gmina Klucze, powiat olkuski, województwo małopolskie, Polska",OK,2026-10-12T13:27:14.290156
+"05-252 Dręszew, Polska",,,,ZERO_RESULTS,2026-10-12T13:27:16.214575
+"07-300 Ostrów Mazowiecka, Polska",52.800056,21.8858996,"07-300, Ostrów Mazowiecka, powiat ostrowski, województwo mazowieckie, Polska",OK,2026-10-12T13:27:17.444749
+"37-111 Rakszawa, Polska",50.16161,22.2328216,"37-111, Rakszawa, gmina Rakszawa, powiat łańcucki, województwo podkarpackie, Polska",OK,2026-10-12T13:27:18.711622
+"32-077 Smardzowice, Polska",50.1880924,19.8567678,"32-077, Smardzowice, gmina Skała, powiat krakowski, województwo małopolskie, Polska",OK,2026-10-12T13:27:19.901023
+"02-672 Warszawa, Polska",52.1834086,21.0049819,"02-672, Mokotów, Warszawa, województwo mazowieckie, Polska",OK,2026-10-12T13:27:21.509234
+"78-449 Borne Sulinowo, Polska",53.5764324,16.5405539,"78-449, Borne Sulinowo, gmina Borne Sulinowo, powiat szczecinecki, województwo zachodniopomorskie, Polska",OK,2026-10-12T13:27:22.652143
+"67-120 Kożuchów, Polska",51.7544078,15.58619,"67-120, gmina Kożuchów, powiat nowosolski, województwo lubuskie, Polska",OK,2026-10-12T13:27:24.380068
+"58-113 Lutomia Dolna, Polska",50.7577832,16.518401,"58-113, Lutomia Górna, gmina Świdnica, powiat świdnicki, województwo dolnośląskie, Polska",OK,2026-10-12T13:27:25.621525
+"52-437 Wilkszyn, Polska",,,,ZERO_RESULTS,2026-10-12T13:27:27.371805
+"42-350 Pińczyce, Polska",50.5411248,19.2303475,"Pińczyce, gmina Koziegłowy, powiat myszkowski, województwo śląskie, 42-350, Polska",OK,2026-10-12T13:27:28.956820
+"43-330 Wilamowice, Polska",49.9097328,19.1516035,"43-330, Wilamowice - Wymysoü, gmina Wilamowice, powiat bielski, województwo śląskie, Polska",OK,2026-10-12T13:27:30.540299
+"64-605 Wargowo, Polska",,,,ZERO_RESULTS,2026-10-12T13:27:31.953632
+"32-003 Podłęże, Polska",50.0095752,20.1568185,"32-003, Podłęże, gmina Niepołomice, powiat wielicki, województwo małopolskie, Polska",OK,2026-10-12T13:27:33.593391
+"32-070 Dąbrowa Szlachecka, Polska",49.9984875,19.7505446,"Dąbrowa Szlachecka, gmina Czernichów, powiat krakowski, województwo małopolskie, Polska",OK,2026-10-12T13:27:34.863257
