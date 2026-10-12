@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import gzip
 import base64
 import hashlib
 import time
@@ -72,7 +73,8 @@ API_KEY = st.secrets.get("GOOGLE_MAPS_API_KEY", "")
 MAX_POINTS = 150
 
 # Cache par macierzy (punkt→punkt)
-DM_PAIRS_CACHE_PATH = "dm_pairs_cache.json"
+DM_PAIRS_CACHE_PATH = "dm_pairs_cache.json.gz"
+LEGACY_DM_PAIRS_CACHE_PATH = "dm_pairs_cache.json"
 
 # Cache dla geocodingu
 GEOCODING_CACHE_DIR = "cache_geocoding"
@@ -91,6 +93,7 @@ _last_nominatim_request_at = 0.0
 # =========================
 def decode_github_file_content(file_obj):
     """Czyta zawartość pliku z GitHub bez wywoływania `decoded_content` przy `encoding='none'`."""
+    download_url = getattr(file_obj, "download_url", None)
     try:
         raw_data = getattr(file_obj, "_rawData", {}) or {}
         if isinstance(raw_data, dict):
@@ -99,15 +102,17 @@ def decode_github_file_content(file_obj):
             if isinstance(content, str):
                 text = content.strip()
                 if not text:
-                    return b""
-                if encoding == "base64":
+                    if not download_url:
+                        return b""
+                elif encoding == "base64":
                     try:
                         return base64.b64decode(text)
                     except Exception:
                         return text.encode("utf-8")
-                if encoding in (None, "none"):
+                elif encoding in (None, "none"):
                     return text.encode("utf-8")
-                return content.encode("utf-8")
+                elif text:
+                    return content.encode("utf-8")
 
         if hasattr(file_obj, "_content"):
             try:
@@ -122,6 +127,15 @@ def decode_github_file_content(file_obj):
     except Exception:
         pass
 
+    if isinstance(download_url, str) and download_url:
+        headers = {"Accept": "application/octet-stream"}
+        token = st.secrets.get("GITHUB_TOKEN")
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        response = requests.get(download_url, headers=headers, timeout=60)
+        response.raise_for_status()
+        return response.content
+
     raise ValueError("Nie udało się odczytać treści pliku z GitHub: brak obsługiwanego formatu encodowania")
 
 
@@ -134,11 +148,21 @@ def load_pairs_cache_from_github() -> dict:
     try:
         g = Github(st.secrets["GITHUB_TOKEN"])
         repo = g.get_repo(st.secrets["GITHUB_REPO"])
-        file = repo.get_contents(DM_PAIRS_CACHE_PATH)
+        try:
+            file = repo.get_contents(DM_PAIRS_CACHE_PATH)
+        except GithubException as error:
+            if error.status != 404:
+                raise
+            file = repo.get_contents(LEGACY_DM_PAIRS_CACHE_PATH)
         raw = decode_github_file_content(file)
+        if file.path == DM_PAIRS_CACHE_PATH:
+            raw = gzip.decompress(raw)
         if not raw.strip():
             return {}
-        return json.loads(raw.decode("utf-8"))
+        cache = json.loads(raw.decode("utf-8"))
+        if not isinstance(cache, dict):
+            raise ValueError("Nieprawidłowy format cache par na GitHubie")
+        return cache
     except Exception:
         return {}
 
@@ -188,14 +212,19 @@ if "geocoding_cache_df" not in st.session_state:
 
 if "dm_pairs_cache" not in st.session_state:
     if os.path.exists(DM_PAIRS_CACHE_PATH):
-        with open(DM_PAIRS_CACHE_PATH, "r", encoding="utf-8") as f:
+        with gzip.open(DM_PAIRS_CACHE_PATH, "rt", encoding="utf-8") as f:
             st.session_state["dm_pairs_cache"] = json.load(f)
     else:
         gh_pairs = load_pairs_cache_from_github()
-        st.session_state["dm_pairs_cache"] = gh_pairs
         if gh_pairs:
-            with open(DM_PAIRS_CACHE_PATH, "w", encoding="utf-8") as f:
-                json.dump(gh_pairs, f)
+            st.session_state["dm_pairs_cache"] = gh_pairs
+            with gzip.open(DM_PAIRS_CACHE_PATH, "wt", encoding="utf-8") as f:
+                json.dump(gh_pairs, f, separators=(",", ":"))
+        elif os.path.exists(LEGACY_DM_PAIRS_CACHE_PATH):
+            with open(LEGACY_DM_PAIRS_CACHE_PATH, "r", encoding="utf-8") as f:
+                st.session_state["dm_pairs_cache"] = json.load(f)
+        else:
+            st.session_state["dm_pairs_cache"] = {}
 
 # Baza (depot)
 BASE_NAME = "_Plantpol baza"
@@ -641,12 +670,39 @@ def push_pairs_cache_to_github(pairs: dict, n_new: int):
     try:
         g = Github(st.secrets["GITHUB_TOKEN"])
         repo = g.get_repo(st.secrets["GITHUB_REPO"])
-        content = json.dumps(pairs)
+        existing = None
         try:
             existing = repo.get_contents(DM_PAIRS_CACHE_PATH)
         except GithubException as error:
             if error.status != 404:
                 raise
+            try:
+                legacy = repo.get_contents(LEGACY_DM_PAIRS_CACHE_PATH)
+            except GithubException as legacy_error:
+                if legacy_error.status != 404:
+                    raise
+                remote_pairs = {}
+            else:
+                legacy_content = decode_github_file_content(legacy)
+                remote_pairs = json.loads(legacy_content.decode("utf-8"))
+        else:
+            compressed_content = decode_github_file_content(existing)
+            remote_pairs = json.loads(gzip.decompress(compressed_content).decode("utf-8"))
+
+        if not isinstance(remote_pairs, dict):
+            raise ValueError("Nieprawidłowy format istniejącego cache par na GitHubie")
+        for key, value in pairs.items():
+            if isinstance(remote_pairs.get(key), dict) and isinstance(value, dict):
+                remote_pairs[key].update(value)
+            else:
+                remote_pairs[key] = value
+
+        content = gzip.compress(
+            json.dumps(remote_pairs, separators=(",", ":")).encode("utf-8"),
+            compresslevel=6,
+            mtime=0,
+        )
+        if existing is None:
             repo.create_file(DM_PAIRS_CACHE_PATH, "Auto: Create DM pairs cache", content)
         else:
             repo.update_file(
@@ -655,7 +711,7 @@ def push_pairs_cache_to_github(pairs: dict, n_new: int):
                 content,
                 sha=existing.sha,
             )
-        with open(DM_PAIRS_CACHE_PATH, "w", encoding="utf-8") as f:
+        with open(DM_PAIRS_CACHE_PATH, "wb") as f:
             f.write(content)
         return True
     except Exception as error:
