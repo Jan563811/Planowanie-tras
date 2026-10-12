@@ -952,3 +952,11 @@ address,lat,lng,formatted_address,status,cached_at
 "26-026 Morawica, Polska",50.7507134,20.6155184,"26-026, Brzeziny, gmina Morawica, powiat kielecki, województwo świętokrzyskie, Polska",OK,2026-10-11T20:57:11.103973
 "26-337 Aleksandrów, Polska",51.2720719,19.9717606,"26-337, Aleksandrów, gmina Aleksandrów, powiat piotrkowski, województwo łódzkie, Polska",OK,2026-10-11T20:57:12.840036
 "97-425 Zelów, Polska",51.4711813,19.2224298,"97-425, Zelów, gmina Zelów, powiat bełchatowski, województwo łódzkie, Polska",OK,2026-10-11T20:57:14.437794
+"42-674 Karchowice, Polska",,,,ZERO_RESULTS,2026-10-12T12:29:38.051047
+"44-245 Żory, Polska",50.0324816,18.6288802,"44-245, Rój, Żory, województwo śląskie, Polska",OK,2026-10-12T12:29:39.240741
+"97-310 Karlin, Polska",,,,ZERO_RESULTS,2026-10-12T12:29:40.818136
+"2211 VS NOORDWIJKERHOUT, Polska",,,,ZERO_RESULTS,2026-10-12T12:29:42.630725
+"02-234 Warszawa, Polska",52.1796225,20.9319375,"02-234, Włochy, Warszawa, województwo mazowieckie, Polska",OK,2026-10-12T12:29:43.930727
+"62-840 Koźminek, Polska",51.7939658,18.3325749,"62-840, Koźminek, gmina Koźminek, powiat kaliski, województwo wielkopolskie, Polska",OK,2026-10-12T12:29:45.253287
+"40-007 Katowice, Polska",50.2613378,19.027868,"40-007, Śródmieście, Katowice, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-12T12:29:46.845199
+"Baia Sprie, Maramures, Polska",,,,ZERO_RESULTS,2026-10-12T12:29:48.422082
