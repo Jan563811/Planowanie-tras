@@ -503,13 +503,22 @@ def geocode_address(address: str):
     legacy_key = legacy_geocode_cache_key(address)
     cache_file = os.path.join(GEOCODING_CACHE_DIR, f"{normalized_key}.json")
     legacy_cache_file = os.path.join(GEOCODING_CACHE_DIR, f"{legacy_key}.json")
+    postcode_match = re.search(r"(?<!\d)\d{2}-\d{3}(?!\d)", address)
+    postcode = postcode_match.group(0) if postcode_match else ""
 
     # 1. Lokalny JSON cache (nowy i stary klucz, aby nie tracić istniejących danych)
     for candidate in [cache_file, legacy_cache_file]:
         if os.path.exists(candidate):
             with open(candidate, "r", encoding="utf-8") as f:
                 cached = json.load(f)
-            return cached["lat"], cached["lng"], cached["formatted"], cached["status"], "lokalny JSON"
+            retry_postcode = (
+                postcode
+                and postcode != address.strip()
+                and cached["status"] == "ZERO_RESULTS"
+                and not cached.get("postcode_fallback_attempted", False)
+            )
+            if not retry_postcode:
+                return cached["lat"], cached["lng"], cached["formatted"], cached["status"], "lokalny JSON"
 
     # 2. CSV cache z GitHub (session_state): porównujemy po znormalizowanym adresie, nie po surowym stringu
     df = st.session_state["geocoding_cache_df"]
@@ -519,53 +528,101 @@ def geocode_address(address: str):
             matched = df[df["address"].map(lambda x: normalize_address_for_cache(x) == normalized_target)]
             if not matched.empty:
                 row = matched.iloc[0]
-                cache_data = {
-                    "lat": row["lat"],
-                    "lng": row["lng"],
-                    "formatted": row["formatted_address"],
-                    "status": row["status"]
-                }
-                with open(cache_file, "w", encoding="utf-8") as f:
-                    json.dump(cache_data, f)
-                return row["lat"], row["lng"], row["formatted_address"], row["status"], "GitHub CSV"
+                fallback_attempted = (
+                    str(row.get("postcode_fallback_attempted", False)).strip().lower() == "true"
+                )
+                retry_postcode = (
+                    postcode
+                    and postcode != address.strip()
+                    and row["status"] == "ZERO_RESULTS"
+                    and not fallback_attempted
+                )
+                if not retry_postcode:
+                    cache_data = {
+                        "lat": row["lat"],
+                        "lng": row["lng"],
+                        "formatted": row["formatted_address"],
+                        "status": row["status"],
+                        "postcode_fallback_attempted": fallback_attempted,
+                    }
+                    with open(cache_file, "w", encoding="utf-8") as f:
+                        json.dump(cache_data, f)
+                    return row["lat"], row["lng"], row["formatted_address"], row["status"], "GitHub CSV"
 
+    postcode_fallback_attempted = False
     if API_PROVIDER == "osm":
         global _last_nominatim_request_at
-        wait_s = 1.05 - (time.monotonic() - _last_nominatim_request_at)
-        if wait_s > 0:
-            time.sleep(wait_s)
-        r = requests.get(
-            NOMINATIM_URL,
-            params={"q": address, "format": "jsonv2", "limit": 1, "countrycodes": "pl"},
-            headers={"User-Agent": OSM_USER_AGENT},
-            timeout=25,
-        )
-        r.raise_for_status()
-        _last_nominatim_request_at = time.monotonic()
-        results = r.json()
+        queries = [address]
+        if postcode and postcode != address.strip():
+            queries.append(postcode)
+
+        results = []
+        source = "Nominatim (OpenStreetMap)"
+        for query in queries:
+            if query == postcode and query != address:
+                postcode_fallback_attempted = True
+            wait_s = 1.05 - (time.monotonic() - _last_nominatim_request_at)
+            if wait_s > 0:
+                time.sleep(wait_s)
+            r = requests.get(
+                NOMINATIM_URL,
+                params={"q": query, "format": "jsonv2", "limit": 1, "countrycodes": "pl"},
+                headers={"User-Agent": OSM_USER_AGENT},
+                timeout=25,
+            )
+            r.raise_for_status()
+            _last_nominatim_request_at = time.monotonic()
+            results = r.json()
+            if results:
+                if query == postcode:
+                    source = "Nominatim (sam kod)"
+                break
+
         if results:
             result = results[0]
             lat, lng = float(result["lat"]), float(result["lon"])
             formatted, status = result.get("display_name", ""), "OK"
         else:
             lat, lng, formatted, status = None, None, "", "ZERO_RESULTS"
-        source = "Nominatim (OpenStreetMap)"
     else:
         # Google Geocoding API
         url = "https://maps.googleapis.com/maps/api/geocode/json"
-        params = {"address": address, "key": API_KEY}
-        r = requests.get(url, params=params, timeout=25)
-        data = r.json()
+        queries = [address]
+        if postcode and postcode != address.strip():
+            queries.append(postcode)
 
-        if data.get("status") == "OK" and data.get("results"):
-            loc = data["results"][0]["geometry"]["location"]
-            formatted = data["results"][0].get("formatted_address", "")
-            lat, lng, status = loc["lat"], loc["lng"], "OK"
-        else:
-            lat, lng, formatted, status = None, None, "", data.get("status", "UNKNOWN")
         source = "Google API"
+        for query in queries:
+            if query == postcode and query != address:
+                postcode_fallback_attempted = True
+            r = requests.get(url, params={"address": query, "key": API_KEY}, timeout=25)
+            data = r.json()
+            results = data.get("results", [])
 
-    cache_data = {"lat": lat, "lng": lng, "formatted": formatted, "status": status}
+            if data.get("status") == "OK" and results:
+                loc = results[0]["geometry"]["location"]
+                formatted = results[0].get("formatted_address", "")
+                lat, lng, status = loc["lat"], loc["lng"], "OK"
+                if query == postcode:
+                    source = "Google API (sam kod)"
+                break
+
+            no_results = data.get("status") == "ZERO_RESULTS" or (
+                data.get("status") == "OK" and not results
+            )
+            if no_results and query == address and len(queries) > 1:
+                continue
+
+            lat, lng, formatted, status = None, None, "", data.get("status", "UNKNOWN")
+            break
+
+    cache_data = {
+        "lat": lat,
+        "lng": lng,
+        "formatted": formatted,
+        "status": status,
+        "postcode_fallback_attempted": postcode_fallback_attempted,
+    }
     with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(cache_data, f)
 
@@ -575,6 +632,7 @@ def geocode_address(address: str):
         "lng": lng,
         "formatted_address": formatted,
         "status": status,
+        "postcode_fallback_attempted": postcode_fallback_attempted,
         "cached_at": datetime.now().isoformat()
     }])
     st.session_state["geocoding_cache_df"] = pd.concat(
@@ -1552,7 +1610,9 @@ with tab_result:
             "lokalny JSON": 0,
             "GitHub CSV": 0,
             "Google API": 0,
+            "Google API (sam kod)": 0,
             "Nominatim (OpenStreetMap)": 0,
+            "Nominatim (sam kod)": 0,
         }
         total = len(points_df)
         for i, addr in enumerate(points_df["adres"]):
@@ -1573,8 +1633,10 @@ with tab_result:
             f"Geokodowanie — źródła: "
             f"{geo_sources['lokalny JSON']} z lokalnego cache | "
             f"{geo_sources['GitHub CSV']} z GitHub CSV | "
-            f"{geo_sources['Google API']} nowych z Google API | "
-            f"{geo_sources['Nominatim (OpenStreetMap)']} nowych z Nominatim"
+            f"Google API: {geo_sources['Google API']} kod+miejscowość, "
+            f"{geo_sources['Google API (sam kod)']} sam kod | "
+            f"Nominatim: {geo_sources['Nominatim (OpenStreetMap)']} kod+miejscowość, "
+            f"{geo_sources['Nominatim (sam kod)']} sam kod"
         )
 
         points_df["latitude"] = lats
