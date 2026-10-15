@@ -1037,3 +1037,103 @@ address,lat,lng,formatted_address,status,cached_at,postcode_fallback_attempted
 "47-300 Krapkowice Żywocice, Polska",50.4555913,17.9544028,"47-300, Krapkowice, gmina Krapkowice, powiat krapkowicki, województwo opolskie, Polska",OK,2026-10-15T04:26:38.710966,True
 "43-394 Iłownica, Polska",49.856701,18.8793347,"43-394, Rudzica, gmina Jasienica, powiat bielski, województwo śląskie, Polska",OK,2026-10-15T04:26:42.017524,True
 "05-652 Michrów, Polska",51.9086286,20.739942,"05-652, Jeziora, gmina Pniewy, powiat grójecki, województwo mazowieckie, Polska",OK,2026-10-15T04:26:45.048920,True
+"06-420 Nasierowo-Dziurawieniec, Polska",52.8177636,20.8374229,"06-420, gmina Gołymin-Ośrodek, powiat ciechanowski, województwo mazowieckie, Polska",OK,2026-10-15T07:51:28.595140,True
+"05-307 Dobre, Polska",52.3272355,21.6808813,"05-307, Dobre, gmina Dobre, powiat miński, województwo mazowieckie, Polska",OK,2026-10-15T07:51:29.799109,False
+"02-994 Warszawa, Polska",52.146982,21.1385624,"02-994, Wilanów, Warszawa, województwo mazowieckie, Polska",OK,2026-10-15T07:51:30.979286,False
+"05-074, Polska",52.2236033,21.3588261,"05-074, Halinów, gmina Halinów, powiat miński, województwo mazowieckie, Polska",OK,2026-10-15T07:51:32.579820,False
+"05-326 Poświętne, Polska",52.3341114,21.4166032,"05-326, Choiny, gmina Poświętne, powiat wołomiński, województwo mazowieckie, Polska",OK,2026-10-15T07:51:33.736092,False
+"59-975 Sulików, Polska",51.0823342,15.081462,"59-975, Sulików, gmina Sulików, powiat zgorzelecki, województwo dolnośląskie, Polska",OK,2026-10-15T07:51:35.309228,False
+"59-420 Bolków, Polska",50.9199513,16.0735328,"59-420, Wierzchosławiczki, gmina Bolków, powiat jaworski, województwo dolnośląskie, Polska",OK,2026-10-15T07:51:36.882513,False
+"55-110 Prusice, Polska",51.3801728,16.9100402,"55-110, Jagoszyce, gmina Prusice, powiat trzebnicki, województwo dolnośląskie, Polska",OK,2026-10-15T07:51:38.124431,False
+"47-370 Zielina, Polska",50.4572007,17.7891724,"47-370, Kujawy, gmina Strzeleczki, powiat krapkowicki, województwo opolskie, Polska",OK,2026-10-15T07:51:41.073737,True
+"48-325 Ścinawa Mała, Polska",50.4218639,17.5456101,"Ścinawa Mała, gmina Korfantów, powiat nyski, województwo opolskie, Polska",OK,2026-10-15T07:51:42.358291,False
+"32-652 Bulowice, Polska",49.8764163,19.2829383,"32-652, Bulowice, gmina Kęty, powiat oświęcimski, województwo małopolskie, Polska",OK,2026-10-15T07:51:43.633276,False
+"43-344 Bielsko-Biała, Polska",49.8546438,19.0918622,"43-344, Bielsko-Biała, województwo śląskie, Polska",OK,2026-10-15T07:51:45.168958,False
+"26-065 Zajączków, Polska",50.8787061,20.4492328,"26-065, Wincentów, gmina Piekoszów, powiat kielecki, województwo świętokrzyskie, Polska",OK,2026-10-15T07:51:48.185474,True
+"46-331 Kolonia Biskupska, Polska",50.9300962,18.521111,"46-331, Radłów, gmina Radłów, powiat oleski, województwo opolskie, Polska",OK,2026-10-15T07:51:51.109186,True
+"42-141 Przystajń, Polska",50.8872836,18.6847271,"42-141, gmina Przystajń, powiat kłobucki, województwo śląskie, Polska",OK,2026-10-15T07:51:52.696487,False
+"42-680 Tatrnowskie Góry, Polska",50.4612261,18.8060336,"42-680, Rybna, Tarnowskie Góry, powiat tarnogórski, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T07:51:55.816047,True
+"42-445 Szczekociny, Polska",50.6341841,19.8054678,"42-445, Szczekociny, gmina Szczekociny, powiat zawierciański, województwo śląskie, Polska",OK,2026-10-15T07:51:57.366223,False
+"41-710 Ruda Śląska, Polska",50.2677161,18.86437,"41-710, Wirek, Ruda Śląska, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T07:51:58.547611,False
+"32-100 Proszowice, Polska",50.1922537,20.3256435,"32-100, Jakubowice, gmina Proszowice, powiat proszowicki, województwo małopolskie, Polska",OK,2026-10-15T07:51:59.881313,False
+"32-112 Klimontów, Polska",50.2286505,20.3260147,"32-112, Klimontów, gmina Proszowice, powiat proszowicki, województwo małopolskie, Polska",OK,2026-10-15T07:52:01.103034,False
+"32-064 Pisary, Polska",50.7998983,21.7003497,"Pisary, gmina Ożarów, powiat opatowski, województwo świętokrzyskie, Polska",OK,2026-10-15T07:52:02.354823,False
+"32-050 Radziszów, Polska",49.9383536,19.8095394,"Radziszów, gmina Skawina, powiat krakowski, województwo małopolskie, Polska",OK,2026-10-15T07:52:03.927585,False
+"37-550 Radymno, Polska",49.9448866,22.8160927,"37-550, Radymno, powiat jarosławski, województwo podkarpackie, Polska",OK,2026-10-15T07:52:05.491935,False
+"37-403 Pysznica, Polska",50.5801515,22.1364841,"37-403, Pysznica, gmina Pysznica, powiat stalowowolski, województwo podkarpackie, Polska",OK,2026-10-15T07:52:06.675747,False
+"37-207 Gać, Polska",50.0248124,22.3811433,"37-207, Gać, gmina Gać, powiat przeworski, województwo podkarpackie, Polska",OK,2026-10-15T07:52:07.984836,False
+"38-230 Nowy Żmigród, Polska",49.6052029,21.5399187,"38-230, Nowy Żmigród, gmina Nowy Żmigród, powiat jasielski, województwo podkarpackie, Polska",OK,2026-10-15T07:52:09.213882,False
+"36-207 Grabownica Starzeńska, Polska",49.6604156,22.095538,"36-207, Grabownica Starzeńska, gmina Brzozów, powiat brzozowski, województwo podkarpackie, Polska",OK,2026-10-15T07:52:10.837248,False
+"33-314 Łososina Dolna, Polska",49.7537624,20.6222515,"33-314, Łososina Dolna, gmina Łososina Dolna, powiat nowosądecki, województwo małopolskie, Polska",OK,2026-10-15T07:52:12.461402,False
+"38-100 Strzyżów, Polska",49.8660129,21.7945658,"38-100, Strzyżów, gmina Strzyżów, powiat strzyżowski, województwo podkarpackie, Polska",OK,2026-10-15T07:52:14.199012,False
+"32-420 Gdów, Polska",49.9185513,20.214161,"32-420, Marszowice, gmina Gdów, powiat wielicki, województwo małopolskie, Polska",OK,2026-10-15T07:52:15.796644,False
+"33-395 Mała Wieś, Polska",50.9473007,19.6084406,"Mała Wieś, gmina Żytno, powiat radomszczański, województwo łódzkie, 97-532, Polska",OK,2026-10-15T07:52:17.613826,False
+"33-314 Żbikowice, Polska",49.7432776,20.581152,"Żbikowice, gmina Łososina Dolna, powiat nowosądecki, województwo małopolskie, Polska",OK,2026-10-15T07:52:19.192212,False
+"32-740 Łapanów, Polska",49.8623121,20.2889525,"32-740, Łapanów, gmina Łapanów, powiat bocheński, województwo małopolskie, Polska",OK,2026-10-15T07:52:20.745814,False
+"64-330 Opalenica, Polska",52.3090246,16.412202,"64-330, Opalenica, gmina Opalenica, powiat nowotomyski, województwo wielkopolskie, Polska",OK,2026-10-15T07:52:22.312026,False
+"66-432 Baczyna, Polska",52.7549367,15.1093338,"66-432, Baczyna, gmina Lubiszyn, powiat gorzowski, województwo lubuskie, Polska",OK,2026-10-15T07:52:23.593763,False
+"66-600 Krosno Odrzańskie, Polska",52.0564136,15.0858582,"66-600, Krosno Odrzańskie, gmina Krosno Odrzańskie, powiat krośnieński, województwo lubuskie, Polska",OK,2026-10-15T07:52:24.880021,False
+"61-324 Poznań, Polska",52.3416842,17.014712,"61-324, Krzesinki, Szczepankowo-Spławie-Krzesinki, Poznań, województwo wielkopolskie, Polska",OK,2026-10-15T07:52:26.451146,False
+"62-010 Pobiedziska, Polska",52.4858336,17.2584801,"62-010, Złotniczki, gmina Pobiedziska, powiat poznański, województwo wielkopolskie, Polska",OK,2026-10-15T07:52:28.004627,False
+"62-212 Mieleszyn, Polska",52.6601319,17.5299374,"62-212, gmina Mieleszyn, powiat gnieźnieński, województwo wielkopolskie, Polska",OK,2026-10-15T07:52:29.202526,False
+"62-610 Sompolno, Polska",52.3641358,18.5168605,"62-610, gmina Sompolno, powiat koniński, województwo wielkopolskie, Polska",OK,2026-10-15T07:52:30.422709,False
+"62-834 Ceków, Polska",51.8680358,18.2812238,"62-834, gmina Ceków-Kolonia, powiat kaliski, województwo wielkopolskie, Polska",OK,2026-10-15T07:52:31.974670,False
+"21-205 Jabłoń, Polska",51.7099237,23.0631881,"21-205, gmina Jabłoń, powiat parczewski, województwo lubelskie, Polska",OK,2026-10-15T07:52:33.597000,False
+"21-136 Czerwonka-Gozdów, Polska",51.526293,22.5277842,"Czerwonka-Gozdów, gmina Firlej, powiat lubartowski, województwo lubelskie, Polska",OK,2026-10-15T07:52:34.811124,False
+"24-340 Józefów n/Wisłą, Polska",51.0237356,21.8977341,"24-340, Studnisko, gmina Józefów nad Wisłą, powiat opolski, województwo lubelskie, Polska",OK,2026-10-15T07:52:37.858632,True
+"22-107 Sawin, Polska",51.2877657,23.4563242,"22-107, Sawin, gmina Sawin, powiat chełmski, województwo lubelskie, Polska",OK,2026-10-15T07:52:39.421347,False
+"21-020 Milejów, Polska",51.2218686,22.9278607,"21-020, Milejów, gmina Milejów, powiat łęczyński, województwo lubelskie, Polska",OK,2026-10-15T07:52:41.143138,False
+"21-002 Jastków, Polska",51.3048194,22.4660524,"21-002, Panieńszczyzna, gmina Jastków, powiat lubelski, województwo lubelskie, Polska",OK,2026-10-15T07:52:42.755794,False
+"24-120 Kazimierz Dolny, Polska",51.3224952,21.9790555,"24-120, Kazimierz Dolny, gmina Kazimierz Dolny, powiat puławski, województwo lubelskie, Polska",OK,2026-10-15T07:52:44.038579,False
+"30-239 Kraków, Polska",50.0706341,19.8461675,"30-239, Kraków, województwo małopolskie, Polska",OK,2026-10-15T07:52:45.870863,False
+"43-419 Hażlach, Polska",49.8006759,18.6603292,"43-419, Hażlach, gmina Hażlach, powiat cieszyński, województwo śląskie, Polska",OK,2026-10-15T07:52:47.445612,False
+"26-332 Sławno, Polska",51.3973509,20.1504981,"26-332, Sławno-Kolonia, gmina Sławno, powiat opoczyński, województwo łódzkie, Polska",OK,2026-10-15T07:52:48.789246,False
+"74-520 Osinów Dolny, Polska",52.8392935,14.1244157,"Najdalej na zachód wysunięty punkt Polski, 126, Osinów Dolny, gmina Cedynia, powiat gryfiński, województwo zachodniopomorskie, 74-520, Polska",OK,2026-10-15T07:52:50.386710,False
+"78-642 Strączno, Polska",53.2455234,16.3381693,"78-642, gmina Wałcz, powiat wałecki, województwo zachodniopomorskie, Polska",OK,2026-10-15T07:52:53.295366,True
+"88-410 Gąsawa, Polska",52.7712243,17.7924066,"88-410, gmina Gąsawa, powiat żniński, województwo kujawsko-pomorskie, Polska",OK,2026-10-15T07:52:54.461793,False
+"62-025 Kostrzyn Wielkopolski, Polska",52.3874479,17.2133019,"62-025, Kostrzyn, gmina Kostrzyn, powiat poznański, województwo wielkopolskie, Polska",OK,2026-10-15T07:52:57.528091,True
+"91-610 Łódź, Polska",51.8002448,19.5371157,"91-610, Łódź-Widzew, Łódź, województwo łódzkie, Polska",OK,2026-10-15T07:52:58.705062,False
+"95-041 Gałków Duży, Polska",51.7171615,19.7293955,"95-041, Gałków Mały, gmina Koluszki, powiat łódzki wschodni, województwo łódzkie, Polska",OK,2026-10-15T07:53:01.586489,True
+"95-006 Brójce, Polska",51.6822015,19.6516655,"95-006, Brójce, gmina Brójce, powiat łódzki wschodni, województwo łódzkie, Polska",OK,2026-10-15T07:53:03.173673,False
+"05-140 Skubianka, Polska",52.5079848,21.0388907,"05-140, Serock, gmina Serock, powiat legionowski, województwo mazowieckie, Polska",OK,2026-10-15T07:53:06.467029,True
+"96-314 Baranów, Polska",52.1589776,20.4771812,"96-314, Regów, gmina Baranów, powiat grodziski, województwo mazowieckie, Polska",OK,2026-10-15T07:53:08.067348,False
+"26-660 Jankowice, Polska",52.4495796,16.647059,"Brenntag Polska sp. z o.o., 2, Szumin, Jankowice, gmina Tarnowo Podgórne, powiat poznański, województwo wielkopolskie, 62-080, Polska",OK,2026-10-15T07:53:09.359767,False
+"15-694 Białystok, Polska",53.1721349,23.0463715,"15-694, Fasty, gmina Dobrzyniewo Duże, powiat białostocki, województwo podlaskie, Polska",OK,2026-10-15T07:53:10.559382,False
+"07-420 Kadzidło, Polska",53.2325968,21.4458826,"07-420, Kadzidło, gmina Kadzidło, powiat ostrołęcki, województwo mazowieckie, Polska",OK,2026-10-15T07:53:12.110322,False
+"21-050 Piaski, Polska",51.1391981,22.8095701,"21-050, Wola Piasecka, gmina Piaski, powiat świdnicki, województwo lubelskie, Polska",OK,2026-10-15T07:53:15.660557,False
+"21-504 Rokitno, Polska",52.1320351,23.3268633,"21-504, gmina Rokitno, powiat bialski, województwo lubelskie, Polska",OK,2026-10-15T07:53:17.387576,False
+"21-140 Michów, Polska",51.5336141,22.3299036,"21-140, Michów, gmina Michów, powiat lubartowski, województwo lubelskie, Polska",OK,2026-10-15T07:53:18.987433,False
+"21-413 Serokomla, Polska",51.691195,22.3186932,"21-413, Serokomla, gmina Serokomla, powiat łukowski, województwo lubelskie, Polska",OK,2026-10-15T07:53:20.520987,False
+"08-124 Mokobody, Polska",52.2555375,22.1311826,"08-124, gmina Mokobody, powiat siedlecki, województwo mazowieckie, Polska",OK,2026-10-15T07:53:22.052623,False
+"32-765 Rzezawa, Polska",49.9953388,20.5203864,"32-765, Rzezawa, gmina Rzezawa, powiat bocheński, województwo małopolskie, Polska",OK,2026-10-15T07:53:23.608220,False
+"41-945 Piekary Ślaskie, Polska",50.4100316,18.9467605,"41-945, Kozłowa Góra, Piekary Śląskie, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T07:53:25.162241,False
+"42-446 Irządze, Polska",50.6173667,19.6847866,"42-446, gmina Irządze, powiat zawierciański, województwo śląskie, Polska",OK,2026-10-15T07:53:26.371240,False
+"43-331 Dankowice, Polska",49.9342989,19.1028307,"43-331, Dankowice, gmina Wilamowice, powiat bielski, województwo śląskie, Polska",OK,2026-10-15T07:53:27.578163,False
+"34-326 Zarzecze, Polska",50.6256406,19.8213417,"Poczta Polska, Senatorska, Zarzecze, Szczekociny, gmina Szczekociny, powiat zawierciański, województwo śląskie, 42-445, Polska",OK,2026-10-15T07:53:29.396223,False
+"43-385 Jasienica, Polska",49.8108837,18.9225101,"43-385, Jasienica, gmina Jasienica, powiat bielski, województwo śląskie, Polska",OK,2026-10-15T07:53:31.994582,False
+"43-512 Bestwinka, Polska",49.9291282,19.0663839,"Bestwinka, gmina Bestwina, powiat bielski, województwo śląskie, Polska",OK,2026-10-15T07:53:33.567753,False
+"37-127 Krzemienica, Polska",50.0687749,22.1831848,"37-127, Krzemienica, gmina Czarna, powiat łańcucki, województwo podkarpackie, Polska",OK,2026-10-15T07:53:34.811687,False
+"28-210 Kolonia Miłoszowice, Polska",50.6808614,21.274865,"Kolonia Miłoszowice, Miłoszowice, gmina Bogoria, powiat staszowski, województwo świętokrzyskie, 28-210, Polska",OK,2026-10-15T07:53:35.991737,False
+"33-113 Zgłobice, Polska",49.9794707,20.907851,"33-113, Zgłobice, gmina Tarnów, powiat tarnowski, województwo małopolskie, Polska",OK,2026-10-15T07:53:37.598823,False
+"32-744 Łapczyca, Polska",49.9574602,20.3653212,"32-744, Łapczyca, gmina Bochnia, powiat bocheński, województwo małopolskie, Polska",OK,2026-10-15T07:53:38.806635,False
+"32-828 Biadoliny Szlacheckie, Polska",49.993236,20.7292019,"32-828, Biadoliny Szlacheckie, gmina Dębno, powiat brzeski, województwo małopolskie, Polska",OK,2026-10-15T07:53:39.958182,False
+"33-312 Tęgoborze, Polska",49.718227,20.6465538,"33-312, Tęgoborze, gmina Łososina Dolna, powiat nowosądecki, województwo małopolskie, Polska",OK,2026-10-15T07:53:41.267328,False
+"45-831 Opole, Polska",50.6724035,17.8860358,"45-831, Półwieś, Opole, województwo opolskie, Polska",OK,2026-10-15T07:53:42.441131,False
+"52-013 Wrocław, Polska",51.0706192,17.0901135,"52-013, Księże Wielkie, Księże, Wrocław, województwo dolnośląskie, Polska",OK,2026-10-15T07:53:43.606694,False
+"35-310 Rzeszów, Polska",50.0264801,22.0223664,"35-310, Paderewskiego, Rzeszów, województwo podkarpackie, Polska",OK,2026-10-15T07:53:45.212219,False
+"11-010 Barczewo, Polska",53.8285717,20.7031525,"11-010, Barczewo, gmina Barczewo, powiat olsztyński, województwo warmińsko-mazurskie, Polska",OK,2026-10-15T07:53:46.582861,False
+"29-100 Włoszczowa, Polska",50.8352399,19.9699848,"29-100, Włoszczowa, gmina Włoszczowa, powiat włoszczowski, województwo świętokrzyskie, Polska",OK,2026-10-15T07:53:47.981211,False
+"13-100 Nidzica, Polska",53.3890649,20.4423376,"13-100, gmina Nidzica, powiat nidzicki, województwo warmińsko-mazurskie, Polska",OK,2026-10-15T07:53:49.711910,False
+"01-082, Polska",52.2138636,21.0037346,"Biblioteka Narodowa, 213, Aleja Niepodległości, Kolonia Staszica, Filtry, Ochota, Warszawa, województwo mazowieckie, 02-086, Polska",OK,2026-10-15T07:53:50.997704,False
+"51-421 Wrocław, Polska",51.1411816,17.0886933,"51-421, Kowale, Wrocław, województwo dolnośląskie, Polska",OK,2026-10-15T07:53:52.543880,False
+"55-010 Żerniki Wrocławskie, Polska",51.0331255,17.0557939,"Żerniki Wrocławskie, gmina Siechnice, powiat wrocławski, województwo dolnośląskie, Polska",OK,2026-10-15T07:53:53.719781,False
+"85-063 Bydgoszcz, Polska",53.1325147,18.0126306,"85-063, Bocianowo-Śródmieście-Stare Miasto, Bydgoszcz, województwo kujawsko-pomorskie, Polska",OK,2026-10-15T07:53:55.318497,False
+"25-255 Kielce, Polska",50.8578972,20.684317,"25-255, Kielce, województwo świętokrzyskie, Polska",OK,2026-10-15T07:53:56.629078,False
+"05-510 Konstancin-Jeziorna, Polska",52.0765305,21.0925783,"05-510, Chylice, Konstancin-Jeziorna, gmina Konstancin-Jeziorna, powiat piaseczyński, województwo mazowieckie, Polska",OK,2026-10-15T07:53:58.198550,False
+"00-999 Warszawa, Polska",52.2772074,21.0540258,"00-999, Targówek, Warszawa, województwo mazowieckie, Polska",OK,2026-10-15T07:53:59.460714,False
+"05-252 Dręszew, Polska",52.4876956,21.2926648,"05-252, Dąbrówka, gmina Dąbrówka, powiat wołomiński, województwo mazowieckie, Polska",OK,2026-10-15T07:54:02.462446,True
+"01-057 Warszawa, Polska",52.2449198,20.9818103,"01-057, Wola, Warszawa, województwo mazowieckie, Polska",OK,2026-10-15T07:54:03.814199,False
+"03-510 Warszawa, Polska",52.2707345,21.0499966,"03-510, Targówek, Warszawa, województwo mazowieckie, Polska",OK,2026-10-15T07:54:05.372277,False
+"84-240 Reda, Polska",54.6106817,18.3494152,"84-240, Reda, powiat wejherowski, województwo pomorskie, Polska",OK,2026-10-15T07:54:06.968107,False
+"21-003 Elizówka, Polska",51.297619,22.5768768,"Elizówka, gmina Niemce, powiat lubelski, województwo lubelskie, Polska",OK,2026-10-15T07:54:08.592155,False
+"20-232 Lublin, Polska",51.2582138,22.6341818,"20-232, Hajdów-Zadębie, Lublin, województwo lubelskie, Polska",OK,2026-10-15T07:54:09.897987,False
