@@ -1271,3 +1271,32 @@ address,lat,lng,formatted_address,status,cached_at,postcode_fallback_attempted
 "83-333 Garcz, Polska",54.345396,18.106634,"Poczta Polska, Kartuska, Bukowinki, Garcz, gmina Chmielno, powiat kartuski, województwo pomorskie, 83-333, Polska",OK,2026-10-15T10:31:25.665277,False
 "93-348 Łódź, Polska",51.7100404,19.4608259,"93-348, Łódź-Górna, Łódź, województwo łódzkie, Polska",OK,2026-10-15T10:31:26.894757,False
 "83-305 Rąb, Polska",54.4051413,18.2074164,"83-305, gmina Przodkowo, powiat kartuski, województwo pomorskie, Polska",OK,2026-10-15T10:31:31.569641,True
+"32-709 Drwinia, Polska",50.0992333,20.4431261,"32-709, Drwinia, gmina Drwinia, powiat bocheński, województwo małopolskie, Polska",OK,2026-10-15T13:21:39.303236,False
+"57-410 Ścinawka Średnia, Polska",50.5247351,16.4905158,"57-410, Ścinawka Średnia, gmina Radków, powiat kłodzki, województwo dolnośląskie, Polska",OK,2026-10-15T13:21:40.505002,False
+"87-811 Szpetal Górny, Polska",52.6832431,19.1000007,"Szpetal Górny, gmina Fabianki, powiat włocławski, województwo kujawsko-pomorskie, Polska",OK,2026-10-15T13:21:42.127997,False
+"64-761 Wizany, Polska",52.895214,16.0237513,"64-761, Krzyż Wielkopolski, gmina Krzyż Wielkopolski, powiat czarnkowsko-trzcianecki, województwo wielkopolskie, Polska",OK,2026-10-15T13:21:45.511084,True
+"44-153 Smolnica, Polska",52.9134017,23.7572532,"Smolnica, Tarnopol, gmina Narewka, powiat hajnowski, województwo podlaskie, 17-220, Polska",OK,2026-10-15T13:21:47.123203,False
+"43-195 Mikołów, Polska",50.1747069,18.8674058,"43-195, Mokre, Mikołów, powiat mikołowski, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T13:21:48.667677,False
+"43-426 Dębowiec, Polska",49.7980998,18.7245176,"43-426, Iskrzyczyn, gmina Dębowiec, powiat cieszyński, województwo śląskie, Polska",OK,2026-10-15T13:21:49.943682,False
+"09-120 Nowe Miasto, Polska",52.6628354,20.6382534,"09-120, Nowe Miasto, gmina Nowe Miasto, powiat płoński, województwo mazowieckie, Polska",OK,2026-10-15T13:21:51.781043,False
+"07-417 Ostrołęka, Polska",53.0570382,21.6095178,"07-417, Ostrołęka, województwo mazowieckie, Polska",OK,2026-10-15T13:21:53.368000,False
+"36-207 Grabownica, Polska",49.6604156,22.095538,"36-207, Grabownica Starzeńska, gmina Brzozów, powiat brzozowski, województwo podkarpackie, Polska",OK,2026-10-15T13:21:55.109369,False
+"39-102 Lubzina, Polska",50.0662766,21.5327288,"39-102, Lubzina, gmina Ropczyce, powiat ropczycko-sędziszowski, województwo podkarpackie, Polska",OK,2026-10-15T13:21:56.330547,False
+"11-034 Stawiguda, Polska",53.661806,20.4010698,"11-034, gmina Stawiguda, powiat olsztyński, województwo warmińsko-mazurskie, Polska",OK,2026-10-15T13:21:57.891351,False
+"45-215 Opole, Polska",50.6786223,17.9236874,"45-215, Chabry, Opole, województwo opolskie, Polska",OK,2026-10-15T13:21:59.138808,False
+"57-256 Bardo, Polska",50.5057101,16.7362455,"57-256, Bardo, gmina Bardo, powiat ząbkowicki, województwo dolnośląskie, Polska",OK,2026-10-15T13:22:00.343623,False
+"84-250 Gniewino, Polska",54.7216225,18.0005671,"84-250, Gniewino, gmina Gniewino, powiat wejherowski, województwo pomorskie, Polska",OK,2026-10-15T13:22:01.916530,False
+"23-235 Annopol, Polska",50.8793245,21.8787144,"23-235, Annopol, gmina Annopol, powiat kraśnicki, województwo lubelskie, Polska",OK,2026-10-15T13:22:03.511273,False
+"24-103 Żyrzyn, Polska",51.5003557,22.0695656,"24-103, Żyrzyn, gmina Żyrzyn, powiat puławski, województwo lubelskie, Polska",OK,2026-10-15T13:22:05.097931,False
+"21-470 Krzywda, Polska",51.8029189,22.1384662,"21-470, gmina Krzywda, powiat łukowski, województwo lubelskie, Polska",OK,2026-10-15T13:22:06.707030,False
+"24-220 Niedrzwica Duża, Polska",51.11408,22.3824935,"24-220, Niedrzwica Duża, gmina Niedrzwica Duża, powiat lubelski, województwo lubelskie, Polska",OK,2026-10-15T13:22:07.926228,False
+"22-150 Wierzbica, Polska",51.2642422,23.2969742,"22-150, Wierzbica-Osiedle, gmina Wierzbica, powiat chełmski, województwo lubelskie, Polska",OK,2026-10-15T13:22:09.661260,False
+"87-321 Bartniczka, Polska",53.2510289,19.6008369,"87-321, Bartniczka, gmina Bartniczka, powiat brodnicki, województwo kujawsko-pomorskie, Polska",OK,2026-10-15T13:22:10.858349,False
+"32-082 ZELKÓW, Polska",50.1593052,19.7961829,"Zelków, gmina Zabierzów, powiat krakowski, województwo małopolskie, Polska",OK,2026-10-15T13:22:12.463841,False
+"43-502 Czechowice-Dziedzice, Polska",49.8969615,18.9831121,"43-502, Czechowice-Dziedzice, gmina Czechowice-Dziedzice, powiat bielski, województwo śląskie, Polska",OK,2026-10-15T13:22:14.075707,False
+"13-306 Marzancice, Polska",53.3963833,19.5374891,"13-306, Lipowiec, gmina Kurzętnik, powiat nowomiejski, województwo warmińsko-mazurskie, Polska",OK,2026-10-15T13:22:16.511549,True
+"11-430 Gudniki 6, Polska",54.169104,21.1482589,"11-430, Korsze, gmina Korsze, powiat kętrzyński, województwo warmińsko-mazurskie, Polska",OK,2026-10-15T13:22:19.058255,True
+"05-304 Ładzyń, Polska",52.2841222,21.5310901,"05-304, Mały Stanisławów, gmina Stanisławów, powiat miński, województwo mazowieckie, Polska",OK,2026-10-15T13:22:22.421411,True
+"39-230 Brzostek, Polska",49.8817182,21.4176172,"39-230, Brzostek, gmina Brzostek, powiat dębicki, województwo podkarpackie, Polska",OK,2026-10-15T13:22:23.978039,False
+"78-630 Mielęcin Wałecki, Polska",53.0890693,16.1507754,"78-630, Człopa, gmina Człopa, powiat wałecki, województwo zachodniopomorskie, Polska",OK,2026-10-15T13:22:26.994704,True
+"68-320 Jasień, Polska",51.7537009,15.0408893,"68-320, gmina Jasień, powiat żarski, województwo lubuskie, Polska",OK,2026-10-15T13:22:28.537113,False
