@@ -1032,3 +1032,8 @@ address,lat,lng,formatted_address,status,cached_at,postcode_fallback_attempted
 "43-394 Iłownica, Polska",49.8567002,18.8793408,"43-394, Rudzica, gmina Jasienica, powiat bielski, województwo śląskie, Polska",OK,2026-10-14T15:53:45.070200,True
 "05-652 Michrów, Polska",51.9086286,20.739942,"05-652, Jeziora, gmina Pniewy, powiat grójecki, województwo mazowieckie, Polska",OK,2026-10-14T15:53:47.632866,True
 "97-310 Karlin, Polska",51.5049016,19.6837956,"97-310, gmina Moszczenica, powiat piotrkowski, województwo łódzkie, Polska",OK,2026-10-14T15:53:50.655759,True
+"08-113 Olszyc Włościański, Polska",52.0404135,22.1583484,"08-113, gmina Domanice, powiat siedlecki, województwo mazowieckie, Polska",OK,2026-10-15T04:26:33.172371,True
+"75-900 Koszalin-Kretomino, Polska",54.2145337,16.1877831,"75-900, Koszalin, województwo zachodniopomorskie, Polska",OK,2026-10-15T04:26:36.099245,True
+"47-300 Krapkowice Żywocice, Polska",50.4555913,17.9544028,"47-300, Krapkowice, gmina Krapkowice, powiat krapkowicki, województwo opolskie, Polska",OK,2026-10-15T04:26:38.710966,True
+"43-394 Iłownica, Polska",49.856701,18.8793347,"43-394, Rudzica, gmina Jasienica, powiat bielski, województwo śląskie, Polska",OK,2026-10-15T04:26:42.017524,True
+"05-652 Michrów, Polska",51.9086286,20.739942,"05-652, Jeziora, gmina Pniewy, powiat grójecki, województwo mazowieckie, Polska",OK,2026-10-15T04:26:45.048920,True
