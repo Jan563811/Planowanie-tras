@@ -1212,3 +1212,58 @@ address,lat,lng,formatted_address,status,cached_at,postcode_fallback_attempted
 "18-200 Wysokie Mazowieckie, Polska",52.9232395,22.4904234,"18-200, Wysokie Mazowieckie, powiat wysokomazowiecki, województwo podlaskie, Polska",OK,2026-10-15T08:01:25.595334,False
 "09-440 Rogowo, Polska",53.0639333,18.7283487,"Volvo Maszyny Budowlane Polska, Rogowska, Grębocin, gmina Lubicz, powiat toruński, województwo kujawsko-pomorskie, 87-122, Polska",OK,2026-10-15T08:01:26.774969,False
 "14-230 Zalewo, Polska",53.7833555,19.6120694,"14-230, Dobrzyki, gmina Zalewo, powiat iławski, województwo warmińsko-mazurskie, Polska",OK,2026-10-15T08:01:28.350074,False
+"21-512 Zalesie, Polska",52.0579301,23.408627,"21-512, gmina Zalesie, powiat bialski, województwo lubelskie, Polska",OK,2026-10-15T08:06:53.693036,False
+"21-077 Spiczyn, Polska",51.34744,22.7538368,"21-077, Spiczyn, gmina Spiczyn, powiat łęczyński, województwo lubelskie, Polska",OK,2026-10-15T08:06:55.258529,False
+"22-375 Izbica, Polska",50.8932023,23.1491787,"22-375, Izbica, gmina Izbica, powiat krasnostawski, województwo lubelskie, Polska",OK,2026-10-15T08:06:56.983553,False
+"20-118 Lublin, Polska",51.2515424,22.5800023,"20-118, Kalinowszczyzna, Lublin, województwo lubelskie, Polska",OK,2026-10-15T08:06:58.711715,False
+"22-554 Trzeszczany, Polska",50.8237054,23.7320707,"22-554, Trzeszczany Pierwsze, gmina Trzeszczany, powiat hrubieszowski, województwo lubelskie, Polska",OK,2026-10-15T08:07:00.326959,False
+"22-435 Komarów-Osada, Polska",50.6316656,23.4932414,"22-435, Komarów-Osada, gmina Komarów-Osada, powiat zamojski, województwo lubelskie, Polska",OK,2026-10-15T08:07:01.634001,False
+"22-435 Komarów- Osada, Polska",50.6316656,23.4932414,"22-435, Komarów-Osada, gmina Komarów-Osada, powiat zamojski, województwo lubelskie, Polska",OK,2026-10-15T08:07:03.354216,False
+"89-240 Kcynia, Polska",53.0059649,17.4783291,"89-240, gmina Kcynia, powiat nakielski, województwo kujawsko-pomorskie, Polska",OK,2026-10-15T08:07:04.541018,False
+"89-310 Łobżenica, Polska",53.2573687,17.2582392,"89-310, Łobżenica, gmina Łobżenica, powiat pilski, województwo wielkopolskie, Polska",OK,2026-10-15T08:07:06.118343,False
+"63-130 Książ Wielkop., Polska",52.0508397,17.223217,"63-130, gmina Książ Wielkopolski, powiat śremski, województwo wielkopolskie, Polska",OK,2026-10-15T08:07:09.250769,True
+"63-910 Miejska Górka, Polska",51.6626678,16.9767319,"63-910, gmina Miejska Górka, powiat rawicki, województwo wielkopolskie, Polska",OK,2026-10-15T08:07:10.406153,False
+"91-490 Łódź, Polska",51.8120427,19.4433869,"91-490, Łódź-Bałuty, Łódź, województwo łódzkie, Polska",OK,2026-10-15T08:07:11.568120,False
+"86-330 Mełno, Polska",53.4382353,18.9415078,"Poczta Polska, 228, Mełno, gmina Gruta, powiat grudziądzki, województwo kujawsko-pomorskie, 86-330, Polska",OK,2026-10-15T08:07:12.746925,False
+"86-302 Grudziądz, Polska",53.4596458,18.7654843,"86-302, Park - Las Komunalny, Grudziądz, województwo kujawsko-pomorskie, Polska",OK,2026-10-15T08:07:14.287021,False
+"87-600 Lipno, Polska",52.8317008,19.1721044,"87-600, Lipno, powiat lipnowski, województwo kujawsko-pomorskie, Polska",OK,2026-10-15T08:07:15.866596,False
+"88-110 Jacewo, Polska",52.79914,18.29717,"Jacewo, gmina Inowrocław, powiat inowrocławski, województwo kujawsko-pomorskie, 88-110, Polska",OK,2026-10-15T08:07:17.429529,False
+"99-311 Pniewo, Polska",52.1851641,19.5931914,"99-311, gmina Bedlno, powiat kutnowski, województwo łódzkie, Polska",OK,2026-10-15T08:07:20.695532,True
+"96-130 Głuchów, Polska",51.7852986,20.0778197,"96-130, gmina Głuchów, powiat skierniewicki, województwo łódzkie, Polska",OK,2026-10-15T08:07:22.527073,False
+"42-233 Borowno-Kolonia, Polska",50.92,19.2691667,"Borowno-Kolonia, Borowno, gmina Mykanów, powiat częstochowski, województwo śląskie, 42-233, Polska",OK,2026-10-15T08:07:23.681607,False
+"44-190 Knurów, Polska",50.2239683,18.6732986,"44-190, Knurów, powiat gliwicki, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T08:07:24.988802,False
+"43-417 Kaczyce, Polska",49.8359323,18.593383,"43-417, Kaczyce, gmina Zebrzydowice, powiat cieszyński, województwo śląskie, Polska",OK,2026-10-15T08:07:26.602349,False
+"43-460 Wisła, Polska",49.6402422,18.8852148,"43-460, Wisła, powiat cieszyński, województwo śląskie, Polska",OK,2026-10-15T08:07:28.163034,False
+"44-268 Jastrzębie Zdrój, Polska",49.9977149,18.6353563,"44-268, Szeroka, Jastrzębie-Zdrój, województwo śląskie, Polska",OK,2026-10-15T08:07:29.403603,False
+"30-799 Kraków, Polska",50.0365098,20.0695921,"30-799, Podgórze, Kraków, województwo małopolskie, Polska",OK,2026-10-15T08:07:30.557809,False
+"26-624 Kowala, Polska",51.3316698,21.1002451,"26-624, Parznice, gmina Kowala, powiat radomski, województwo mazowieckie, Polska",OK,2026-10-15T08:07:32.105523,False
+"36-030 Błażowa Górna, Polska",49.877787,22.0812803,"Błażowa Górna, gmina Błażowa, powiat rzeszowski, województwo podkarpackie, Polska",OK,2026-10-15T08:07:33.700655,False
+"36-245 Nozdrzec, Polska",49.766881,22.190474,"36-245, Nozdrzec, gmina Nozdrzec, powiat brzozowski, województwo podkarpackie, Polska",OK,2026-10-15T08:07:35.418674,False
+"38-311 Szymbark, Polska",49.6217082,21.1028145,"38-311, Szymbark, gmina Gorlice, powiat gorlicki, województwo małopolskie, Polska",OK,2026-10-15T08:07:37.133465,False
+"38-306 Libusza, Polska",49.6896096,21.2442924,"38-306, Libusza, gmina Biecz, powiat gorlicki, województwo małopolskie, Polska",OK,2026-10-15T08:07:38.751033,False
+"32-406 Zakliczyn, Polska",49.8931791,20.0056501,"32-406, Zakliczyn, gmina Siepraw, powiat myślenicki, województwo małopolskie, Polska",OK,2026-10-15T08:07:40.472210,False
+"32-031 Kulerzów, Polska",49.9432348,19.8557855,"Kulerzów, gmina Mogilany, powiat krakowski, województwo małopolskie, Polska",OK,2026-10-15T08:07:42.066369,False
+"13-306 Kurzętnik, Polska",53.3963833,19.5374891,"13-306, Lipowiec, gmina Kurzętnik, powiat nowomiejski, województwo warmińsko-mazurskie, Polska",OK,2026-10-15T08:07:43.669003,False
+"05-190 Nasielsk, Polska",52.5731489,20.8054942,"05-190, Paulinowo, gmina Nasielsk, powiat nowodworski, województwo mazowieckie, Polska",OK,2026-10-15T08:07:44.873316,False
+"09-470 bodzanów, Polska",52.4969449,20.0109035,"09-470, gmina Bodzanów, powiat płocki, województwo mazowieckie, Polska",OK,2026-10-15T08:07:46.059977,False
+"05-850 Jawczyce, Polska",52.2155478,20.7997404,"05-850, Ożarów Mazowiecki, gmina Ożarów Mazowiecki, powiat warszawski zachodni, województwo mazowieckie, Polska",OK,2026-10-15T08:07:49.050119,True
+"05-820 Piastów, Polska",52.1846456,20.8448123,"05-820, Piastów, powiat pruszkowski, województwo mazowieckie, Polska",OK,2026-10-15T08:07:50.609872,False
+"05-503 Wola Gołkowska, Polska",52.0375086,20.9375997,"05-503, Głosków, gmina Piaseczno, powiat piaseczyński, województwo mazowieckie, Polska",OK,2026-10-15T08:07:53.452337,True
+"26-425 Odrzywół, Polska",51.5345967,20.5271889,"26-425, Wysokin, gmina Odrzywół, powiat przysuski, województwo mazowieckie, Polska",OK,2026-10-15T08:07:55.007837,False
+"26-800 Białobrzegi, Polska",51.6413051,20.9624029,"26-800, Białobrzegi, gmina Białobrzegi, powiat białobrzeski, województwo mazowieckie, Polska",OK,2026-10-15T08:07:56.576941,False
+"05-640 Mogielnica, Polska",51.6805116,20.7274047,"05-640, Mogielnica, gmina Mogielnica, powiat grójecki, województwo mazowieckie, Polska",OK,2026-10-15T08:07:57.858308,False
+"64-225 Jaromierz, Polska",52.0951976,15.9296718,"64-225, gmina Siedlec, powiat wolsztyński, województwo wielkopolskie, Polska",OK,2026-10-15T08:08:00.309516,True
+"62-067 Rakoniewice, Polska",52.1420008,16.2743569,"62-067, Rakoniewice, gmina Rakoniewice, powiat grodziski, województwo wielkopolskie, Polska",OK,2026-10-15T08:08:01.892247,False
+"64-061 Kamieniec, Polska",52.1631553,16.4568796,"64-061, gmina Kamieniec, powiat grodziski, województwo wielkopolskie, Polska",OK,2026-10-15T08:08:03.052569,False
+"44-189 Wilcza, Polska",50.1915246,18.5909155,"44-189, Wilcza, gmina Pilchowice, powiat gliwicki, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T08:08:04.871495,False
+"44-341 Skrbeńsko, Polska",49.905763,18.5340563,"Skrbeńsko, gmina Godów, powiat wodzisławski, województwo śląskie, Polska",OK,2026-10-15T08:08:06.448453,False
+"44-145 Pilchowice, Polska",50.2143826,18.5517398,"44-145, Pilchowice, gmina Pilchowice, powiat gliwicki, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T08:08:07.756857,False
+"44-178 Przyszowice, Polska",50.2456111,18.739798,"44-178, Przyszowice, gmina Gierałtowice, powiat gliwicki, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T08:08:09.320173,False
+"42-580 Wojkowice, Polska",50.3658303,19.036874,"42-580, Wojkowice, powiat będziński, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T08:08:10.866785,False
+"06-513 Wieczfnia Kościelna, Polska",53.1848483,20.4748578,"06-513, gmina Wieczfnia Kościelna, powiat mławski, województwo mazowieckie, Polska",OK,2026-10-15T08:08:12.455233,False
+"09-131 Joniec, Polska",52.5988123,20.5725947,"09-131, Joniec-Kolonia, gmina Joniec, powiat płoński, województwo mazowieckie, Polska",OK,2026-10-15T08:08:13.614118,False
+"96-500 Altanka, Polska",52.2295686,20.2498956,"96-500, Sochaczew, powiat sochaczewski, województwo mazowieckie, Polska",OK,2026-10-15T08:08:16.528165,True
+"93-649 Łódz, Polska",51.7117869,19.5903831,"93-649, Wiskitno, Łódź-Górna, Łódź, województwo łódzkie, Polska",OK,2026-10-15T08:08:17.674643,False
+"99-122 Orszewice, Polska",52.0813211,19.3162812,"Orszewice, gmina Góra Świętej Małgorzaty, powiat łęczycki, województwo łódzkie, Polska",OK,2026-10-15T08:08:18.986588,False
+"07-132 Ostrówek, Polska",51.78378,21.1861739,"Poczta Polska, Wójtowska, Ostrówek, Warka, gmina Warka, powiat grójecki, województwo mazowieckie, 05-660, Polska",OK,2026-10-15T08:08:20.595434,False
+"08-311 Bielany, Polska",52.335605,22.237719,"08-311, gmina Bielany, powiat sokołowski, województwo mazowieckie, Polska",OK,2026-10-15T08:08:21.827415,False
