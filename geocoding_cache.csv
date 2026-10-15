@@ -1137,3 +1137,78 @@ address,lat,lng,formatted_address,status,cached_at,postcode_fallback_attempted
 "84-240 Reda, Polska",54.6106817,18.3494152,"84-240, Reda, powiat wejherowski, województwo pomorskie, Polska",OK,2026-10-15T07:54:06.968107,False
 "21-003 Elizówka, Polska",51.297619,22.5768768,"Elizówka, gmina Niemce, powiat lubelski, województwo lubelskie, Polska",OK,2026-10-15T07:54:08.592155,False
 "20-232 Lublin, Polska",51.2582138,22.6341818,"20-232, Hajdów-Zadębie, Lublin, województwo lubelskie, Polska",OK,2026-10-15T07:54:09.897987,False
+"26-910 Magnuszew, Polska",51.7627664,21.3691368,"26-910, Magnuszew, gmina Magnuszew, powiat kozienicki, województwo mazowieckie, Polska",OK,2026-10-15T07:59:29.644138,False
+"36-030 Błażowa, Polska",49.89386,22.0908854,"36-030, Błażowa, gmina Błażowa, powiat rzeszowski, województwo podkarpackie, Polska",OK,2026-10-15T07:59:30.845202,False
+"36-062 Zaczernie, Polska",50.0916387,21.9964938,"36-062, Zaczernie, gmina Trzebownisko, powiat rzeszowski, województwo podkarpackie, Polska",OK,2026-10-15T07:59:32.146192,False
+"33-380 Krynica Zdrój, Polska",49.4332115,20.9617428,"33-380, Krynica-Zdrój, gmina Krynica-Zdrój, powiat nowosądecki, województwo małopolskie, Polska",OK,2026-10-15T07:59:33.719917,False
+"33-170 Tuchów, Polska",49.8985792,21.0484144,"33-170, Tuchów, gmina Tuchów, powiat tarnowski, województwo małopolskie, Polska",OK,2026-10-15T07:59:35.020398,False
+"32-733 Trzciana, Polska",49.8482353,20.3770814,"32-733, Trzciana, gmina Trzciana, powiat bocheński, województwo małopolskie, Polska",OK,2026-10-15T07:59:36.744672,False
+"32-720 Nowy Wiśnicz, Polska",49.9147466,20.4786119,"32-720, Stary Wiśnicz, gmina Nowy Wiśnicz, powiat bocheński, województwo małopolskie, Polska",OK,2026-10-15T07:59:37.898760,False
+"32-052 Radziszów, Polska",49.9383536,19.8095394,"Radziszów, gmina Skawina, powiat krakowski, województwo małopolskie, Polska",OK,2026-10-15T07:59:39.080067,False
+"32-002 Kokotów 325, Polska",50.0139139,20.0963232,"Kokotów, gmina Wieliczka, powiat wielicki, województwo małopolskie, Polska",OK,2026-10-15T07:59:40.806625,False
+"30-234 Kraków, Polska",50.0705326,19.8604544,"30-234, Zwierzyniec, Kraków, województwo małopolskie, Polska",OK,2026-10-15T07:59:42.127724,False
+"44-193 Knurów, Polska",50.2011849,18.6403331,"44-193, Krywałd, Knurów, powiat gliwicki, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T07:59:43.350388,False
+"78-120 Gościno, Polska",54.0443926,15.6576433,"78-120, Gościno, gmina Gościno, powiat kołobrzeski, województwo zachodniopomorskie, Polska",OK,2026-10-15T07:59:44.926756,False
+"70-831 Szczecin, Polska",53.395901,14.6696117,"70-831, Dąbie, Prawobrzeże, Szczecin, województwo zachodniopomorskie, Polska",OK,2026-10-15T07:59:46.198563,False
+"75-255 Koszalin, Polska",54.2091835,16.1609943,"75-255, Koszalin, województwo zachodniopomorskie, Polska",OK,2026-10-15T07:59:47.427445,False
+"62-303 Kaczanowo, Polska",52.2899638,17.5827874,"Kaczanowo, gmina Września, powiat wrzesiński, województwo wielkopolskie, Polska",OK,2026-10-15T07:59:49.007746,False
+"64-113 Kąkolewo, Polska",51.8598633,16.6917319,"Kąkolewo, gmina Osieczna, powiat leszczyński, województwo wielkopolskie, 64-113, Polska",OK,2026-10-15T07:59:50.310117,False
+"21-132 Kamionka, Polska",51.4519218,22.4571737,"21-132, Stare Pole, gmina Kamionka, powiat lubartowski, województwo lubelskie, Polska",OK,2026-10-15T07:59:52.141076,False
+"21-044 Trawniki, Polska",51.1468386,22.9826883,"21-044, Trawniki-Kolonia, gmina Trawniki, powiat świdnicki, województwo lubelskie, Polska",OK,2026-10-15T07:59:53.407994,False
+"23-407 Tereszpol, Polska",50.5783931,22.8942598,"23-407, Tereszpol-Zaorenda, gmina Tereszpol, powiat biłgorajski, województwo lubelskie, Polska",OK,2026-10-15T07:59:54.972261,False
+"66-006 Ochla, Polska",51.8806356,15.4701562,"Ochla, Nowe Miasto, Zielona Góra, województwo lubuskie, 66-006, Polska",OK,2026-10-15T07:59:56.227315,False
+"98-235 Chrzanowice, Polska",51.6411838,18.4340958,"Chrzanowice, gmina Błaszki, powiat sieradzki, województwo łódzkie, 98-235, Polska",OK,2026-10-15T07:59:57.537424,False
+"91-531 Łódź, Polska",51.8314432,19.551221,"91-531, Łódź-Bałuty, Łódź, województwo łódzkie, Polska",OK,2026-10-15T07:59:58.716292,False
+"42-470 Siewierz, Polska",50.4825879,19.2361972,"42-470, Siewierz, gmina Siewierz, powiat będziński, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T08:00:00.281948,False
+"47-175 Kadłub, Polska",50.6107906,18.270752,"47-175, Kadłub, gmina Strzelce Opolskie, powiat strzelecki, województwo opolskie, Polska",OK,2026-10-15T08:00:01.840551,False
+"43-267 Suszec, Polska",50.0356345,18.7805523,"43-267, Suszec, gmina Suszec, powiat pszczyński, województwo śląskie, Polska",OK,2026-10-15T08:00:03.187032,False
+"85-790 Bydgoszcz, Polska",53.1539029,18.162453,"85-790, Stary Fordon, Bydgoszcz, województwo kujawsko-pomorskie, Polska",OK,2026-10-15T08:00:04.398097,False
+"88-306 Dąbrowa, Polska",52.7705006,17.9421655,"88-306, gmina Dąbrowa, powiat mogileński, województwo kujawsko-pomorskie, Polska",OK,2026-10-15T08:00:05.554574,False
+"09-530 Gąbin, Polska",52.4231627,19.7463782,"09-530, Gąbin, gmina Gąbin, powiat płocki, województwo mazowieckie, Polska",OK,2026-10-15T08:00:07.119373,False
+"96-316 Stare Budy, Polska",51.7355556,17.5911111,"Stare Budy, Roszki, gmina Krotoszyn, powiat krotoszyński, województwo wielkopolskie, 63-716, Polska",OK,2026-10-15T08:00:08.935778,False
+"99-417 Bolimów, Polska",52.0879631,20.1757188,"99-417, gmina Bolimów, powiat skierniewicki, województwo łódzkie, Polska",OK,2026-10-15T08:00:10.490652,False
+"28-500 Kazimierza Wielka, Polska",50.2533051,20.482898,"28-500, Odonów, gmina Kazimierza Wielka, powiat kazimierski, województwo świętokrzyskie, Polska",OK,2026-10-15T08:00:12.307040,False
+"27-415 Kunów, Polska",50.9656342,21.2914035,"27-415, Kunów, gmina Kunów, powiat ostrowiecki, województwo świętokrzyskie, Polska",OK,2026-10-15T08:00:13.659009,False
+"07-440 Goworowo, Polska",52.893599,21.5524681,"07-440, gmina Goworowo, powiat ostrołęcki, województwo mazowieckie, Polska",OK,2026-10-15T08:00:14.872258,False
+"03-034 Warszawa, Polska",52.3279505,21.0103606,"03-034, Białołęka, Warszawa, województwo mazowieckie, Polska",OK,2026-10-15T08:00:16.605678,False
+"05-126 Nieporęt, Polska",52.3997576,21.0421826,"05-126, Nieporęt, gmina Nieporęt, powiat legionowski, województwo mazowieckie, Polska",OK,2026-10-15T08:00:17.842481,False
+"32-830 Łopoń, Polska",49.9448684,20.8199951,"32-830, Więckowice, gmina Wojnicz, powiat tarnowski, województwo małopolskie, Polska",OK,2026-10-15T08:00:20.659075,True
+"43-354 Czaniec, Polska",49.8484358,19.2549221,"43-354, Czaniec, gmina Porąbka, powiat bielski, województwo śląskie, Polska",OK,2026-10-15T08:00:22.219230,False
+"05-428 Venhorsy, Polska",53.1581927,15.4028798,"428, Choszczno, gmina Choszczno, powiat choszczeński, województwo zachodniopomorskie, Polska",OK,2026-10-15T08:00:25.074204,True
+"42-622 Świerklaniec, Polska",50.4417941,18.9302368,"42-622, gmina Świerklaniec, powiat tarnogórski, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T08:00:26.277767,False
+"59-720 Szczytnica, Polska",51.27831,15.7161424,"Szczytnica, gmina Warta Bolesławiecka, powiat bolesławiecki, województwo dolnośląskie, Polska",OK,2026-10-15T08:00:27.489598,False
+"64-125 Poniec, Polska",51.7618104,16.8171302,"64-125, Poniec, gmina Poniec, powiat gostyński, województwo wielkopolskie, Polska",OK,2026-10-15T08:00:29.077541,False
+"63-648 Słupia pod Kępnem, Polska",51.2389464,18.0464555,"63-648, gmina Baranów, powiat kępiński, województwo wielkopolskie, Polska",OK,2026-10-15T08:00:31.794099,True
+"98-350 Biała Kopiec, Polska",51.2666979,18.4351098,"98-350, Biała-Kopiec, gmina Biała, powiat wieluński, województwo łódzkie, Polska",OK,2026-10-15T08:00:33.109180,False
+"82-440 Dzierzgoń, Polska",53.9376034,19.3271506,"82-440, Nowiec, gmina Dzierzgoń, powiat sztumski, województwo pomorskie, Polska",OK,2026-10-15T08:00:34.663919,False
+"82-300 Raczki Elbląskie, Polska",54.1718473,19.4151355,"82-300, Elbląg, województwo warmińsko-mazurskie, Polska",OK,2026-10-15T08:00:38.225760,True
+"65-010 Stryków, Polska",51.9009447,19.6036969,"Stryków, gmina Stryków, powiat zgierski, województwo łódzkie, Polska",OK,2026-10-15T08:00:39.408624,False
+"05-800 Pruszków, Polska",52.1690791,20.8068497,"05-800, Pruszków, powiat pruszkowski, województwo mazowieckie, Polska",OK,2026-10-15T08:00:40.964231,False
+"26-806 Stara Błotnica, Polska",51.5449611,20.9774667,"26-806, Stara Błotnica, gmina Stara Błotnica, powiat białobrzeski, województwo mazowieckie, Polska",OK,2026-10-15T08:00:42.126541,False
+"48-120 Baborów, Polska",50.1585845,17.9798432,"48-120, Baborów, gmina Baborów, powiat głubczycki, województwo opolskie, Polska",OK,2026-10-15T08:00:43.435260,False
+"19-314 Kalinowo, Polska",53.8528718,22.64515,"19-314, gmina Kalinowo, powiat ełcki, województwo warmińsko-mazurskie, Polska",OK,2026-10-15T08:00:44.703098,False
+"16-060 Żuki, Polska",53.4489834,23.4345493,"Żuki, gmina Sokółka, powiat sokólski, województwo podlaskie, Polska",OK,2026-10-15T08:00:46.423043,False
+"23-204 Kraśnik, Polska",50.9587789,22.1575716,"23-204, Kraśnik, powiat kraśnicki, województwo lubelskie, Polska",OK,2026-10-15T08:00:48.147069,False
+"32-733 Leszczyna, Polska",49.8482353,20.3770814,"32-733, Trzciana, gmina Trzciana, powiat bocheński, województwo małopolskie, Polska",OK,2026-10-15T08:00:51.092149,True
+"11-300 Biskupiec, Polska",53.8641984,20.9558082,"11-300, Biskupiec, gmina Biskupiec, powiat olsztyński, województwo warmińsko-mazurskie, Polska",OK,2026-10-15T08:00:52.426400,False
+"76-100 Rzyszczewo, Polska",53.9265974,16.0502867,"Rzyszczewo, gmina Białogard, powiat białogardzki, województwo zachodniopomorskie, 78-200, Polska",OK,2026-10-15T08:00:54.051583,False
+"63-200 Jarocin, Polska",51.9720251,17.4995237,"63-200, Jarocin, gmina Jarocin, powiat jarociński, województwo wielkopolskie, Polska",OK,2026-10-15T08:00:55.322440,False
+"62-064 Plewiska, Polska",52.3680592,16.8167078,"62-064, Plewiska, gmina Komorniki, powiat poznański, województwo wielkopolskie, Polska",OK,2026-10-15T08:00:56.883432,False
+"55-010 Groblice, Polska",51.0126304,17.1745037,"Groblice, gmina Siechnice, powiat wrocławski, województwo dolnośląskie, Polska",OK,2026-10-15T08:00:58.492655,False
+"86-070 Dąbrowa Chełmińska, Polska",53.178945,18.2765729,"86-070, gmina Dąbrowa Chełmińska, powiat bydgoski, województwo kujawsko-pomorskie, Polska",OK,2026-10-15T08:01:00.068878,False
+"88-192 Sadłogoszcz, Polska",52.8568141,18.0082474,"Sadłogoszcz, gmina Barcin, powiat żniński, województwo kujawsko-pomorskie, 88-192, Polska",OK,2026-10-15T08:01:01.269240,False
+"86-200 Chełmno, Polska",53.3522533,18.4545899,"86-200, Chełmno, powiat chełmiński, województwo kujawsko-pomorskie, Polska",OK,2026-10-15T08:01:02.890505,False
+"86-131 Jeżewo, Polska",53.5058844,18.4769881,"86-131, gmina Jeżewo, powiat świecki, województwo kujawsko-pomorskie, Polska",OK,2026-10-15T08:01:04.237602,False
+"05-831 Parole, Polska",52.0485073,20.7716245,"05-831, Młochów, gmina Nadarzyn, powiat pruszkowski, województwo mazowieckie, Polska",OK,2026-10-15T08:01:07.081329,True
+"05-830 Nadarzyn, Polska",52.0910253,20.8038385,"05-830, Nadarzyn, gmina Nadarzyn, powiat pruszkowski, województwo mazowieckie, Polska",OK,2026-10-15T08:01:08.664849,False
+"96-332 Grabina, Polska",53.6142721,14.8681031,"Grabina, Żółwia Błoć, gmina Goleniów, powiat goleniowski, województwo zachodniopomorskie, Polska",OK,2026-10-15T08:01:10.394328,False
+"96-330 Mrozy, Polska",52.1655506,21.8001682,"Mrozy, gmina Mrozy, powiat miński, województwo mazowieckie, Polska",OK,2026-10-15T08:01:12.025068,False
+"26-411 Rusinów, Polska",51.4379833,20.5908084,"26-411, Rusinów, gmina Rusinów, powiat przysuski, województwo mazowieckie, Polska",OK,2026-10-15T08:01:13.591323,False
+"26-806 Stare Żdżary, Polska",51.5449611,20.9774667,"26-806, Stara Błotnica, gmina Stara Błotnica, powiat białobrzeski, województwo mazowieckie, Polska",OK,2026-10-15T08:01:16.594920,True
+"26-510 Chlewiska, Polska",51.2499578,20.7628149,"26-510, Chlewiska, gmina Chlewiska, powiat szydłowiecki, województwo mazowieckie, Polska",OK,2026-10-15T08:01:18.197355,False
+"26-601 Bielicha, Polska",51.401936,21.097109,"26-601, Kozia Góra, Radom, województwo mazowieckie, Polska",OK,2026-10-15T08:01:21.653346,True
+"27-310 Ciepielów, Polska",51.233853,21.5469905,"27-310, Kałków, gmina Ciepielów, powiat lipski, województwo mazowieckie, Polska",OK,2026-10-15T08:01:22.956814,False
+"18-105 Suraż, Polska",52.9444477,23.0007451,"18-105, Suraż, gmina Suraż, powiat białostocki, województwo podlaskie, Polska",OK,2026-10-15T08:01:24.162521,False
+"18-200 Wysokie Mazowieckie, Polska",52.9232395,22.4904234,"18-200, Wysokie Mazowieckie, powiat wysokomazowiecki, województwo podlaskie, Polska",OK,2026-10-15T08:01:25.595334,False
+"09-440 Rogowo, Polska",53.0639333,18.7283487,"Volvo Maszyny Budowlane Polska, Rogowska, Grębocin, gmina Lubicz, powiat toruński, województwo kujawsko-pomorskie, 87-122, Polska",OK,2026-10-15T08:01:26.774969,False
+"14-230 Zalewo, Polska",53.7833555,19.6120694,"14-230, Dobrzyki, gmina Zalewo, powiat iławski, województwo warmińsko-mazurskie, Polska",OK,2026-10-15T08:01:28.350074,False
