@@ -1267,3 +1267,7 @@ address,lat,lng,formatted_address,status,cached_at,postcode_fallback_attempted
 "99-122 Orszewice, Polska",52.0813211,19.3162812,"Orszewice, gmina Góra Świętej Małgorzaty, powiat łęczycki, województwo łódzkie, Polska",OK,2026-10-15T08:08:18.986588,False
 "07-132 Ostrówek, Polska",51.78378,21.1861739,"Poczta Polska, Wójtowska, Ostrówek, Warka, gmina Warka, powiat grójecki, województwo mazowieckie, 05-660, Polska",OK,2026-10-15T08:08:20.595434,False
 "08-311 Bielany, Polska",52.335605,22.237719,"08-311, gmina Bielany, powiat sokołowski, województwo mazowieckie, Polska",OK,2026-10-15T08:08:21.827415,False
+"43-155 Bieruń, Polska",50.0775539,19.1620237,"43-155, Bieruń, powiat bieruńsko-lędziński, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-15T10:31:24.300993,False
+"83-333 Garcz, Polska",54.345396,18.106634,"Poczta Polska, Kartuska, Bukowinki, Garcz, gmina Chmielno, powiat kartuski, województwo pomorskie, 83-333, Polska",OK,2026-10-15T10:31:25.665277,False
+"93-348 Łódź, Polska",51.7100404,19.4608259,"93-348, Łódź-Górna, Łódź, województwo łódzkie, Polska",OK,2026-10-15T10:31:26.894757,False
+"83-305 Rąb, Polska",54.4051413,18.2074164,"83-305, gmina Przodkowo, powiat kartuski, województwo pomorskie, Polska",OK,2026-10-15T10:31:31.569641,True
