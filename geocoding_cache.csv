@@ -1300,3 +1300,71 @@ address,lat,lng,formatted_address,status,cached_at,postcode_fallback_attempted
 "39-230 Brzostek, Polska",49.8817182,21.4176172,"39-230, Brzostek, gmina Brzostek, powiat dębicki, województwo podkarpackie, Polska",OK,2026-10-15T13:22:23.978039,False
 "78-630 Mielęcin Wałecki, Polska",53.0890693,16.1507754,"78-630, Człopa, gmina Człopa, powiat wałecki, województwo zachodniopomorskie, Polska",OK,2026-10-15T13:22:26.994704,True
 "68-320 Jasień, Polska",51.7537009,15.0408893,"68-320, gmina Jasień, powiat żarski, województwo lubuskie, Polska",OK,2026-10-15T13:22:28.537113,False
+"46-070 Wawelno, Polska",50.6454382,17.7821145,"Polska Nowa Wieś (293), Lipowa, Polska Nowa Wieś, gmina Komprachcice, powiat opolski, województwo opolskie, 46-070, Polska",OK,2026-10-28T15:51:15.178505,False
+"48-210 Biała, Polska",50.3960632,17.6754943,"48-210, Biała, gmina Biała, powiat prudnicki, województwo opolskie, Polska",OK,2026-10-28T15:51:16.444911,False
+"46-060 Prószków, Polska",50.5944139,17.8772048,"46-060, Prószków, gmina Prószków, powiat opolski, województwo opolskie, Polska",OK,2026-10-28T15:51:17.987299,False
+"47-344 Kromołów, Polska",50.3768716,17.9959739,"47-344, Walce, gmina Walce, powiat krapkowicki, województwo opolskie, Polska",OK,2026-10-28T15:51:20.543595,True
+"32-051 Jaśkowice, Polska",51.1287174,18.2175176,"Jaśkowice, gmina Byczyna, powiat kluczborski, województwo opolskie, 46-220, Polska",OK,2026-10-28T15:51:23.037919,False
+"34-122 Wieprz, Polska",49.9034057,19.3593004,"34-122, Wieprz, gmina Wieprz, powiat wadowicki, województwo małopolskie, Polska",OK,2026-10-28T15:51:24.327462,False
+"89-511 Cekcyn, Polska",53.583648,18.0125078,"89-511, gmina Cekcyn, powiat tucholski, województwo kujawsko-pomorskie, Polska",OK,2026-10-28T15:51:25.874735,False
+"26-803 Falęcice-Wola, Polska",51.6859877,20.9261663,"26-803, Falęcice-Wola, gmina Promna, powiat białobrzeski, województwo mazowieckie, Polska",OK,2026-10-28T15:51:27.061635,False
+"02-892 Warszawa, Polska",52.1074609,21.0278993,"02-892, Ursynów, Warszawa, województwo mazowieckie, Polska",OK,2026-10-28T15:51:28.258605,False
+"32-241 Kozłów, Polska",50.4739686,20.0177208,"32-241, Kozłów, gmina Kozłów, powiat miechowski, województwo małopolskie, Polska",OK,2026-10-28T15:51:29.654932,False
+"33-389 Jazowsko, Polska",49.529779,20.5171302,"Jazowsko, gmina Łącko, powiat nowosądecki, województwo małopolskie, Polska",OK,2026-10-28T15:51:31.260691,False
+"24-313 Wilków, Polska",51.2467969,21.8802009,"24-313, Szczekarków-Kolonia, gmina Wilków, powiat opolski, województwo lubelskie, Polska",OK,2026-10-28T15:51:32.695024,False
+"35-125 Wawrzeńczyce, Polska",50.9324652,21.0890786,"Wawrzeńczyce, gmina Pawłów, powiat starachowicki, województwo świętokrzyskie, Polska",OK,2026-10-28T15:51:34.309316,False
+"63-405 Sieroszewice, Polska",51.6219424,18.0104389,"63-405, gmina Sieroszewice, powiat ostrowski, województwo wielkopolskie, Polska",OK,2026-10-28T15:51:35.481692,False
+"47-435 Raszczyce, Polska",50.1213323,18.31437,"47-435, Raszczyce, gmina Lyski, powiat rybnicki, województwo śląskie, Polska",OK,2026-10-28T15:51:36.619276,False
+"43-180 Orzesze (Jaśkowice), Polska",50.1219443,18.7811933,"43-180, Orzesze, powiat mikołowski, województwo śląskie, Polska",OK,2026-10-28T15:51:39.426330,True
+"44-293 Gaszowice, Polska",50.1032798,18.4376583,"44-293, Gaszowice, gmina Gaszowice, powiat rybnicki, województwo śląskie, Polska",OK,2026-10-28T15:51:40.711879,False
+"98-335 Pątnów, Polska",51.1248939,18.6294404,"98-335, Bieniec, gmina Pątnów, powiat wieluński, województwo łódzkie, Polska",OK,2026-10-28T15:51:42.237266,False
+"98-240 Szadek, Polska",51.7034357,18.9685066,"98-240, Szadek, gmina Szadek, powiat zduńskowolski, województwo łódzkie, Polska",OK,2026-10-28T15:51:43.538417,False
+"29-135 Radków 19, Polska",50.7077257,19.9859936,"29-135, Radków, gmina Radków, powiat włoszczowski, województwo świętokrzyskie, Polska",OK,2026-10-28T15:51:46.321441,True
+"43-374 Buczkowice, Polska",49.7283742,19.0694307,"43-374, Buczkowice, gmina Buczkowice, powiat bielski, województwo śląskie, Polska",OK,2026-10-28T15:51:47.535453,False
+"38-507 Jurowce, Polska",49.5974355,22.1353426,"Jurowce, gmina Sanok, powiat sanocki, województwo podkarpackie, Polska",OK,2026-10-28T15:51:48.827229,False
+"27-660 Koprzywnica, Polska",50.5929635,21.5794817,"27-660, Koprzywnica, gmina Koprzywnica, powiat sandomierski, województwo świętokrzyskie, Polska",OK,2026-10-28T15:51:49.957498,False
+"42-231 Stary Cykarzew, Polska",50.95446,19.17278,"Stary Cykarzew, gmina Mykanów, powiat częstochowski, województwo śląskie, 42-231, Polska",OK,2026-10-28T15:51:51.521938,False
+"42-125 Łobodno, Polska",50.9308352,18.9905554,"Łobodno, gmina Kłobuck, powiat kłobucki, województwo śląskie, 42-125, Polska",OK,2026-10-28T15:51:52.802726,False
+"44-187 Świbie, Polska",50.5109333,18.5377265,"Świbie, gmina Wielowieś, powiat gliwicki, województwo śląskie, Polska",OK,2026-10-28T15:51:54.357320,False
+"72-200 Nowogard, Polska",53.6754867,15.1164017,"72-200, Nowogard, gmina Nowogard, powiat goleniowski, województwo zachodniopomorskie, Polska",OK,2026-10-28T15:51:55.947780,False
+"64-965 Okonek, Polska",53.5192584,16.836895,"64-965, Okonek, gmina Okonek, powiat złotowski, województwo wielkopolskie, Polska",OK,2026-10-28T15:51:57.496006,False
+"64-843 Dziembówko, Polska",53.0730711,16.8374129,"64-843, gmina Kaczory, powiat pilski, województwo wielkopolskie, Polska",OK,2026-10-28T15:52:00.704191,True
+"98-400 Klatka, Polska",51.3057927,18.1589019,"98-400, gmina Wieruszów, powiat wieruszowski, województwo łódzkie, Polska",OK,2026-10-28T15:52:04.286577,True
+"44-213 Książenice, Polska",50.15945,18.59925,"Książenice, gmina Czerwionka-Leszczyny, powiat rybnicki, województwo śląskie, 44-213, Polska",OK,2026-10-28T15:52:05.561729,False
+"43-392 Międzyrzecze Górne, Polska",49.8450499,18.9489353,"43-392, Międzyrzecze Górne, gmina Jasienica, powiat bielski, województwo śląskie, Polska",OK,2026-10-28T15:52:06.703749,False
+"82-335 Gronowo Elbląskie, Polska",54.1044253,19.3038722,"82-335, Jegłownik, gmina Gronowo Elbląskie, powiat elbląski, województwo warmińsko-mazurskie, Polska",OK,2026-10-28T15:52:07.992060,False
+"82-335 Gronowo Elbląskie - Jegłownik, Polska",54.1044253,19.3038722,"82-335, Jegłownik, gmina Gronowo Elbląskie, powiat elbląski, województwo warmińsko-mazurskie, Polska",OK,2026-10-28T15:52:09.522510,False
+"26-330 Żarnów, Polska",51.246391,20.1668072,"26-330, Żarnów, gmina Żarnów, powiat opoczyński, województwo łódzkie, Polska",OK,2026-10-28T15:52:11.407691,False
+"26-333 Paradyż, Polska",51.309311,20.1028255,"26-333, Paradyż, gmina Paradyż, powiat opoczyński, województwo łódzkie, Polska",OK,2026-10-28T15:52:12.720155,False
+"41-814 Zabrze, Polska",50.3619183,18.7602401,"41-814, Grzybowice, Zabrze, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska",OK,2026-10-28T15:52:13.970900,False
+"06-200 Makowica, Polska",52.8676064,21.1008819,"06-200, Maków Mazowiecki, powiat makowski, województwo mazowieckie, Polska",OK,2026-10-28T15:52:17.142432,True
+"06-200 Maków Mazowiecki, Polska",52.8676064,21.1008819,"06-200, Maków Mazowiecki, powiat makowski, województwo mazowieckie, Polska",OK,2026-10-28T15:52:18.696711,False
+"22-630 Tyszowce, Polska",50.6210663,23.6732715,"22-630, Zamłynie, gmina Tyszowce, powiat tomaszowski, województwo lubelskie, Polska",OK,2026-10-28T15:52:20.281405,False
+"33-311 Wielogłowy, Polska",49.6760817,20.6950087,"33-311, Wielogłowy, gmina Chełmiec, powiat nowosądecki, województwo małopolskie, Polska",OK,2026-10-28T15:52:21.866014,False
+"36-002 Jasionka, Polska",52.0834024,22.3862893,"Jasionka, gmina Zbuczyn, powiat siedlecki, województwo mazowieckie, 08-106, Polska",OK,2026-10-28T15:52:23.520580,False
+"35-330 Rzeszów, Polska",50.0109273,22.061401,"35-330, Słocina, Rzeszów, województwo podkarpackie, Polska",OK,2026-10-28T15:52:25.053009,False
+"38-422 Krościenko Wyżne, Polska",49.6656091,21.8306491,"Walter Vingberg Polska SA, 83, Księża, Pustyny, Krościenko Wyżne, gmina Krościenko Wyżne, powiat krośnieński, województwo podkarpackie, 38-422, Polska",OK,2026-10-28T15:52:26.233876,False
+"36-220 Jasienica Rosielna, Polska",49.7448607,21.9312692,"36-220, Jasienica Rosielna, gmina Jasienica Rosielna, powiat brzozowski, województwo podkarpackie, Polska",OK,2026-10-28T15:52:27.569052,False
+"38-406 Odrzykoń, Polska",49.7436229,21.7302161,"38-406, Odrzykoń, gmina Wojaszówka, powiat krośnieński, województwo podkarpackie, Polska",OK,2026-10-28T15:52:29.175984,False
+"26-652 Zakrzew Janiszew, Polska",51.4359737,21.034289,"26-652, Mleczków, gmina Zakrzew, powiat radomski, województwo mazowieckie, Polska",OK,2026-10-28T15:52:31.893081,True
+"38-457 Zręcin, Polska",49.6487611,21.6744912,"Poczta Polska, Bieszczadzka, Góra, Zręcin, gmina Chorkówka, powiat krośnieński, województwo podkarpackie, 38-458, Polska",OK,2026-10-28T15:52:33.524180,False
+"89-410 Więcbork, Polska",53.3490234,17.4761833,"89-410, gmina Więcbork, powiat sępoleński, województwo kujawsko-pomorskie, Polska",OK,2026-10-28T15:52:34.776295,False
+"64-932 Stara Łubianka, Polska",53.2298381,16.68526,"64-932, gmina Szydłowo, powiat pilski, województwo wielkopolskie, Polska",OK,2026-10-28T15:52:38.001764,True
+"62-540 Stogi 16, Polska",52.3772393,18.1699454,"62-540, Kleczew, gmina Kleczew, powiat koniński, województwo wielkopolskie, Polska",OK,2026-10-28T15:52:40.459008,True
+"63-930 Jutrosin, Polska",51.6335423,17.1573127,"63-930, Dubin, gmina Jutrosin, powiat rawicki, województwo wielkopolskie, Polska",OK,2026-10-28T15:52:41.734773,False
+"46-022 Luboszyce, Polska",50.7235464,17.9553934,"46-022, Luboszyce, gmina Łubniany, powiat opolski, województwo opolskie, Polska",OK,2026-10-28T15:52:42.873766,False
+"10-687 Olsztyn, Polska",53.7096214,20.5346318,"10-687, gmina Purda, powiat olsztyński, województwo warmińsko-mazurskie, Polska",OK,2026-10-28T15:52:44.407280,False
+"82-325 Markusy, Polska",54.0473775,19.3936675,"82-325, Markusy, gmina Markusy, powiat elbląski, województwo warmińsko-mazurskie, Polska",OK,2026-10-28T15:52:45.664687,False
+"89-650 Czersk, Polska",53.7933019,17.9783587,"89-650, Czersk, gmina Czersk, powiat chojnicki, województwo pomorskie, Polska",OK,2026-10-28T15:52:47.236326,False
+"85-405 Bydgoszcz, Polska",53.1493376,17.9582256,"85-405, Czyżkówko, Bydgoszcz, województwo kujawsko-pomorskie, Polska",OK,2026-10-28T15:52:48.493822,False
+"06-425 Karniewo, Polska",52.8461726,20.9900402,"06-425, Karniewo, gmina Karniewo, powiat makowski, województwo mazowieckie, Polska",OK,2026-10-28T15:52:50.029119,False
+"06-220 Stary Szelków, Polska",52.803208,21.2091426,"06-220, Magnuszew Duży, gmina Szelków, powiat makowski, województwo mazowieckie, Polska",OK,2026-10-28T15:52:52.824908,True
+"06-220 Smrock Dwór 2, Polska",52.803208,21.2091426,"06-220, Magnuszew Duży, gmina Szelków, powiat makowski, województwo mazowieckie, Polska",OK,2026-10-28T15:52:55.153634,True
+"07-140 Kołodziąż- Rybie, Polska",52.631638,21.8352711,"07-140, gmina Sadowne, powiat węgrowski, województwo mazowieckie, Polska",OK,2026-10-28T15:52:58.395477,True
+"07-104 Stoczek, Polska",52.5465494,21.888508,"07-104, gmina Stoczek, powiat węgrowski, województwo mazowieckie, Polska",OK,2026-10-28T15:52:59.552501,False
+"05-462 Góraszka, Polska",52.1773983,21.315077,"05-462, Wiązowna, gmina Wiązowna, powiat otwocki, województwo mazowieckie, Polska",OK,2026-10-28T15:53:02.741637,True
+"05-077 Warszawa, Polska",52.2188047,21.2409548,"05-077, Wesoła, Warszawa, województwo mazowieckie, Polska",OK,2026-10-28T15:53:04.379113,False
+"16-200 Dąbrowa Białostocka, Polska",53.6405893,23.340252,"16-200, Dąbrowa Białostocka, gmina Dąbrowa Białostocka, powiat sokólski, województwo podlaskie, Polska",OK,2026-10-28T15:53:05.966679,False
+"21-110 Ostrów Lubelski, Polska",51.4720476,22.8464621,"21-110, Kolechowice-Folwark, gmina Ostrów Lubelski, powiat lubartowski, województwo lubelskie, Polska",OK,2026-10-28T15:53:07.325830,False
+"26-680 Zalesice-Kolonia, Polska",51.2556849,21.0947896,"26-680, Wierzbica, gmina Wierzbica, powiat radomski, województwo mazowieckie, Polska",OK,2026-10-28T15:53:10.140362,True
+"24-170 Kurów, Polska",51.390695,22.1810821,"24-170, Kurów, gmina Kurów, powiat puławski, województwo lubelskie, Polska",OK,2026-10-28T15:53:11.773000,False
