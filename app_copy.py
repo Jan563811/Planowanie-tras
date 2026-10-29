@@ -321,12 +321,9 @@ with tpl_col2:
     )
 
 st.markdown("### Źródła geokodowania i tras")
-selected_api_provider = st.selectbox(
-    "Dostawca API",
-    ["Google Maps", "OpenStreetMap (bezpłatne)"],
-    key="routing_api_provider",
-)
-API_PROVIDER = "osm" if selected_api_provider.startswith("OpenStreetMap") else "google"
+selected_api_provider = "OpenStreetMap (bezpłatne)"
+API_PROVIDER = "osm"
+st.caption(f"Dostawca API: {selected_api_provider}")
 st.caption(
     "OpenStreetMap korzysta z publicznych usług Nominatim i OSRM: bez klucza API, "
     "bez gwarancji dostępności i z ograniczeniami użycia. Geokodowanie: maks. 1 nowe zapytanie/s. "
