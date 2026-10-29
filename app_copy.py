@@ -4,9 +4,11 @@ import json
 import gzip
 import base64
 import hashlib
+import math
 import time
+from email.utils import parsedate_to_datetime
 from typing import List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import streamlit as st
 import pandas as pd
@@ -86,6 +88,11 @@ NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 OSRM_TABLE_URL = "https://router.project-osrm.org/table/v1/driving"
 OSM_USER_AGENT = "PlantpolRoutePlanner/1.0 (route planning application)"
 _last_nominatim_request_at = 0.0
+_nominatim_429_streak = 0
+_nominatim_blocked_until = 0.0
+NOMINATIM_MAX_ATTEMPTS = 3
+NOMINATIM_BACKOFF_BASE_SECONDS = 2.0
+NOMINATIM_RATE_LIMIT_COOLDOWN_SECONDS = 60.0
 
 
 # =========================
@@ -321,9 +328,12 @@ with tpl_col2:
     )
 
 st.markdown("### Źródła geokodowania i tras")
-selected_api_provider = "OpenStreetMap (bezpłatne)"
-API_PROVIDER = "osm"
-st.caption(f"Dostawca API: {selected_api_provider}")
+selected_api_provider = st.selectbox(
+    "Dostawca API",
+    ["Google Maps", "OpenStreetMap (bezpłatne)"],
+    key="routing_api_provider",
+)
+API_PROVIDER = "osm" if selected_api_provider.startswith("OpenStreetMap") else "google"
 st.caption(
     "OpenStreetMap korzysta z publicznych usług Nominatim i OSRM: bez klucza API, "
     "bez gwarancji dostępności i z ograniczeniami użycia. Geokodowanie: maks. 1 nowe zapytanie/s. "
@@ -495,6 +505,22 @@ def geocode_cache_key(address: str) -> str:
     return hashlib.sha256(key_base.encode("utf-8")).hexdigest()
 
 
+def retry_after_seconds(value: str | None) -> float | None:
+    if not value:
+        return None
+    try:
+        seconds = float(value)
+        return max(0.0, seconds) if math.isfinite(seconds) else None
+    except ValueError:
+        try:
+            retry_at = parsedate_to_datetime(value)
+            if retry_at.tzinfo is None:
+                retry_at = retry_at.replace(tzinfo=timezone.utc)
+            return max(0.0, (retry_at - datetime.now(retry_at.tzinfo)).total_seconds())
+        except (TypeError, ValueError, OverflowError):
+            return None
+
+
 def geocode_address(address: str):
     normalized_key = geocode_cache_key(address)
     legacy_key = legacy_geocode_cache_key(address)
@@ -548,28 +574,55 @@ def geocode_address(address: str):
 
     postcode_fallback_attempted = False
     if API_PROVIDER == "osm":
-        global _last_nominatim_request_at
+        global _last_nominatim_request_at, _nominatim_429_streak, _nominatim_blocked_until
         queries = [address]
         if postcode and postcode != address.strip():
             queries.append(postcode)
 
         results = []
         source = "Nominatim (OpenStreetMap)"
+        if time.monotonic() < _nominatim_blocked_until:
+            return None, None, "", "RATE_LIMITED", source
+        _nominatim_blocked_until = 0.0
         for query in queries:
             if query == postcode and query != address:
                 postcode_fallback_attempted = True
-            wait_s = 1.05 - (time.monotonic() - _last_nominatim_request_at)
-            if wait_s > 0:
-                time.sleep(wait_s)
-            r = requests.get(
-                NOMINATIM_URL,
-                params={"q": query, "format": "jsonv2", "limit": 1, "countrycodes": "pl"},
-                headers={"User-Agent": OSM_USER_AGENT},
-                timeout=25,
-            )
-            r.raise_for_status()
-            _last_nominatim_request_at = time.monotonic()
-            results = r.json()
+            for attempt in range(NOMINATIM_MAX_ATTEMPTS):
+                wait_s = 1.05 - (time.monotonic() - _last_nominatim_request_at)
+                if wait_s > 0:
+                    time.sleep(wait_s)
+                try:
+                    r = requests.get(
+                        NOMINATIM_URL,
+                        params={"q": query, "format": "jsonv2", "limit": 1, "countrycodes": "pl"},
+                        headers={"User-Agent": OSM_USER_AGENT},
+                        timeout=25,
+                    )
+                    _last_nominatim_request_at = time.monotonic()
+                    r.raise_for_status()
+                    results = r.json()
+                    _nominatim_429_streak = 0
+                    break
+                except requests.exceptions.RequestException as exc:
+                    _last_nominatim_request_at = time.monotonic()
+                    response = getattr(exc, "response", None)
+                    if response is None or response.status_code != 429:
+                        _nominatim_429_streak = 0
+                        status = f"HTTP_ERROR_{response.status_code}" if response is not None else "REQUEST_ERROR"
+                        return None, None, "", status, source
+
+                    _nominatim_429_streak += 1
+                    retry_after = retry_after_seconds(response.headers.get("Retry-After"))
+                    if _nominatim_429_streak >= NOMINATIM_MAX_ATTEMPTS:
+                        cooldown = max(NOMINATIM_RATE_LIMIT_COOLDOWN_SECONDS, retry_after or 0.0)
+                        _nominatim_blocked_until = time.monotonic() + cooldown
+                        return None, None, "", "RATE_LIMITED", source
+                    if attempt + 1 == NOMINATIM_MAX_ATTEMPTS:
+                        status = "HTTP_ERROR_429"
+                        return None, None, "", status, source
+
+                    backoff = NOMINATIM_BACKOFF_BASE_SECONDS * (2 ** attempt)
+                    time.sleep(max(backoff, retry_after or 0.0))
             if results:
                 if query == postcode:
                     source = "Nominatim (sam kod)"
@@ -1635,6 +1688,20 @@ with tab_result:
             f"Nominatim: {geo_sources['Nominatim (OpenStreetMap)']} kod+miejscowość, "
             f"{geo_sources['Nominatim (sam kod)']} sam kod"
         )
+        request_failures = [
+            status for status in statuses
+            if status.startswith(("HTTP_ERROR_", "REQUEST_ERROR", "RATE_LIMITED"))
+        ]
+        if request_failures:
+            failure_counts = pd.Series(request_failures).value_counts()
+            failure_summary = ", ".join(
+                f"{status}: {count}" for status, count in failure_counts.items()
+            )
+            st.warning(
+                f"Usługa geokodowania zwróciła błędy dla {len(request_failures)} punktów "
+                f"({failure_summary}). Te punkty zostaną pominięte w trasowaniu; "
+                "błędów nie zapisano do cache. Spróbuj ponownie później."
+            )
 
         points_df["latitude"] = lats
         points_df["longitude"] = lngs
