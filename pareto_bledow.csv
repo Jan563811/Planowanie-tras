@@ -1,8 +1,8 @@
 kategoria,liczba_adresow,udzial,udzial_skumulowany
-OSM wybrał inną miejscowość o tej samej nazwie,36,27.7%,27.7%
-Kod z uciętym zerem na początku (np. 5091 zamiast 05-091),33,25.4%,53.1%
-Kod błędny w danych źródłowych (nie pasuje do miejscowości),30,23.1%,76.2%
-Brak kodu pocztowego / klient zagraniczny,19,14.6%,90.8%
-"Miejscowość z adresu nie należy do kodu, a punkt leży poza obszarem kodu",6,4.6%,95.4%
-Brak współrzędnych (geokoder nic nie znalazł),5,3.8%,99.2%
-"Kod spoza spisu, punkt daleko od strefy kodu",1,0.8%,100.0%
+OSM wybrał inną miejscowość o tej samej nazwie,36,27.3%,27.3%
+Kod z uciętym zerem na początku (np. 5091 zamiast 05-091),33,25.0%,52.3%
+Kod błędny w danych źródłowych (nie pasuje do miejscowości),31,23.5%,75.8%
+Brak kodu pocztowego / klient zagraniczny,19,14.4%,90.2%
+"Miejscowość z adresu nie należy do kodu, a punkt leży poza obszarem kodu",6,4.5%,94.7%
+Brak współrzędnych (geokoder nic nie znalazł),5,3.8%,98.5%
+"Kod spoza spisu, punkt daleko od strefy kodu",2,1.5%,100.0%
