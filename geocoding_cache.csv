@@ -1368,3 +1368,89 @@ address,lat,lng,formatted_address,status,cached_at,postcode_fallback_attempted
 "21-110 Ostrów Lubelski, Polska",51.4720476,22.8464621,"21-110, Kolechowice-Folwark, gmina Ostrów Lubelski, powiat lubartowski, województwo lubelskie, Polska",OK,2026-10-28T15:53:07.325830,False
 "26-680 Zalesice-Kolonia, Polska",51.2556849,21.0947896,"26-680, Wierzbica, gmina Wierzbica, powiat radomski, województwo mazowieckie, Polska",OK,2026-10-28T15:53:10.140362,True
 "24-170 Kurów, Polska",51.390695,22.1810821,"24-170, Kurów, gmina Kurów, powiat puławski, województwo lubelskie, Polska",OK,2026-10-28T15:53:11.773000,False
+"58-130 Żarów, Polska",50.94076,16.49474,"Żarów, Poland",OK,2026-10-30T06:07:52.232796,False
+"38-423 Miejsce Piastowe, Polska",49.6528667,21.8065459,"38-423 Widacz, Poland",OK,2026-10-30T06:07:52.390993,False
+"57-530 Międzylesie, Polska",50.1476994,16.6671053,"Międzylesie, Poland",OK,2026-10-30T06:07:52.531305,False
+"08-500 Ryki, Polska",51.6256317,21.9326302,"08-500 Ryki, Poland",OK,2026-10-30T06:07:52.671551,False
+"22-463 Radecznica, Polska",50.743136,22.8328077,"22-463 Radecznica, Poland",OK,2026-10-30T06:07:52.797344,False
+"22-652 Telatyn, Polska",50.527223,23.8394021,"22-652 Telatyn, Poland",OK,2026-10-30T06:07:52.927915,False
+"47-417 Łubowice, Polska",50.1598404,18.2301137,"47-417 Łubowice, Poland",OK,2026-10-30T06:07:53.039301,False
+"43-246 Strumień, Polska",49.9168442,18.7639257,"Strumień, Poland",OK,2026-10-30T06:07:53.173502,False
+"43-523 Pruchna, Polska",49.8650345,18.6816473,"43-523 Pruchna, Poland",OK,2026-10-30T06:07:53.309663,False
+"41-600 Świętochłowice, Polska",50.2935264,18.9086302,"41-600 Chorzów, Poland",OK,2026-10-30T06:07:53.408956,False
+"93-300 Kutno, Polska",52.230618,19.364278,"99-300 Kutno, Poland",OK,2026-10-30T06:07:53.530072,False
+"97-318 Czarnocin, Polska",51.5902809,19.6814345,"Czarnocin, Poland",OK,2026-10-30T06:07:53.641866,False
+"42-140 Panki, Polska",50.8829915,18.7506382,"42-140 Panki, Poland",OK,2026-10-30T06:07:53.755835,False
+"34-350 Węgierska Górka, Polska",49.606601,19.1163069,"Węgierska Górka, Poland",OK,2026-10-30T06:07:53.884577,False
+"32-089 Wielka Wieś, Polska",50.1567186,19.8433657,"32-089 Wielka Wieś, Poland",OK,2026-10-30T06:07:53.984774,False
+"32-425 Trzemeśnia, Polska",49.8270549,20.0220704,"32-425 Trzemeśnia, Poland",OK,2026-10-30T06:07:54.071230,False
+"74-300 Myślibórz, Polska",52.9237186,14.86785,"Myślibórz, Poland",OK,2026-10-30T06:07:54.188439,False
+"69-200 Sulęcin, Polska",52.44387,15.11697,"69-200 Sulęcin, Poland",OK,2026-10-30T06:07:54.311161,False
+"99-416 Nieborów k. Łowicza, Polska",52.06881850000001,20.0695934,"Nieborów, Poland",OK,2026-10-30T06:07:54.449458,False
+"05-119 Legionowo, Polska",52.4044483,20.9499697,"Legionowo, Poland",OK,2026-10-30T06:07:54.540569,False
+"26-650 Oblas, Polska",51.4477199,20.9253966,"Oblas, Poland",OK,2026-10-30T06:07:54.655324,False
+"26-415 Klwów, Polska",51.5344639,20.6364509,"26-415 Klwów, Poland",OK,2026-10-30T06:07:54.772249,False
+"77-134 Tuchomie, Polska",54.070645,17.3077166,"77-134 Trzebiatkowa, Poland",OK,2026-10-30T06:07:54.872010,False
+"83-111 Malenin, Polska",54.1345015,18.6874001,"83-111 Malenin, Poland",OK,2026-10-30T06:07:55.007701,False
+"13-200 Działdowo, Polska",53.2356765,20.1799787,"Działdowo, Poland",OK,2026-10-30T06:07:55.100008,False
+"82-410 Stary Targ, Polska",53.9503766,19.1883286,"82-410 Stary Dwór, Poland",OK,2026-10-30T06:07:55.191744,False
+"13-340 Wielka Tymawa, Polska",53.50169169999999,19.2223382,"13-340 Wielka Tymawa, Poland",OK,2026-10-30T06:07:55.315080,False
+"24-200 Bełżyce, Polska",51.17404,22.28024,"Bełżyce, Poland",OK,2026-10-30T06:07:55.411080,False
+"24-320 Poniatowa, Polska",51.1810643,22.1223941,"Poniatowa-Wieś, Poland",OK,2026-10-30T06:07:55.497336,False
+"17-207 Kuraszewo, Polska",52.81194869999999,23.4757349,"Kuraszewo, Poland",OK,2026-10-30T06:07:55.611813,False
+"21-421 Tuchowicz, Polska",51.88989,22.221779,"21-421 Tuchowicz, Poland",OK,2026-10-30T06:07:55.746148,False
+"20-442 Lublin, Polska",51.1991708,22.5803166,"20-442 Lublin, Poland",OK,2026-10-30T06:07:55.842759,False
+"22-604 Tarnawatka, Polska",50.53099479999999,23.3956908,"22-604 Tarnawatka, Poland",OK,2026-10-30T06:07:55.954584,False
+"64-930 Szydłowo, Polska",53.1620102,16.6118082,"64-930 Szydłowo, Poland",OK,2026-10-30T06:07:56.044267,False
+"89-333 Osiek nad Notecią, Polska",53.1212394,17.2881681,"Osiek nad Notecią, Poland",OK,2026-10-30T06:07:56.152266,False
+"64-610 Rogoźno Wielkopolskie, Polska",52.74965,17.00343,"Rogoźno, Poland",OK,2026-10-30T06:07:56.247415,False
+"42-793 Ciasna, Polska",50.7542407,18.608683,"Ciasna, Poland",OK,2026-10-30T06:07:56.351678,False
+"46-113 Wilków, Polska",51.1063319,17.6683894,"46-113 Lubska, Poland",OK,2026-10-30T06:07:56.443613,False
+"47-150 Zalesie Śląskie, Polska",50.3942547,18.1675918,"47-150 Leśnica, Poland",OK,2026-10-30T06:07:56.562840,False
+"47-300 Dąbrówka Górna, Polska",50.5374268,17.9285667,"Dąbrówka Górna, Poland",OK,2026-10-30T06:07:56.667311,False
+"89-512 Iwiec, Polska",53.5427032,18.0706017,"89-512 Iwiec, Poland",OK,2026-10-30T06:07:56.762065,False
+"88-111 Rojewo, Polska",52.9024088,18.2766533,"88-111 Rojewo, Poland",OK,2026-10-30T06:07:56.857380,False
+"88-150 Kruszwica, Polska",52.67429,18.33159,"88-150 Kruszwica, Poland",OK,2026-10-30T06:07:56.960346,False
+"99-418 Bełchów, Polska",52.0190335,20.045533,"99-418 Bełchów, Poland",OK,2026-10-30T06:07:57.061685,False
+"95-015 Głowno, Polska",51.9643,19.71565,"Głowno, Poland",OK,2026-10-30T06:07:57.172562,False
+"95-080 Rydzynki, Polska",51.6146768,19.4762186,"95-080 Rydzynki, Poland",OK,2026-10-30T06:07:57.290458,False
+"42-609 Tarnowskie Góry, Polska",50.4805192,18.8148759,"42-609 Tarnowskie Góry, Poland",OK,2026-10-30T06:07:57.391830,False
+"27-640 Klimontów, Polska",50.6566296,21.4509737,"27-640 Klimontów, Poland",OK,2026-10-30T06:07:57.494825,False
+"27-620 Dwikozy, Polska",50.7355265,21.7887966,"27-620 Dwikozy, Poland",OK,2026-10-30T06:07:57.581874,False
+"27-500 Opatów, Polska",50.8018537,21.427194,"27-500 Opatów, Poland",OK,2026-10-30T06:07:57.688068,False
+"26-100 Skarżysko - Kamienna, Polska",51.0956514,20.8580607,"26-100 Skarżysko-Kamienna, Poland",OK,2026-10-30T06:07:57.805418,False
+"27-225 Pawłów, Polska",50.962365,21.120109,"27-225 Pawłów, Poland",OK,2026-10-30T06:07:57.911639,False
+"96-206 Sadkowice, Polska",51.72369759999999,20.5140136,"96-206 Sadkowice, Poland",OK,2026-10-30T06:07:58.006195,False
+"97-216 Czerniewice, Polska",51.6539635,20.1557261,"97-216 Czerniewice, Poland",OK,2026-10-30T06:07:58.133809,False
+"93-219 Łódź, Polska",51.7455115,19.4937147,"93-219 Łódź, Poland",OK,2026-10-30T06:07:58.235408,False
+"09-213 Rempin, Polska",52.7248424,19.6463633,"09-213 Rempin, Poland",OK,2026-10-30T06:07:58.338183,False
+"09-140 Raciąż, Polska",52.78149999999999,20.11774,"Raciąż, Poland",OK,2026-10-30T06:07:58.431697,False
+"05-152 Czosnów, Polska",52.39128050000001,20.7297053,"05-152 Czosnów, Poland",OK,2026-10-30T06:07:58.545458,False
+"07-123 Ostrówek, Polska",51.3421578,18.5959892,"Ostrówek 7, 98-311, Poland",OK,2026-10-30T06:07:58.667671,False
+"34-602 Laskowa, Polska",49.7613385,20.4503151,"34-603 Laskowa, Poland",OK,2026-10-30T06:07:58.773500,False
+"05-408 Rzakta, Polska",52.13380249999999,21.4554382,"Rzakta, Poland",OK,2026-10-30T06:07:58.874069,False
+"08-220 Sarnaki, Polska",52.31475409999999,22.8893802,"Sarnaki, Poland",OK,2026-10-30T06:07:58.966253,False
+"37-126 Medynia Głogowska, Polska",50.1804115,22.1431983,"Medynia Głogowska 37, 37-126, Poland",OK,2026-10-30T06:07:59.069727,False
+"36-042 Lubenia, Polska",49.9409133,21.9374619,"36-042 Lubenia, Poland",OK,2026-10-30T06:07:59.160954,False
+"35-604 Rzeszów, Polska",50.0100326,22.018423,"35-604 Rzeszów, Poland",OK,2026-10-30T06:07:59.263710,False
+"72-210 Bienice, Polska",53.6149616,15.2982943,"Bienice, Poland",OK,2026-10-30T06:07:59.392780,False
+"78-607 Rudki, Polska",53.40185529999999,16.3649954,"78-607 Rudki, Poland",OK,2026-10-30T06:07:59.486717,False
+"73-108 Kobylanka, Polska",53.3451833,14.8692741,"73-108 Kobylanka, Poland",OK,2026-10-30T06:07:59.576505,False
+"66-431 Santok, Polska",52.7387455,15.4089314,"Santok, Poland",OK,2026-10-30T06:07:59.666416,False
+"82-100 Nowy Dwór Gdański, Polska",54.2095745,19.1773797,"82-100 Gozdawa, Poland",OK,2026-10-30T06:07:59.834878,False
+"13-300 Mszanowo, Polska",53.4413875,19.6074904,"13-300 Mszanowo, Poland",OK,2026-10-30T06:07:59.941756,False
+"05-502 Piaseczno, Polska",52.0811536,21.0238602,"05-500 Piaseczno, Poland",OK,2026-10-30T06:08:00.048728,False
+"08-110 Białki, Polska",52.1306692,22.2920847,"08-110 Białki, Poland",OK,2026-10-30T06:08:00.237881,False
+"22-135 Białopole, Polska",50.986004,23.7312286,"22-135 Białopole, Poland",OK,2026-10-30T06:08:00.326578,False
+"22-550 Werbkowice, Polska",50.7535287,23.763773,"22-550 Werbkowice, Poland",OK,2026-10-30T06:08:00.426960,False
+"22-442 Adamów, Polska",50.59471130000001,23.1519929,"22-442 Adamów, Poland",OK,2026-10-30T06:08:00.536673,False
+"23-310 Modliborzyce, Polska",50.75416380000001,22.3294471,"23-310 Modliborzyce, Poland",OK,2026-10-30T06:08:00.653187,False
+"11-210 Sępopol, Polska",54.2690259,21.0143446,"Sępopol, Poland",OK,2026-10-30T06:08:00.779488,False
+"64-130 Rydzyna, Polska",51.7864465,16.6672572,"64-130 Rydzyna, Poland",OK,2026-10-30T06:08:00.904639,False
+"47-180 Izbicko, Polska",50.5715496,18.1546193,"47-180 Izbicko, Poland",OK,2026-10-30T06:08:01.020914,False
+"98-337 Strzelce Wielkie, Polska",51.13873170000001,19.1449738,"98-337 Strzelce Wielkie, Poland",OK,2026-10-30T06:08:01.132822,False
+"86-134 Dragacz, Polska",53.5057582,18.7388671,"86-134 Dragacz, Poland",OK,2026-10-30T06:08:01.236082,False
+"88-140 Gniewkowo, Polska",52.89463,18.40746,"88-140 Gniewkowo, Poland",OK,2026-10-30T06:08:01.343751,False
+"99-307 Strzelce, Polska",52.318528,19.4090336,"99-307 Strzelce, Poland",OK,2026-10-30T06:08:01.435400,False
+"97-212 Budziszewice, Polska",51.6672931,19.93565,"Budziszewice, Poland",OK,2026-10-30T06:08:01.530285,False
+"96-124 Maków, Polska",51.9468249,20.0493962,"96-124 Maków, Poland",OK,2026-10-30T06:08:01.632206,False
