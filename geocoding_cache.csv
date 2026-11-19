@@ -1454,3 +1454,4 @@ address,lat,lng,formatted_address,status,cached_at,postcode_fallback_attempted
 "99-307 Strzelce, Polska",52.318528,19.4090336,"99-307 Strzelce, Poland",OK,2026-10-30T06:08:01.435400,False
 "97-212 Budziszewice, Polska",51.6672931,19.93565,"Budziszewice, Poland",OK,2026-10-30T06:08:01.530285,False
 "96-124 Maków, Polska",51.9468249,20.0493962,"96-124 Maków, Poland",OK,2026-10-30T06:08:01.632206,False
+"61-631 Poznań, Polska",52.4390228,16.9423939,"61-631, Poznań, województwo wielkopolskie, Polska",OK,2026-11-19T13:32:40.499282,False
