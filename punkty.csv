@@ -244,6 +244,7 @@ kod;lat;lng;miejscowosc;formatted_address;zrodlo;zaktualizowano
 21-200;51.6321150;22.9019580;Parczew, Polska;21-200, Parczew, gmina Parczew, powiat parczewski, województwo lubelskie, Polska;migracja;2026-10-15
 21-205;51.7099237;23.0631881;Jabłoń, Polska;21-205, gmina Jabłoń, powiat parczewski, województwo lubelskie, Polska;migracja;2026-10-15
 21-300;51.7832025;22.6218532;Radzyń Podlaski, Polska;21-300 Radzyń Podlaski, Poland;migracja;2026-10-15
+21-310;51.7635985;22.7829714;Wohyń;21-310, Bezwola, gmina Wohyń, powiat radzyński, województwo lubelskie, Polska;nominatim;2026-11-24
 21-400;51.9264154;22.3481054;Łuków, Polska;21-400 Łuków, Poland;migracja;2026-10-15
 21-411;51.8456804;22.3386556;Świderki, Polska;Świderki, gmina Wojcieszków, powiat łukowski, województwo lubelskie, 21-411, Polska;migracja;2026-10-15
 21-413;51.6911950;22.3186932;Serokomla, Polska;21-413, Serokomla, gmina Serokomla, powiat łukowski, województwo lubelskie, Polska;migracja;2026-10-15
@@ -596,6 +597,7 @@ kod;lat;lng;miejscowosc;formatted_address;zrodlo;zaktualizowano
 42-700;50.6668008;18.6951984;Lubliniec, Polska;42-700 Jawornica, Poland;migracja;2026-10-15
 42-772;50.7258677;18.5178356;Polska;Lubliniecka, Maliny, Główczyce, Gwoździany, gmina Pawonków, powiat lubliniecki, województwo śląskie, 42-772, Polska;migracja;2026-10-15
 43-100;50.1201480;19.0185475;Tychy, Polska;43-100 Tychy, Poland;migracja;2026-10-15
+43-155;50.0774858;19.1623248;Bieruń;43-155, Bieruń, powiat bieruńsko-lędziński, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska;nominatim;2026-11-24
 43-176;50.1083779;18.8672230;Gostyń, Polska;43-176, Gostyń, gmina Wyry, powiat mikołowski, Górnośląsko-Zagłębiowska Metropolia, województwo śląskie, Polska;migracja;2026-10-15
 43-190;50.2038826;18.8383313;Mikołów, Polska;43-190 Mikołów, Poland;migracja;2026-10-15
 43-200;49.9868161;18.9254287;Pszczyna, Polska;43-200 Brzeźce, Poland;migracja;2026-10-15
@@ -936,6 +938,7 @@ kod;lat;lng;miejscowosc;formatted_address;zrodlo;zaktualizowano
 78-449;53.5764324;16.5405539;Borne Sulinowo, Polska;78-449, Borne Sulinowo, gmina Borne Sulinowo, powiat szczecinecki, województwo zachodniopomorskie, Polska;migracja;2026-10-15
 78-520;53.5300495;15.9883893;Złocieniec, Polska;78-520 Złocieniec, Poland;migracja;2026-10-15
 78-600;53.2734739;16.4752847;Wałcz, Polska;Wałcz, Poland;migracja;2026-10-15
+78-630;53.0890755;16.1508076;Mielęcin Wałecki;78-630, Człopa, gmina Człopa, powiat wałecki, województwo zachodniopomorskie, Polska;nominatim_kod;2026-11-24
 78-642;53.2455234;16.3381693;Strączno, Polska;78-642, gmina Wałcz, powiat wałecki, województwo zachodniopomorskie, Polska;migracja;2026-10-15
 78-650;53.3404056;16.1124766;Mirosławiec, Polska;78-650, gmina Mirosławiec, powiat wałecki, województwo zachodniopomorskie, Polska;migracja;2026-10-15
 80-174;54.3277016;18.5352179;Gdańsk, Polska;80-174, Poland;migracja;2026-10-15
