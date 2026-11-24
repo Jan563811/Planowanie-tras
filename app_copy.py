@@ -2121,18 +2121,20 @@ with tab_profit:
             only_over = st.checkbox("Pokaż tylko przekroczenia", value=False)
 
             profit_colcfg = {
-                "Pojemność": st.column_config.NumberColumn(format="%d"),
-                "Punkty": st.column_config.NumberColumn(format="%d"),
-                "Wózki": st.column_config.NumberColumn(format="%d"),
-                "Lp.": st.column_config.NumberColumn(format="%d"),
-                "km": st.column_config.NumberColumn(format="%.1f"),
-                "Δkm": st.column_config.NumberColumn(format="%.1f"),
-                "Stawka": st.column_config.NumberColumn(format="%.2f"),
-                "Koszt": st.column_config.NumberColumn(format="%.0f"),
-                "Koszt dodania": st.column_config.NumberColumn(format="%.0f"),
-                "Wartość": st.column_config.NumberColumn(format="%.0f"),
+                "Pojemność": st.column_config.NumberColumn(format="%d", width="small"),
+                "Punkty": st.column_config.NumberColumn(format="%d", width="small"),
+                "Wózki": st.column_config.NumberColumn(format="%d", width="small"),
+                "Lp.": st.column_config.NumberColumn(format="%d", width="small"),
+                "km": st.column_config.NumberColumn(format="%.1f", width="small"),
+                "Δkm": st.column_config.NumberColumn(format="%.1f", width="small"),
+                "Stawka": st.column_config.NumberColumn(format="%.2f", width="small"),
+                "Koszt": st.column_config.NumberColumn(format="%.0f", width="small"),
+                "Koszt dodania": st.column_config.NumberColumn(format="%.0f", width="small"),
+                "Wartość": st.column_config.NumberColumn(format="%.0f", width="small"),
                 "Wskaźnik": st.column_config.TextColumn(width="small"),
                 "Status": st.column_config.TextColumn(width="medium"),
+                "Nazwa": st.column_config.TextColumn(width="medium"),
+                "Adres": st.column_config.TextColumn(width="medium"),
             }
 
             def _show(df, extra_drop=()):
