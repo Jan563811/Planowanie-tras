@@ -1494,6 +1494,7 @@ def build_profitability(routes, nodes, vehicle_ids, vehicle_caps, dist_km_df, ra
     names = nodes["name"].tolist()
     addrs = nodes["address"].tolist()
     values = nodes["wartosc"].astype(float).tolist() if "wartosc" in nodes else [0.0] * len(nodes)
+    demands = nodes["demand_wozki"].fillna(0).astype(int).tolist()
 
     route_rows, point_rows = [], []
     seq = 0
@@ -1511,21 +1512,24 @@ def build_profitability(routes, nodes, vehicle_ids, vehicle_caps, dist_km_df, ra
         ratio = cost / value if value > 0 else None
         route_rows.append({
             "seq": seq, "Samochód": label, "Pojemność": cap, "Punkty": len(stops),
-            "km": km, "Stawka": rate, "Koszt": cost, "Wartość": value,
+            "Wózki": sum(demands[n] for n in stops), "km": km, "Stawka": rate, "Koszt": cost, "Wartość": value,
             "Wskaźnik": ratio, "Status": profit_status(ratio, route_thr),
         })
         for i in range(1, len(route) - 1):
             node, prev_node, next_node = route[i], route[i - 1], route[i + 1]
-            delta_km = (
+            # Odległości drogowe nie zawsze spełniają nierówność trójkąta (objazd przez punkt
+            # bywa krótszy niż bezpośredni przejazd wg czasu), więc ujemną różnicę traktujemy jako 0.
+            delta_km = max(
                 float(dist[prev_node][node] or 0) + float(dist[node][next_node] or 0)
-                - float(dist[prev_node][next_node] or 0)
+                - float(dist[prev_node][next_node] or 0),
+                0.0,
             )
-            delta_cost = max(delta_km, 0.0) * rate
+            delta_cost = delta_km * rate
             node_value = values[node]
             point_ratio = delta_cost / node_value if node_value > 0 else None
             point_rows.append({
                 "seq": seq, "Samochód": label, "Lp.": i, "Nazwa": names[node], "Adres": addrs[node],
-                "Δkm": delta_km, "Koszt dodania": delta_cost, "Wartość": node_value,
+                "Wózki": demands[node], "Δkm": delta_km, "Koszt dodania": delta_cost, "Wartość": node_value,
                 "Wskaźnik": point_ratio, "Status": profit_status(point_ratio, point_thr),
             })
     return pd.DataFrame(route_rows), pd.DataFrame(point_rows)
@@ -1535,75 +1539,186 @@ def _pct(x):
     return "–" if x is None or pd.isna(x) else f"{x * 100:.1f}%"
 
 
-def profitability_to_html(routes_df, points_df, route_threshold_pct, point_threshold_pct, rates_df) -> str:
-    from html import escape
+_STATUS_FILL = {
+    "PRZEKROCZENIE": "F8C9C9",
+    "blisko progu": "FFF2B3",
+    "OK": "D9F2D9",
+    "brak wartości": "EEEEEE",
+}
+_STATUS_MARK = {"PRZEKROCZENIE": "▲ ", "blisko progu": "● ", "OK": "✔ "}
+
+
+def _profit_rates_text(rates_df) -> str:
+    return ", ".join(
+        f"{safe_int(r['Pojemność (wózki)'])} wózków = {safe_float(r['Stawka PLN/km']):.2f}"
+        for _, r in rates_df.iterrows() if pd.notna(r["Pojemność (wózki)"])
+    )
+
+
+def _profit_intro(route_threshold_pct, point_threshold_pct, rates_df):
+    return [
+        f"Data: {date.today().isoformat()} · Próg trasy: {route_threshold_pct:.0f}% "
+        f"· Próg punktu: {point_threshold_pct:.0f}% · Stawki PLN/km: {_profit_rates_text(rates_df)}",
+        "Koszt trasy = km pętli (baza → punkty → baza) × stawka dla wielkości samochodu. "
+        "Koszt dodania punktu = o ile km wydłuża trasę ten punkt (względem ominięcia go) × stawka. "
+        "Wskaźnik = koszt / wartość towaru.",
+    ]
+
+
+def profitability_to_xlsx_bytes(routes_df, points_df, route_threshold_pct, point_threshold_pct, rates_df) -> bytes:
+    from openpyxl import Workbook
+    from openpyxl.styles import PatternFill, Font, Alignment
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Trasy"
+    header_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+    bold = Font(bold=True)
+
+    def write_sheet(sheet, title_lines, headers, rows, formats, status_col):
+        for line in title_lines:
+            sheet.append([line])
+        sheet.append([])
+        sheet.append(headers)
+        header_row = sheet.max_row
+        for col in range(1, len(headers) + 1):
+            cell = sheet.cell(row=header_row, column=col)
+            cell.fill = header_fill
+            cell.font = bold
+            cell.alignment = Alignment(wrap_text=True, vertical="center")
+        for row in rows:
+            status = row[status_col]
+            row = list(row)
+            row[status_col] = _STATUS_MARK.get(status, "") + status
+            sheet.append(row)
+            color = _STATUS_FILL.get(status, "EEEEEE")
+            fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
+            for col in range(1, len(headers) + 1):
+                cell = sheet.cell(row=sheet.max_row, column=col)
+                cell.fill = fill
+                if formats.get(col):
+                    cell.number_format = formats[col]
+        for col in range(1, len(headers) + 1):
+            letter = sheet.cell(row=header_row, column=col).column_letter
+            width = max(
+                len(str(sheet.cell(row=r, column=col).value or ""))
+                for r in range(header_row, sheet.max_row + 1)
+            )
+            sheet.column_dimensions[letter].width = min(max(width + 2, 10), 45)
+        sheet.freeze_panes = sheet.cell(row=header_row + 1, column=1)
+
+    intro = _profit_intro(route_threshold_pct, point_threshold_pct, rates_df)
+    route_headers = ["Trasa", "Samochód", "Pojemność", "Punkty", "Wózki", "km", "PLN/km",
+                     "Koszt [PLN]", "Wartość [PLN]", "Wskaźnik", "Status"]
+    route_rows = [
+        [int(r["seq"]), str(r["Samochód"]), int(r["Pojemność"]), int(r["Punkty"]), int(r["Wózki"]),
+         round(float(r["km"]), 1), float(r["Stawka"]), round(float(r["Koszt"]), 0),
+         round(float(r["Wartość"]), 0), None if pd.isna(r["Wskaźnik"]) else float(r["Wskaźnik"]), r["Status"]]
+        for _, r in routes_df.iterrows()
+    ]
+    write_sheet(ws, intro, route_headers, route_rows,
+                {6: "0.0", 7: "0.00", 8: "#,##0", 9: "#,##0", 10: "0.0%"}, 10)
+
+    ws2 = wb.create_sheet("Punkty")
+    point_headers = ["Trasa", "Samochód", "Lp.", "Nazwa", "Adres", "Wózki", "Δkm",
+                     "Koszt dodania [PLN]", "Wartość [PLN]", "Wskaźnik", "Status"]
+    point_rows = [
+        [int(p["seq"]), str(p["Samochód"]), int(p["Lp."]), str(p["Nazwa"]), str(p["Adres"]), int(p["Wózki"]),
+         round(float(p["Δkm"]), 1), round(float(p["Koszt dodania"]), 0), round(float(p["Wartość"]), 0),
+         None if pd.isna(p["Wskaźnik"]) else float(p["Wskaźnik"]), p["Status"]]
+        for _, p in points_df.iterrows()
+    ]
+    write_sheet(ws2, intro, point_headers, point_rows,
+                {7: "0.0", 8: "#,##0", 9: "#,##0", 10: "0.0%"}, 10)
+
+    output = BytesIO()
+    wb.save(output)
+    return output.getvalue()
+
+
+def profitability_to_docx_bytes(routes_df, points_df, route_threshold_pct, point_threshold_pct, rates_df) -> bytes:
+    from docx.enum.section import WD_ORIENT
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+    from docx.shared import Pt, Cm
 
     def money(x):
         return f"{x:,.0f}".replace(",", " ")
 
-    css = """
-    body{font-family:Arial,sans-serif;font-size:12px;color:#000;margin:16px}
-    h1{font-size:18px} h2{font-size:14px;margin:18px 0 4px;page-break-after:avoid}
-    table{border-collapse:collapse;width:100%;margin-bottom:8px}
-    th,td{border:1px solid #888;padding:3px 6px;text-align:left}
-    th{background:#d9d9d9} td.n{text-align:right;white-space:nowrap}
-    .PRZEKROCZENIE{background:#f8c9c9;font-weight:bold}
-    .blisko{background:#fff2b3} .OK{background:#d9f2d9} .brak{background:#eee}
-    .btn{padding:6px 14px;margin-bottom:10px;cursor:pointer}
-    .note{color:#444;margin:4px 0}
-    @media print{.btn{display:none} body{margin:0} tr{page-break-inside:avoid}}
-    """
+    def shade(cell, color):
+        tc_pr = cell._tc.get_or_add_tcPr()
+        shd = OxmlElement("w:shd")
+        shd.set(qn("w:val"), "clear")
+        shd.set(qn("w:color"), "auto")
+        shd.set(qn("w:fill"), color)
+        tc_pr.append(shd)
 
-    def cls(status):
-        return {"PRZEKROCZENIE": "PRZEKROCZENIE", "blisko progu": "blisko", "OK": "OK"}.get(status, "brak")
+    def add_table(headers, rows, status_idx, right_cols):
+        table = doc.add_table(rows=1, cols=len(headers))
+        table.style = "Table Grid"
+        for i, header in enumerate(headers):
+            cell = table.rows[0].cells[i]
+            cell.text = header
+            shade(cell, "D9D9D9")
+            for run in cell.paragraphs[0].runs:
+                run.bold = True
+        for row in rows:
+            status = row[status_idx]
+            cells = table.add_row().cells
+            for i, value in enumerate(row):
+                text = _STATUS_MARK.get(status, "") + status if i == status_idx else str(value)
+                cells[i].text = text
+                shade(cells[i], _STATUS_FILL.get(status, "EEEEEE"))
+                if i in right_cols:
+                    cells[i].paragraphs[0].alignment = 2
+                if status == "PRZEKROCZENIE":
+                    for run in cells[i].paragraphs[0].runs:
+                        run.bold = True
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(8)
 
-    def mark(status):
-        return {"PRZEKROCZENIE": "▲ ", "blisko progu": "● ", "OK": "✔ "}.get(status, "") + status
+    doc = Document()
+    section = doc.sections[0]
+    section.orientation = WD_ORIENT.LANDSCAPE
+    section.page_width, section.page_height = section.page_height, section.page_width
+    for margin in ("left_margin", "right_margin", "top_margin", "bottom_margin"):
+        setattr(section, margin, Cm(1.5))
 
-    rates_text = ", ".join(
-        f"{safe_int(r['Pojemność (wózki)'])} wózków = {safe_float(r['Stawka PLN/km']):.2f}"
-        for _, r in rates_df.iterrows() if pd.notna(r["Pojemność (wózki)"])
+    doc.add_heading("Planowanie tras Plantpol – rentowność transportu", level=1)
+    for line in _profit_intro(route_threshold_pct, point_threshold_pct, rates_df):
+        doc.add_paragraph(line)
+
+    doc.add_heading("Podsumowanie tras", level=2)
+    add_table(
+        ["Trasa", "Samochód", "Pojemność", "Punkty", "Wózki", "km", "PLN/km",
+         "Koszt [PLN]", "Wartość [PLN]", "Wskaźnik", "Status"],
+        [[int(r["seq"]), r["Samochód"], int(r["Pojemność"]), int(r["Punkty"]), int(r["Wózki"]),
+          f"{r['km']:.1f}", f"{r['Stawka']:.2f}", money(r["Koszt"]), money(r["Wartość"]),
+          _pct(r["Wskaźnik"]), r["Status"]] for _, r in routes_df.iterrows()],
+        10, {0, 2, 3, 4, 5, 6, 7, 8, 9},
     )
-    parts = [f"<html><head><meta charset='utf-8'><style>{css}</style></head><body>",
-             "<button class='btn' onclick='window.print()'>Drukuj</button>",
-             "<h1>Planowanie tras Plantpol – rentowność transportu</h1>",
-             f"<p class='note'>Data: {date.today().isoformat()} · Próg trasy: {route_threshold_pct:.0f}% "
-             f"· Próg punktu: {point_threshold_pct:.0f}% · Stawki PLN/km: {rates_text}</p>",
-             "<p class='note'>Koszt trasy = km pętli (baza → punkty → baza) × stawka dla wielkości samochodu. "
-             "Koszt dodania punktu = o ile km wydłuża trasę ten punkt (względem ominięcia go) × stawka. "
-             "Wskaźnik = koszt / wartość towaru.</p>"]
-
-    parts.append("<h2>Podsumowanie tras</h2><table><tr><th>Trasa</th><th>Samochód</th><th>Pojemność</th>"
-                 "<th>Punkty</th><th>km</th><th>PLN/km</th><th>Koszt [PLN]</th><th>Wartość [PLN]</th>"
-                 "<th>Wskaźnik</th><th>Status</th></tr>")
-    for _, r in routes_df.iterrows():
-        parts.append(
-            f"<tr class='{cls(r['Status'])}'><td>{r['seq']}</td><td>{escape(str(r['Samochód']))}</td>"
-            f"<td class='n'>{r['Pojemność']}</td><td class='n'>{r['Punkty']}</td>"
-            f"<td class='n'>{r['km']:.1f}</td><td class='n'>{r['Stawka']:.2f}</td>"
-            f"<td class='n'>{money(r['Koszt'])}</td><td class='n'>{money(r['Wartość'])}</td>"
-            f"<td class='n'>{_pct(r['Wskaźnik'])}</td><td>{mark(r['Status'])}</td></tr>"
-        )
-    parts.append("</table>")
 
     for _, r in routes_df.iterrows():
-        parts.append(
-            f"<h2>Trasa {r['seq']} – samochód {escape(str(r['Samochód']))} (poj. {r['Pojemność']}) · "
-            f"koszt {money(r['Koszt'])} PLN / wartość {money(r['Wartość'])} PLN = {_pct(r['Wskaźnik'])} "
-            f"· {mark(r['Status'])}</h2>"
+        doc.add_heading(
+            f"Trasa {r['seq']} – samochód {r['Samochód']} (poj. {r['Pojemność']}, wózków: {r['Wózki']}) · "
+            f"koszt {money(r['Koszt'])} PLN / wartość {money(r['Wartość'])} PLN = {_pct(r['Wskaźnik'])} · "
+            f"{_STATUS_MARK.get(r['Status'], '')}{r['Status']}",
+            level=3,
         )
-        parts.append("<table><tr><th>Lp.</th><th>Nazwa</th><th>Adres</th><th>Δkm</th><th>Koszt dodania [PLN]</th>"
-                     "<th>Wartość [PLN]</th><th>Wskaźnik</th><th>Status</th></tr>")
-        for _, p in points_df[points_df["seq"] == r["seq"]].iterrows():
-            parts.append(
-                f"<tr class='{cls(p['Status'])}'><td>{p['Lp.']}</td><td>{escape(str(p['Nazwa']))}</td>"
-                f"<td>{escape(str(p['Adres']))}</td><td class='n'>{p['Δkm']:.1f}</td>"
-                f"<td class='n'>{money(p['Koszt dodania'])}</td><td class='n'>{money(p['Wartość'])}</td>"
-                f"<td class='n'>{_pct(p['Wskaźnik'])}</td><td>{mark(p['Status'])}</td></tr>"
-            )
-        parts.append("</table>")
-    parts.append("</body></html>")
-    return "".join(parts)
+        add_table(
+            ["Lp.", "Nazwa", "Adres", "Wózki", "Δkm", "Koszt dodania [PLN]", "Wartość [PLN]", "Wskaźnik", "Status"],
+            [[int(p["Lp."]), p["Nazwa"], p["Adres"], int(p["Wózki"]), f"{p['Δkm']:.1f}",
+              money(p["Koszt dodania"]), money(p["Wartość"]), _pct(p["Wskaźnik"]), p["Status"]]
+             for _, p in points_df[points_df["seq"] == r["seq"]].iterrows()],
+            8, {0, 3, 4, 5, 6, 7},
+        )
+
+    output = BytesIO()
+    doc.save(output)
+    return output.getvalue()
 
 
 # =========================
@@ -1997,13 +2112,28 @@ with tab_profit:
             over_routes = int((profit_routes_df["Status"] == "PRZEKROCZENIE").sum())
             over_points = int((profit_points_df["Status"] == "PRZEKROCZENIE").sum())
             k1, k2, k3, k4, k5 = st.columns(5)
-            k1.metric("Koszt transportu", f"{total_cost:,.0f} PLN".replace(",", " "))
-            k2.metric("Wartość towaru", f"{total_value:,.0f} PLN".replace(",", " "))
+            k1.metric("Koszt transportu [PLN]", f"{total_cost:,.0f}".replace(",", " "))
+            k2.metric("Wartość towaru [PLN]", f"{total_value:,.0f}".replace(",", " "))
             k3.metric("Wskaźnik ogółem", _pct(total_cost / total_value if total_value else None))
             k4.metric("Trasy ponad próg", f"{over_routes} / {len(profit_routes_df)}")
             k5.metric("Punkty ponad próg", f"{over_points} / {len(profit_points_df)}")
 
             only_over = st.checkbox("Pokaż tylko przekroczenia", value=False)
+
+            profit_colcfg = {
+                "Pojemność": st.column_config.NumberColumn(format="%d"),
+                "Punkty": st.column_config.NumberColumn(format="%d"),
+                "Wózki": st.column_config.NumberColumn(format="%d"),
+                "Lp.": st.column_config.NumberColumn(format="%d"),
+                "km": st.column_config.NumberColumn(format="%.1f"),
+                "Δkm": st.column_config.NumberColumn(format="%.1f"),
+                "Stawka": st.column_config.NumberColumn(format="%.2f"),
+                "Koszt": st.column_config.NumberColumn(format="%.0f"),
+                "Koszt dodania": st.column_config.NumberColumn(format="%.0f"),
+                "Wartość": st.column_config.NumberColumn(format="%.0f"),
+                "Wskaźnik": st.column_config.TextColumn(width="small"),
+                "Status": st.column_config.TextColumn(width="medium"),
+            }
 
             def _show(df, extra_drop=()):
                 view = df.drop(columns=["seq", *extra_drop]).copy()
@@ -2013,7 +2143,7 @@ with tab_profit:
 
             st.markdown("#### Trasy")
             routes_view = profit_routes_df[profit_routes_df["Status"] == "PRZEKROCZENIE"] if only_over else profit_routes_df
-            st.dataframe(_show(routes_view).round(2), use_container_width=True, hide_index=True)
+            st.dataframe(_show(routes_view), use_container_width=True, hide_index=True, column_config=profit_colcfg)
 
             st.markdown("#### Punkty na trasach")
             for _, route_row in profit_routes_df.iterrows():
@@ -2028,23 +2158,31 @@ with tab_profit:
                 )
                 with st.expander(title, expanded=route_row["Status"] == "PRZEKROCZENIE"):
                     st.dataframe(
-                        _show(route_points, extra_drop=("Samochód",)).round(2),
-                        use_container_width=True, hide_index=True,
+                        _show(route_points, extra_drop=("Samochód",)),
+                        use_container_width=True, hide_index=True, column_config=profit_colcfg,
                     )
 
-            profit_html = profitability_to_html(
+            profit_args = (
                 profit_routes_df, profit_points_df,
                 route_cost_threshold_pct, point_cost_threshold_pct, rates_df_edited,
             )
-            st.download_button(
-                "Pobierz raport do druku (HTML)",
-                data=profit_html.encode("utf-8"),
-                file_name="rentownosc_transportu.html",
-                mime="text/html",
-                use_container_width=True,
-            )
-            with st.expander("Podgląd wydruku"):
-                st.components.v1.html(profit_html, height=700, scrolling=True)
+            dl1, dl2 = st.columns(2)
+            with dl1:
+                st.download_button(
+                    "Pobierz raport rentowności (XLSX)",
+                    data=profitability_to_xlsx_bytes(*profit_args),
+                    file_name="rentownosc_transportu.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                )
+            with dl2:
+                st.download_button(
+                    "Pobierz raport rentowności (Word)",
+                    data=profitability_to_docx_bytes(*profit_args),
+                    file_name="rentownosc_transportu.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    use_container_width=True,
+                )
 
 
 with tab_geocode:
