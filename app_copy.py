@@ -67,17 +67,36 @@ with col2:
 st.markdown(
     """
     <style>
-    div[data-baseweb="tab-list"] { gap: 8px; border-bottom: 2px solid rgba(128,128,128,0.35); }
-    button[data-baseweb="tab"] {
-        height: auto; padding: 12px 22px;
-        background: rgba(128,128,128,0.14);
-        border-radius: 10px 10px 0 0;
+    [data-testid="stTabs"] [role="tablist"], div[data-baseweb="tab-list"] {
+        gap: 8px !important;
+        border-bottom: 2px solid rgba(128,128,128,0.35) !important;
     }
-    button[data-baseweb="tab"] p { font-size: 1.2rem; font-weight: 700; }
-    button[data-baseweb="tab"]:hover { background: rgba(255,75,75,0.18); }
-    button[data-baseweb="tab"][aria-selected="true"] { background: rgba(255,75,75,0.22); }
-    button[data-baseweb="tab"][aria-selected="true"] p { color: #FF4B4B; }
-    div[data-baseweb="tab-highlight"] { background-color: #FF4B4B; height: 4px; }
+    [data-testid="stTabs"] button[role="tab"], button[data-baseweb="tab"] {
+        height: auto !important;
+        padding: 12px 22px !important;
+        background: rgba(128,128,128,0.16) !important;
+        border-radius: 10px 10px 0 0 !important;
+        border-bottom: 4px solid transparent !important;
+    }
+    [data-testid="stTabs"] button[role="tab"] p, [data-testid="stTabs"] button[role="tab"] span,
+    button[data-baseweb="tab"] p {
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+    }
+    [data-testid="stTabs"] button[role="tab"]:hover, button[data-baseweb="tab"]:hover {
+        background: rgba(255,75,75,0.20) !important;
+    }
+    [data-testid="stTabs"] button[role="tab"][aria-selected="true"],
+    button[data-baseweb="tab"][aria-selected="true"] {
+        background: rgba(255,75,75,0.25) !important;
+        border-bottom: 4px solid #FF4B4B !important;
+    }
+    [data-testid="stTabs"] button[role="tab"][aria-selected="true"] p,
+    [data-testid="stTabs"] button[role="tab"][aria-selected="true"] span,
+    button[data-baseweb="tab"][aria-selected="true"] p {
+        color: #FF4B4B !important;
+    }
+    div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] { display: none !important; }
     </style>
     """,
     unsafe_allow_html=True,
