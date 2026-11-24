@@ -1,14 +1,11 @@
 import os
 import re
-import json
-import gzip
-import base64
-import hashlib
 import math
 import time
-from email.utils import parsedate_to_datetime
 from typing import List
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, date, timedelta
+from io import StringIO
+from urllib.parse import quote
 
 import streamlit as st
 import pandas as pd
@@ -74,170 +71,218 @@ API_KEY = st.secrets.get("GOOGLE_MAPS_API_KEY", "")
 # Limit testowy (punkty)
 MAX_POINTS = 150
 
-# Cache par macierzy (punkt→punkt)
-DM_PAIRS_CACHE_PATH = "dm_pairs_cache.json.gz"
-LEGACY_DM_PAIRS_CACHE_PATH = "dm_pairs_cache.json"
-
-# Cache dla geocodingu
-GEOCODING_CACHE_DIR = "cache_geocoding"
-os.makedirs(GEOCODING_CACHE_DIR, exist_ok=True)
-
-# CSV cache dla Streamlit Cloud
-GEOCODING_CSV_PATH = "geocoding_cache.csv"
+# Cache po kodzie pocztowym
+POINTS_CSV_PATH = "punkty.csv"
+DISTANCES_CSV_PATH = "odleglosci.csv"
+POINTS_CSV_COLUMNS = [
+    "kod", "lat", "lng", "miejscowosc", "formatted_address", "zrodlo", "zaktualizowano"
+]
+DISTANCES_CSV_COLUMNS = [
+    "kod_a", "kod_b", "km", "min", "zrodlo", "zaktualizowano"
+]
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 OSRM_TABLE_URL = "https://router.project-osrm.org/table/v1/driving"
 OSM_USER_AGENT = "PlantpolRoutePlanner/1.0 (route planning application)"
 _last_nominatim_request_at = 0.0
-_nominatim_429_streak = 0
-_nominatim_blocked_until = 0.0
-NOMINATIM_MAX_ATTEMPTS = 3
-NOMINATIM_BACKOFF_BASE_SECONDS = 2.0
-NOMINATIM_RATE_LIMIT_COOLDOWN_SECONDS = 60.0
 
-
-# =========================
-# Helper: Geocoding GitHub cache
-# =========================
-def decode_github_file_content(file_obj):
-    """Czyta zawartość pliku z GitHub bez wywoływania `decoded_content` przy `encoding='none'`."""
-    download_url = getattr(file_obj, "download_url", None)
-    try:
-        raw_data = getattr(file_obj, "_rawData", {}) or {}
-        if isinstance(raw_data, dict):
-            encoding = raw_data.get("encoding")
-            content = raw_data.get("content")
-            if isinstance(content, str):
-                text = content.strip()
-                if not text:
-                    if not download_url:
-                        return b""
-                elif encoding == "base64":
-                    try:
-                        return base64.b64decode(text)
-                    except Exception:
-                        return text.encode("utf-8")
-                elif encoding in (None, "none"):
-                    return text.encode("utf-8")
-                elif text:
-                    return content.encode("utf-8")
-
-        if hasattr(file_obj, "_content"):
-            try:
-                content_value = getattr(file_obj, "_content", None)
-                if isinstance(content_value, str):
-                    text = content_value.strip()
-                    if text:
-                        return text.encode("utf-8")
-            except Exception:
-                pass
-
-    except Exception:
-        pass
-
-    if isinstance(download_url, str) and download_url:
-        headers = {"Accept": "application/octet-stream"}
-        token = st.secrets.get("GITHUB_TOKEN")
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
-        response = requests.get(download_url, headers=headers, timeout=60)
-        response.raise_for_status()
-        return response.content
-
-    raise ValueError("Nie udało się odczytać treści pliku z GitHub: brak obsługiwanego formatu encodowania")
-
-
-def load_pairs_cache_from_github() -> dict:
-    """Załaduj cache par dystansów z GitHub"""
-    if not GITHUB_AVAILABLE:
-        return {}
-    if "GITHUB_TOKEN" not in st.secrets or "GITHUB_REPO" not in st.secrets:
-        return {}
-    try:
-        g = Github(st.secrets["GITHUB_TOKEN"])
-        repo = g.get_repo(st.secrets["GITHUB_REPO"])
-        try:
-            file = repo.get_contents(DM_PAIRS_CACHE_PATH)
-        except GithubException as error:
-            if error.status != 404:
-                raise
-            file = repo.get_contents(LEGACY_DM_PAIRS_CACHE_PATH)
-        raw = decode_github_file_content(file)
-        if file.path == DM_PAIRS_CACHE_PATH:
-            raw = gzip.decompress(raw)
-        if not raw.strip():
-            return {}
-        cache = json.loads(raw.decode("utf-8"))
-        if not isinstance(cache, dict):
-            raise ValueError("Nieprawidłowy format cache par na GitHubie")
-        return cache
-    except Exception:
-        return {}
-
-
-def load_geocoding_from_github():
-    """Załaduj cache geocodingu z GitHub (minimalizuj zapytania do API)"""
-    if not GITHUB_AVAILABLE:
-        return None
-    
-    if "GITHUB_TOKEN" not in st.secrets or "GITHUB_REPO" not in st.secrets:
-        return None
-    
-    try:
-        g = Github(st.secrets["GITHUB_TOKEN"])
-        repo = g.get_repo(st.secrets["GITHUB_REPO"])
-        
-        try:
-            file = repo.get_contents(GEOCODING_CSV_PATH)
-            raw = decode_github_file_content(file)
-            if not raw.strip():
-                return pd.DataFrame(columns=["address", "lat", "lng", "formatted_address", "status", "cached_at"])
-            from io import StringIO
-            return pd.read_csv(StringIO(raw.decode("utf-8")))
-        except Exception:
-            return None
-    except Exception:
-        return None
-
-
-# Inicjalizuj session_state do śledzenia nowych adresów
-if "geocoding_updates" not in st.session_state:
-    st.session_state["geocoding_updates"] = set()
-
-if "geocoding_cache_df" not in st.session_state:
-    # 1. Załaduj z GitHub (jeśli dostępny)
-    github_cache = load_geocoding_from_github()
-    if github_cache is not None and not github_cache.empty:
-        st.session_state["geocoding_cache_df"] = github_cache
-    # 2. Załaduj lokalny CSV (jeśli GitHub niedostępny)
-    elif os.path.exists(GEOCODING_CSV_PATH):
-        st.session_state["geocoding_cache_df"] = pd.read_csv(GEOCODING_CSV_PATH)
-    # 3. Utwórz pusty DataFrame
-    else:
-        st.session_state["geocoding_cache_df"] = pd.DataFrame(
-            columns=["address", "lat", "lng", "formatted_address", "status", "cached_at"]
-        )
-
-if "dm_pairs_cache" not in st.session_state:
-    if os.path.exists(DM_PAIRS_CACHE_PATH):
-        with gzip.open(DM_PAIRS_CACHE_PATH, "rt", encoding="utf-8") as f:
-            st.session_state["dm_pairs_cache"] = json.load(f)
-    else:
-        gh_pairs = load_pairs_cache_from_github()
-        if gh_pairs:
-            st.session_state["dm_pairs_cache"] = gh_pairs
-            with gzip.open(DM_PAIRS_CACHE_PATH, "wt", encoding="utf-8") as f:
-                json.dump(gh_pairs, f, separators=(",", ":"))
-        elif os.path.exists(LEGACY_DM_PAIRS_CACHE_PATH):
-            with open(LEGACY_DM_PAIRS_CACHE_PATH, "r", encoding="utf-8") as f:
-                st.session_state["dm_pairs_cache"] = json.load(f)
-        else:
-            st.session_state["dm_pairs_cache"] = {}
 
 # Baza (depot)
 BASE_NAME = "_Plantpol baza"
 BASE_ADDRESS = "32-600 Zaborze"
+BASE_POSTCODE = "32-600"
 BASE_LAT = 50.0216163
 BASE_LNG = 19.2408601
+
+
+def _empty_csv_frame(columns: List[str]) -> pd.DataFrame:
+    return pd.DataFrame(columns=columns)
+
+
+def read_csv_from_github(path: str, columns: List[str]):
+    if not GITHUB_AVAILABLE:
+        raise RuntimeError("PyGithub nie jest dostępny")
+    if not st.secrets.get("GITHUB_TOKEN") or not st.secrets.get("GITHUB_REPO"):
+        raise RuntimeError("Brak GITHUB_TOKEN lub GITHUB_REPO w secrets")
+
+    repo_name = st.secrets["GITHUB_REPO"]
+    repo = Github(st.secrets["GITHUB_TOKEN"]).get_repo(repo_name)
+    try:
+        file_metadata = repo.get_contents(path)
+    except Exception as error:
+        if getattr(error, "status", None) == 404:
+            return None, None
+        raise
+
+    url = (
+        f"https://api.github.com/repos/{repo_name}/contents/"
+        f"{quote(path, safe='/')}"
+    )
+    response = requests.get(
+        url,
+        headers={
+            "Accept": "application/vnd.github.raw",
+            "Authorization": f"Bearer {st.secrets['GITHUB_TOKEN']}",
+        },
+        timeout=60,
+    )
+    response.raise_for_status()
+    if not response.content:
+        return _empty_csv_frame(columns), file_metadata.sha
+    frame = pd.read_csv(
+        StringIO(response.content.decode("utf-8-sig")),
+        sep=";",
+        dtype=str,
+        keep_default_na=False,
+    )
+    missing_columns = [column for column in columns if column not in frame.columns]
+    if missing_columns:
+        raise ValueError(f"{path}: brakuje kolumn {', '.join(missing_columns)}")
+    return frame[columns], file_metadata.sha
+
+
+def read_local_csv(path: str, columns: List[str]) -> pd.DataFrame:
+    if not os.path.exists(path):
+        return _empty_csv_frame(columns)
+    frame = pd.read_csv(path, sep=";", dtype=str, keep_default_na=False)
+    missing_columns = [column for column in columns if column not in frame.columns]
+    if missing_columns:
+        raise ValueError(f"{path}: brakuje kolumn {', '.join(missing_columns)}")
+    return frame[columns]
+
+
+def _format_csv_frame(frame: pd.DataFrame, columns: List[str]) -> str:
+    result = frame.reindex(columns=columns).fillna("").astype(str)
+    return result.to_csv(sep=";", index=False, lineterminator="\n")
+
+
+def merge_and_push_csv(path: str, new_rows_df: pd.DataFrame, key_cols: List[str]):
+    columns = POINTS_CSV_COLUMNS if path == POINTS_CSV_PATH else DISTANCES_CSV_COLUMNS
+    local_frame = read_local_csv(path, columns)
+    candidates = pd.concat([local_frame, new_rows_df], ignore_index=True)
+    remote_error = None
+    remote_frame = None
+
+    if GITHUB_AVAILABLE and st.secrets.get("GITHUB_TOKEN") and st.secrets.get("GITHUB_REPO"):
+        for attempt in range(2):
+            try:
+                remote_frame, remote_sha = read_csv_from_github(path, columns)
+                base_frame = remote_frame if remote_frame is not None else local_frame
+                existing_keys = {
+                    tuple(str(row[column]) for column in key_cols)
+                    for _, row in base_frame.iterrows()
+                }
+                additions = []
+                for _, row in candidates.iterrows():
+                    key = tuple(str(row[column]) for column in key_cols)
+                    if key not in existing_keys:
+                        additions.append(row.to_dict())
+                        existing_keys.add(key)
+
+                merged = pd.concat(
+                    [base_frame, pd.DataFrame(additions, columns=columns)],
+                    ignore_index=True,
+                )
+                merged = merged.sort_values(key_cols, kind="stable").reset_index(drop=True)
+                csv_content = _format_csv_frame(merged, columns)
+                repo = Github(st.secrets["GITHUB_TOKEN"]).get_repo(st.secrets["GITHUB_REPO"])
+                try:
+                    if remote_sha is None:
+                        repo.create_file(path, f"Create {path}", csv_content)
+                    elif additions:
+                        repo.update_file(
+                            path,
+                            f"Update {path} (+{len(additions)} rows)",
+                            csv_content,
+                            remote_sha,
+                        )
+                except Exception as error:
+                    if getattr(error, "status", None) == 409 and attempt == 0:
+                        continue
+                    raise
+
+                with open(path, "w", encoding="utf-8", newline="") as output_file:
+                    output_file.write(csv_content)
+                st.success(f"{path}: dodano {len(additions)} nowych wierszy.")
+                return merged, len(additions)
+            except Exception as error:
+                remote_error = error
+                if getattr(error, "status", None) == 409 and attempt == 0:
+                    continue
+                break
+    else:
+        remote_error = RuntimeError("Brak skonfigurowanego połączenia z GitHubem")
+
+    base_frame = remote_frame if remote_frame is not None else local_frame
+    existing_keys = {
+        tuple(str(row[column]) for column in key_cols)
+        for _, row in base_frame.iterrows()
+    }
+    additions = []
+    for _, row in candidates.iterrows():
+        key = tuple(str(row[column]) for column in key_cols)
+        if key not in existing_keys:
+            additions.append(row.to_dict())
+            existing_keys.add(key)
+    merged = pd.concat(
+        [base_frame, pd.DataFrame(additions, columns=columns)],
+        ignore_index=True,
+    )
+    merged = merged.sort_values(key_cols, kind="stable").reset_index(drop=True)
+    csv_content = _format_csv_frame(merged, columns)
+    with open(path, "w", encoding="utf-8", newline="") as output_file:
+        output_file.write(csv_content)
+    st.warning(f"{path}: zapisano lokalnie {len(additions)} wierszy; GitHub: {remote_error}")
+    return merged, len(additions)
+
+
+def _load_csv_cache(path: str, columns: List[str]):
+    try:
+        frame, sha = read_csv_from_github(path, columns)
+        if frame is not None:
+            return frame, sha, True
+    except Exception as error:
+        st.warning(f"Nie udało się wczytać {path} z GitHuba; używam kopii lokalnej: {error}")
+    return read_local_csv(path, columns), None, False
+
+
+if "points_cache_df" not in st.session_state:
+    points_cache_df, points_cache_sha, points_cache_is_remote = _load_csv_cache(
+        POINTS_CSV_PATH, POINTS_CSV_COLUMNS
+    )
+    st.session_state["points_cache_df"] = points_cache_df
+    st.session_state["points_cache_sha"] = points_cache_sha
+    st.session_state["points_cache_is_remote"] = points_cache_is_remote
+    st.session_state["points_csv_needs_base"] = not (
+        points_cache_df["kod"].astype(str) == BASE_POSTCODE
+    ).any()
+
+if "distance_cache_df" not in st.session_state:
+    distance_cache_df, distance_cache_sha, distance_cache_is_remote = _load_csv_cache(
+        DISTANCES_CSV_PATH, DISTANCES_CSV_COLUMNS
+    )
+    st.session_state["distance_cache_df"] = distance_cache_df
+    st.session_state["distance_cache_sha"] = distance_cache_sha
+    st.session_state["distance_cache_is_remote"] = distance_cache_is_remote
+
+if "postcode_coords" not in st.session_state:
+    postcode_coords = {}
+    for _, row in st.session_state["points_cache_df"].iterrows():
+        try:
+            postcode_coords[row["kod"]] = (float(row["lat"]), float(row["lng"]))
+        except (TypeError, ValueError):
+            continue
+    postcode_coords[BASE_POSTCODE] = (BASE_LAT, BASE_LNG)
+    st.session_state["postcode_coords"] = postcode_coords
+
+if "distance_cache" not in st.session_state:
+    distance_cache = {}
+    for _, row in st.session_state["distance_cache_df"].iterrows():
+        code_a, code_b = sorted((row["kod_a"], row["kod_b"]))
+        try:
+            distance_cache[(code_a, code_b)] = (float(row["km"]), float(row["min"]))
+        except (TypeError, ValueError):
+            continue
+    st.session_state["distance_cache"] = distance_cache
 
 # Parametry biznesowe
 DAY_START_HOUR = 8               # do wyświetlania godzin
@@ -279,12 +324,14 @@ points_template_df = pd.DataFrame([
         "Miejscowosc": "Warszawa",
         "Skrot_kontrahenta": "Klient A",
         "Ilość wózków": 3,
+        "Wartość": 15000,
     },
     {
         "Kod": "30-002",
         "Miejscowosc": "Kraków",
         "Skrot_kontrahenta": "Klient B",
         "Ilość wózków": 2,
+        "Wartość": 9000,
     },
 ])
 
@@ -403,6 +450,19 @@ with col_p7:
 
 time_limit_s = st.slider("Limit czasu szukania rozwiązania (sek.)", 2, 60, 12, 1)
 
+st.markdown("##### Progi rentowności transportu (tylko raport – nie wpływa na solver)")
+col_r1, col_r2 = st.columns(2)
+with col_r1:
+    route_cost_threshold_pct = st.number_input(
+        "Próg: koszt transportu trasy / wartość towaru na trasie (%)",
+        min_value=0.0, value=30.0, step=1.0,
+    )
+with col_r2:
+    point_cost_threshold_pct = st.number_input(
+        "Próg: koszt dodania punktu / wartość towaru punktu (%)",
+        min_value=0.0, value=30.0, step=1.0,
+    )
+
 service_time_s = int(service_time_h * 3600)
 max_route_work_s = int(max_route_hours * 3600)
 vehicle_fixed_cost = int(vehicle_fixed_cost_ui)
@@ -419,6 +479,10 @@ def normalize_postcode(code: str) -> str:
     if len(s) == 5 and s.isdigit():
         return f"{s[:2]}-{s[2:]}"
     return s
+
+
+def is_valid_postcode(code: str) -> bool:
+    return re.fullmatch(r"\d{2}-\d{3}", code) is not None
 
 def load_points(file) -> pd.DataFrame:
     name = (file.name or "").lower()
@@ -464,368 +528,72 @@ def safe_int(x, default=0) -> int:
 # =========================
 # Helpers: Google APIs
 # =========================
-def normalize_address_for_cache(address: str) -> str:
-    """Uprość adres do klucza typu: kod + miasto, bez resetu istniejącego cache."""
-    if address is None:
-        return ""
+def geocode_postcode(code: str, city: str):
+    global _last_nominatim_request_at
 
-    s = str(address).strip().lower()
-    s = s.replace(".", " ")
-    s = re.sub(r"\s+", " ", s)
-    s = re.sub(r"[^a-ząćęłńóśźż0-9\s,/-]", " ", s)
-    s = re.sub(r"\s+", " ", s).strip()
+    address_query = f"{code} {city}, Polska" if city else f"{code}, Polska"
+    postcode_query = f"{code}, Polska"
+    queries = [(address_query, False)]
+    if postcode_query != address_query:
+        queries.append((postcode_query, True))
 
-    if not s:
-        return ""
-
-    # Najpierw spróbuj wyciągnąć kod pocztowy + miasto, bo to jest stabilny klucz.
-    m = re.search(r"(\d{2}-\d{3})\s*[-, ]*\s*([a-ząćęłńóśźż0-9\s-]+)", s)
-    if m:
-        code = m.group(1)
-        city = re.sub(r"\s+", " ", m.group(2)).strip()
-        if city:
-            return f"{code}|{city}"
-
-    # Fallback: najpierw dajemy stabilny, krótki klucz na podstawie wyrażeń z adresu.
-    # Nie resetujemy danych, tylko rozszerzamy kompatybilność z dawnym cache.
-    return s
-
-
-def legacy_geocode_cache_key(address: str) -> str:
-    """Stary sposób generowania klucza, zachowany dla kompatybilności z istniejącym cache."""
-    raw = str(address).lower().strip().encode("utf-8")
-    return hashlib.sha256(raw).hexdigest()
-
-
-def geocode_cache_key(address: str) -> str:
-    """Generuj klucz cache'u dla adresu, ale zachowaj kompatybilność z istniejącym cache."""
-    normalized = normalize_address_for_cache(address)
-    raw = str(address).lower().strip().encode("utf-8")
-    key_base = normalized if normalized else str(address).lower().strip()
-    return hashlib.sha256(key_base.encode("utf-8")).hexdigest()
-
-
-def retry_after_seconds(value: str | None) -> float | None:
-    if not value:
-        return None
-    try:
-        seconds = float(value)
-        return max(0.0, seconds) if math.isfinite(seconds) else None
-    except ValueError:
-        try:
-            retry_at = parsedate_to_datetime(value)
-            if retry_at.tzinfo is None:
-                retry_at = retry_at.replace(tzinfo=timezone.utc)
-            return max(0.0, (retry_at - datetime.now(retry_at.tzinfo)).total_seconds())
-        except (TypeError, ValueError, OverflowError):
-            return None
-
-
-def geocode_address(address: str):
-    normalized_key = geocode_cache_key(address)
-    legacy_key = legacy_geocode_cache_key(address)
-    cache_file = os.path.join(GEOCODING_CACHE_DIR, f"{normalized_key}.json")
-    legacy_cache_file = os.path.join(GEOCODING_CACHE_DIR, f"{legacy_key}.json")
-    postcode_match = re.search(r"(?<!\d)\d{2}-\d{3}(?!\d)", address)
-    postcode = postcode_match.group(0) if postcode_match else ""
-
-    # 1. Lokalny JSON cache (nowy i stary klucz, aby nie tracić istniejących danych)
-    for candidate in [cache_file, legacy_cache_file]:
-        if os.path.exists(candidate):
-            with open(candidate, "r", encoding="utf-8") as f:
-                cached = json.load(f)
-            retry_postcode = (
-                postcode
-                and postcode != address.strip()
-                and cached["status"] == "ZERO_RESULTS"
-                and not cached.get("postcode_fallback_attempted", False)
+    for query, postcode_only in queries:
+        if API_PROVIDER == "osm":
+            wait_s = 1.05 - (time.monotonic() - _last_nominatim_request_at)
+            if wait_s > 0:
+                time.sleep(wait_s)
+            response = requests.get(
+                NOMINATIM_URL,
+                params={"q": query, "format": "jsonv2", "limit": 1, "countrycodes": "pl"},
+                headers={"User-Agent": OSM_USER_AGENT},
+                timeout=25,
             )
-            if not retry_postcode:
-                return cached["lat"], cached["lng"], cached["formatted"], cached["status"], "lokalny JSON"
-
-    # 2. CSV cache z GitHub (session_state): porównujemy po znormalizowanym adresie, nie po surowym stringu
-    df = st.session_state["geocoding_cache_df"]
-    if "address" in df.columns:
-        normalized_target = normalize_address_for_cache(address)
-        if normalized_target:
-            matched = df[df["address"].map(lambda x: normalize_address_for_cache(x) == normalized_target)]
-            if not matched.empty:
-                row = matched.iloc[0]
-                fallback_attempted = (
-                    str(row.get("postcode_fallback_attempted", False)).strip().lower() == "true"
-                )
-                retry_postcode = (
-                    postcode
-                    and postcode != address.strip()
-                    and row["status"] == "ZERO_RESULTS"
-                    and not fallback_attempted
-                )
-                if not retry_postcode:
-                    cache_data = {
-                        "lat": row["lat"],
-                        "lng": row["lng"],
-                        "formatted": row["formatted_address"],
-                        "status": row["status"],
-                        "postcode_fallback_attempted": fallback_attempted,
-                    }
-                    with open(cache_file, "w", encoding="utf-8") as f:
-                        json.dump(cache_data, f)
-                    return row["lat"], row["lng"], row["formatted_address"], row["status"], "GitHub CSV"
-
-    postcode_fallback_attempted = False
-    if API_PROVIDER == "osm":
-        global _last_nominatim_request_at, _nominatim_429_streak, _nominatim_blocked_until
-        queries = [address]
-        if postcode and postcode != address.strip():
-            queries.append(postcode)
-
-        results = []
-        source = "Nominatim (OpenStreetMap)"
-        if time.monotonic() < _nominatim_blocked_until:
-            return None, None, "", "RATE_LIMITED", source
-        _nominatim_blocked_until = 0.0
-        for query in queries:
-            if query == postcode and query != address:
-                postcode_fallback_attempted = True
-            for attempt in range(NOMINATIM_MAX_ATTEMPTS):
-                wait_s = 1.05 - (time.monotonic() - _last_nominatim_request_at)
-                if wait_s > 0:
-                    time.sleep(wait_s)
-                try:
-                    r = requests.get(
-                        NOMINATIM_URL,
-                        params={"q": query, "format": "jsonv2", "limit": 1, "countrycodes": "pl"},
-                        headers={"User-Agent": OSM_USER_AGENT},
-                        timeout=25,
-                    )
-                    _last_nominatim_request_at = time.monotonic()
-                    r.raise_for_status()
-                    results = r.json()
-                    _nominatim_429_streak = 0
-                    break
-                except requests.exceptions.RequestException as exc:
-                    _last_nominatim_request_at = time.monotonic()
-                    response = getattr(exc, "response", None)
-                    if response is None or response.status_code != 429:
-                        _nominatim_429_streak = 0
-                        status = f"HTTP_ERROR_{response.status_code}" if response is not None else "REQUEST_ERROR"
-                        return None, None, "", status, source
-
-                    _nominatim_429_streak += 1
-                    retry_after = retry_after_seconds(response.headers.get("Retry-After"))
-                    if _nominatim_429_streak >= NOMINATIM_MAX_ATTEMPTS:
-                        cooldown = max(NOMINATIM_RATE_LIMIT_COOLDOWN_SECONDS, retry_after or 0.0)
-                        _nominatim_blocked_until = time.monotonic() + cooldown
-                        return None, None, "", "RATE_LIMITED", source
-                    if attempt + 1 == NOMINATIM_MAX_ATTEMPTS:
-                        status = "HTTP_ERROR_429"
-                        return None, None, "", status, source
-
-                    backoff = NOMINATIM_BACKOFF_BASE_SECONDS * (2 ** attempt)
-                    time.sleep(max(backoff, retry_after or 0.0))
+            response.raise_for_status()
+            _last_nominatim_request_at = time.monotonic()
+            results = response.json()
             if results:
-                if query == postcode:
-                    source = "Nominatim (sam kod)"
-                break
-
-        if results:
-            result = results[0]
-            lat, lng = float(result["lat"]), float(result["lon"])
-            formatted, status = result.get("display_name", ""), "OK"
+                result = results[0]
+                source = "nominatim_kod" if postcode_only or not city else "nominatim"
+                return float(result["lat"]), float(result["lon"]), result.get("display_name", ""), "OK", source
         else:
-            lat, lng, formatted, status = None, None, "", "ZERO_RESULTS"
-    else:
-        # Google Geocoding API
-        url = "https://maps.googleapis.com/maps/api/geocode/json"
-        queries = [address]
-        if postcode and postcode != address.strip():
-            queries.append(postcode)
-
-        source = "Google API"
-        for query in queries:
-            if query == postcode and query != address:
-                postcode_fallback_attempted = True
-            r = requests.get(url, params={"address": query, "key": API_KEY}, timeout=25)
-            data = r.json()
+            response = requests.get(
+                "https://maps.googleapis.com/maps/api/geocode/json",
+                params={"address": query, "key": API_KEY},
+                timeout=25,
+            )
+            response.raise_for_status()
+            data = response.json()
             results = data.get("results", [])
-
             if data.get("status") == "OK" and results:
-                loc = results[0]["geometry"]["location"]
-                formatted = results[0].get("formatted_address", "")
-                lat, lng, status = loc["lat"], loc["lng"], "OK"
-                if query == postcode:
-                    source = "Google API (sam kod)"
-                break
+                result = results[0]
+                location = result["geometry"]["location"]
+                source = "google_kod" if postcode_only or not city else "google"
+                return (
+                    float(location["lat"]),
+                    float(location["lng"]),
+                    result.get("formatted_address", ""),
+                    "OK",
+                    source,
+                )
+            if data.get("status") not in ("ZERO_RESULTS", "OK"):
+                raise RuntimeError(
+                    f"Google Geocoding API error: {data.get('status')} / {data.get('error_message', '')}"
+                )
 
-            no_results = data.get("status") == "ZERO_RESULTS" or (
-                data.get("status") == "OK" and not results
-            )
-            if no_results and query == address and len(queries) > 1:
-                continue
+    source = "nominatim_kod" if API_PROVIDER == "osm" else "google_kod"
+    return None, None, "", "ZERO_RESULTS", source
 
-            lat, lng, formatted, status = None, None, "", data.get("status", "UNKNOWN")
-            break
 
-    cache_data = {
-        "lat": lat,
-        "lng": lng,
-        "formatted": formatted,
-        "status": status,
-        "postcode_fallback_attempted": postcode_fallback_attempted,
-    }
-    with open(cache_file, "w", encoding="utf-8") as f:
-        json.dump(cache_data, f)
-
-    new_row = pd.DataFrame([{
-        "address": address,
-        "lat": lat,
-        "lng": lng,
-        "formatted_address": formatted,
-        "status": status,
-        "postcode_fallback_attempted": postcode_fallback_attempted,
-        "cached_at": datetime.now().isoformat()
-    }])
-    st.session_state["geocoding_cache_df"] = pd.concat(
-        [st.session_state["geocoding_cache_df"], new_row],
-        ignore_index=True
+def haversine_km(point_a, point_b) -> float:
+    lat_a, lng_a = map(math.radians, point_a)
+    lat_b, lng_b = map(math.radians, point_b)
+    delta_lat = lat_b - lat_a
+    delta_lng = lng_b - lng_a
+    value = (
+        math.sin(delta_lat / 2) ** 2
+        + math.cos(lat_a) * math.cos(lat_b) * math.sin(delta_lng / 2) ** 2
     )
-    st.session_state["geocoding_updates"].add(address)
-
-    return lat, lng, formatted, status, source
-
-
-def save_geocoding_to_csv():
-    """Zapisz cache geocodingu do CSV"""
-    st.session_state["geocoding_cache_df"].to_csv(GEOCODING_CSV_PATH, index=False)
-    return True
-
-
-def merge_geocoding_cache_frames(remote_df: pd.DataFrame, local_df: pd.DataFrame) -> pd.DataFrame:
-    """Dodaj brakujące lokalne adresy, zachowując wszystkie wiersze z GitHub."""
-    if remote_df.empty:
-        return local_df.copy()
-    if local_df.empty or "address" not in remote_df.columns or "address" not in local_df.columns:
-        return remote_df.copy()
-
-    remote_keys = {
-        normalize_address_for_cache(address)
-        for address in remote_df["address"]
-        if normalize_address_for_cache(address)
-    }
-    additions = []
-    for row in local_df.to_dict("records"):
-        key = normalize_address_for_cache(row.get("address", ""))
-        if not key or key not in remote_keys:
-            additions.append(row)
-            if key:
-                remote_keys.add(key)
-
-    if not additions:
-        return remote_df.copy()
-    return pd.concat([remote_df, pd.DataFrame(additions)], ignore_index=True)
-
-
-def update_geocoding_csv_github():
-    """Commitnij zaktualizowany CSV do GitHub."""
-    if not GITHUB_AVAILABLE:
-        return False, "PyGithub nie zainstalowany"
-
-    if "GITHUB_TOKEN" not in st.secrets:
-        return False, "GITHUB_TOKEN nie znaleziony w secrets"
-
-    if "GITHUB_REPO" not in st.secrets:
-        return False, "GITHUB_REPO nie znaleziony w secrets (format: user/repo)"
-
-    try:
-        num_updates = len(st.session_state["geocoding_updates"])
-        g = Github(st.secrets["GITHUB_TOKEN"])
-        repo = g.get_repo(st.secrets["GITHUB_REPO"])
-        csv_content = st.session_state["geocoding_cache_df"].to_csv(index=False)
-
-        try:
-            file = repo.get_contents(GEOCODING_CSV_PATH)
-            repo.update_file(
-                GEOCODING_CSV_PATH,
-                f"Auto: Update geocoding cache ({num_updates} nowych adresów)",
-                csv_content,
-                file.sha,
-            )
-        except Exception:
-            repo.create_file(
-                GEOCODING_CSV_PATH,
-                "Auto: Create geocoding cache",
-                csv_content,
-            )
-
-        save_geocoding_to_csv()
-        st.session_state["geocoding_updates"].clear()
-        return True, f"✅ Commitnięto {num_updates} nowych adresów do GitHub"
-
-    except Exception as e:
-        return False, f"❌ Błąd commitowania: {str(e)}"
-
-
-def dm_pair_key(lat_o: float, lng_o: float, lat_d: float, lng_d: float) -> str:
-    pair = f"{lat_o:.7f},{lng_o:.7f}|{lat_d:.7f},{lng_d:.7f}"
-    return hashlib.sha256(pair.encode()).hexdigest()
-
-
-def push_pairs_cache_to_github(pairs: dict, n_new: int):
-    if not GITHUB_AVAILABLE:
-        return False
-    if "GITHUB_TOKEN" not in st.secrets or "GITHUB_REPO" not in st.secrets:
-        return False
-    try:
-        g = Github(st.secrets["GITHUB_TOKEN"])
-        repo = g.get_repo(st.secrets["GITHUB_REPO"])
-        existing = None
-        try:
-            existing = repo.get_contents(DM_PAIRS_CACHE_PATH)
-        except GithubException as error:
-            if error.status != 404:
-                raise
-            try:
-                legacy = repo.get_contents(LEGACY_DM_PAIRS_CACHE_PATH)
-            except GithubException as legacy_error:
-                if legacy_error.status != 404:
-                    raise
-                remote_pairs = {}
-            else:
-                legacy_content = decode_github_file_content(legacy)
-                remote_pairs = json.loads(legacy_content.decode("utf-8"))
-        else:
-            compressed_content = decode_github_file_content(existing)
-            remote_pairs = json.loads(gzip.decompress(compressed_content).decode("utf-8"))
-
-        if not isinstance(remote_pairs, dict):
-            raise ValueError("Nieprawidłowy format istniejącego cache par na GitHubie")
-        for key, value in pairs.items():
-            if isinstance(remote_pairs.get(key), dict) and isinstance(value, dict):
-                remote_pairs[key].update(value)
-            else:
-                remote_pairs[key] = value
-
-        content = gzip.compress(
-            json.dumps(remote_pairs, separators=(",", ":")).encode("utf-8"),
-            compresslevel=6,
-            mtime=0,
-        )
-        if existing is None:
-            repo.create_file(DM_PAIRS_CACHE_PATH, "Auto: Create DM pairs cache", content)
-        else:
-            repo.update_file(
-                DM_PAIRS_CACHE_PATH,
-                f"Auto: Update DM pairs cache (+{n_new} par)",
-                content,
-                sha=existing.sha,
-            )
-        with open(DM_PAIRS_CACHE_PATH, "wb") as f:
-            f.write(content)
-        return True
-    except Exception as error:
-        st.warning(f"Nie udało się zaktualizować cache par na GitHubie: {error}")
-        return False
-
+    return 6371.0 * 2 * math.asin(math.sqrt(value))
 
 def format_latlng(lat, lng) -> str:
     return f"{lat},{lng}"
@@ -904,103 +672,172 @@ def distance_matrix(origins, destinations, mode="driving"):
 
 def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05, postcodes=None):
     n = len(points_latlng)
-    coords = [tuple(map(float, p.split(","))) for p in points_latlng]
     if postcodes is None:
-        postcodes = [""] * n
-    elif len(postcodes) != n:
+        raise ValueError("Lista kodów pocztowych jest wymagana dla macierzy po kodach.")
+    if len(postcodes) != n:
         raise ValueError("Liczba kodów pocztowych musi odpowiadać liczbie punktów macierzy.")
 
-    pairs = st.session_state.get("dm_pairs_cache", {})
+    codes = [normalize_postcode(str(code)) for code in postcodes]
+    postcode_coords = st.session_state["postcode_coords"]
+    for code, point in zip(codes, points_latlng):
+        if code not in postcode_coords:
+            lat, lng = map(float, point.split(","))
+            postcode_coords[code] = (lat, lng)
 
-    missing_count = sum(
-        1 for i in range(n) for j in range(n)
-        if i != j and dm_pair_key(*coords[i], *coords[j]) not in pairs
-    )
+    unique_codes = sorted(set(codes))
+    distance_cache = st.session_state["distance_cache"]
+    needed_pairs = [
+        (code_a, code_b)
+        for index, code_a in enumerate(unique_codes)
+        for code_b in unique_codes[index + 1:]
+    ]
+    missing_pairs = [
+        pair for pair in needed_pairs
+        if pair not in distance_cache
+    ]
+    api_values = {}
 
-    if missing_count == 0:
-        st.info(f"Macierz: wszystkie {n*(n-1)} par w cache — bez zapytań do {selected_api_provider}")
-        dist = [[0]*n for _ in range(n)]
-        dur  = [[0]*n for _ in range(n)]
-        for i in range(n):
-            for j in range(n):
-                if i == j:
+    if missing_pairs:
+        st.warning(f"Macierz: brakuje {len(missing_pairs)} par kodów w odleglosci.csv; pobieram z API.")
+        for batch_size in [10, 8, 5, 4, 2]:
+            code_batches = list(chunked_idx(len(unique_codes), batch_size))
+            code_to_batch = {
+                unique_codes[index]: batch_index
+                for batch_index, batch in enumerate(code_batches)
+                for index in batch
+            }
+            batches_to_fetch = sorted({
+                (code_to_batch[code_a], code_to_batch[code_b])
+                for code_a, code_b in missing_pairs
+            })
+            direct_failures = []
+            try:
+                progress = st.progress(0)
+                status = st.empty()
+                for call_number, (origin_batch_index, destination_batch_index) in enumerate(batches_to_fetch, 1):
+                    origin_codes = [unique_codes[index] for index in code_batches[origin_batch_index]]
+                    destination_codes = [unique_codes[index] for index in code_batches[destination_batch_index]]
+                    origins = [format_latlng(*postcode_coords[code]) for code in origin_codes]
+                    destinations = [format_latlng(*postcode_coords[code]) for code in destination_codes]
+                    dist_m, dur_s = distance_matrix(origins, destinations, mode=mode)
+                    origin_indexes = {code: index for index, code in enumerate(origin_codes)}
+                    destination_indexes = {code: index for index, code in enumerate(destination_codes)}
+                    for code_a, code_b in missing_pairs:
+                        if (
+                            code_a in origin_indexes
+                            and code_b in destination_indexes
+                            and code_a < code_b
+                            and code_to_batch[code_a] == origin_batch_index
+                            and code_to_batch[code_b] == destination_batch_index
+                        ):
+                            distance = dist_m[origin_indexes[code_a]][destination_indexes[code_b]]
+                            duration = dur_s[origin_indexes[code_a]][destination_indexes[code_b]]
+                            if distance is not None and duration is not None:
+                                api_values[(code_a, code_b)] = (float(distance), float(duration))
+                            else:
+                                direct_failures.append((code_a, code_b))
+                    progress.progress(int(call_number / max(len(batches_to_fetch), 1) * 100))
+                    status.text(f"Macierz API: {call_number}/{len(batches_to_fetch)} (batch={batch_size})")
+                    time.sleep(sleep_s)
+
+                reverse_batches = {}
+                for code_a, code_b in direct_failures:
+                    reverse_key = (code_to_batch[code_b], code_to_batch[code_a])
+                    reverse_batches.setdefault(reverse_key, []).append((code_a, code_b))
+                for call_number, ((origin_batch_index, destination_batch_index), pairs) in enumerate(reverse_batches.items(), 1):
+                    origin_codes = [unique_codes[index] for index in code_batches[origin_batch_index]]
+                    destination_codes = [unique_codes[index] for index in code_batches[destination_batch_index]]
+                    origins = [format_latlng(*postcode_coords[code]) for code in origin_codes]
+                    destinations = [format_latlng(*postcode_coords[code]) for code in destination_codes]
+                    dist_m, dur_s = distance_matrix(origins, destinations, mode=mode)
+                    origin_indexes = {code: index for index, code in enumerate(origin_codes)}
+                    destination_indexes = {code: index for index, code in enumerate(destination_codes)}
+                    for code_a, code_b in pairs:
+                        distance = dist_m[origin_indexes[code_b]][destination_indexes[code_a]]
+                        duration = dur_s[origin_indexes[code_b]][destination_indexes[code_a]]
+                        if distance is not None and duration is not None:
+                            api_values[(code_a, code_b)] = (float(distance), float(duration))
+                    time.sleep(sleep_s)
+                progress.empty()
+                status.empty()
+                break
+            except RuntimeError as error:
+                if "progress" in locals():
+                    progress.empty()
+                    status.empty()
+                if "MAX_ELEMENTS_EXCEEDED" in str(error) or "TooBig" in str(error):
+                    if batch_size == 2:
+                        raise
+                    st.warning(f"Limit API dla batch={batch_size}; zmniejszam rozmiar paczki.")
+                    api_values.clear()
                     continue
-                e = pairs[dm_pair_key(*coords[i], *coords[j])]
-                dist[i][j] = e.get("d")
-                dur[i][j]  = e.get("t")
-        return dist, dur, True
+                raise
+        else:
+            raise RuntimeError("Nie udało się pobrać brakujących par z API.")
 
-    st.warning(f"Macierz: brakuje {missing_count} par w cache — pobieranie z {selected_api_provider}")
-
-    for batch_size in [10, 8, 5, 4, 2]:
-        try:
-            origin_batches = list(chunked_idx(n, batch_size))
-            dest_batches   = list(chunked_idx(n, batch_size))
-
-            batches_to_fetch = [
-                (ob, db)
-                for ob in origin_batches
-                for db in dest_batches
-                if any(
-                    i != j and dm_pair_key(*coords[i], *coords[j]) not in pairs
-                    for i in ob for j in db
-                )
-            ]
-
-            new_pairs   = {}
-            total_calls = len(batches_to_fetch)
-            pb  = st.progress(0)
-            txt = st.empty()
-
-            for call_no, (ob, db) in enumerate(batches_to_fetch, 1):
-                origins      = [points_latlng[i] for i in ob]
-                destinations = [points_latlng[j] for j in db]
-                dist_m, dur_s = distance_matrix(origins, destinations, mode=mode)
-
-                for oi, i in enumerate(ob):
-                    for dj, j in enumerate(db):
-                        if i != j:
-                            new_pairs[dm_pair_key(*coords[i], *coords[j])] = {
-                                "d": dist_m[oi][dj],
-                                "t": dur_s[oi][dj],
-                                "kod_a": postcodes[i],
-                                "kod_b": postcodes[j],
-                            }
-
-                pb.progress(int(call_no / total_calls * 100))
-                txt.text(f"Macierz: {call_no}/{total_calls} zapytań (batch={batch_size})")
-                time.sleep(sleep_s)
-
-            pb.empty()
-            txt.empty()
-
-            pairs.update(new_pairs)
-            st.session_state["dm_pairs_cache"] = pairs
-            cache_synced = push_pairs_cache_to_github(pairs, len(new_pairs))
-            if cache_synced:
-                st.success(f"Macierz: pobrano {len(new_pairs)} nowych par, cache zaktualizowany")
-            else:
-                st.warning("Macierz pobrano, ale zapis cache na GitHubie nie został potwierdzony.")
-
-            dist = [[0]*n for _ in range(n)]
-            dur  = [[0]*n for _ in range(n)]
-            for i in range(n):
-                for j in range(n):
-                    if i == j:
-                        continue
-                    e = pairs.get(dm_pair_key(*coords[i], *coords[j])) or {}
-                    dist[i][j] = e.get("d")
-                    dur[i][j]  = e.get("t")
-            return dist, dur, False
-
-        except RuntimeError as e:
-            if "MAX_ELEMENTS_EXCEEDED" in str(e) or "TooBig" in str(e):
-                st.warning(f"MAX_ELEMENTS_EXCEEDED dla batch={batch_size}. Zmniejszam batch…")
+    today = date.today().isoformat()
+    api_source = "osrm" if API_PROVIDER == "osm" else "google"
+    new_distance_rows = pd.DataFrame([
+        {
+            "kod_a": code_a,
+            "kod_b": code_b,
+            "km": f"{distance / 1000.0:.1f}",
+            "min": f"{duration / 60.0:.1f}",
+            "zrodlo": api_source,
+            "zaktualizowano": today,
+        }
+        for (code_a, code_b), (distance, duration) in api_values.items()
+    ], columns=DISTANCES_CSV_COLUMNS)
+    if not new_distance_rows.empty:
+        merged, _ = merge_and_push_csv(
+            DISTANCES_CSV_PATH,
+            new_distance_rows,
+            ["kod_a", "kod_b"],
+        )
+        st.session_state["distance_cache_df"] = merged
+        distance_cache = {}
+        for _, row in merged.iterrows():
+            try:
+                key = tuple(sorted((row["kod_a"], row["kod_b"])))
+                distance_cache[key] = (float(row["km"]), float(row["min"]))
+            except (TypeError, ValueError):
                 continue
-            raise
+        st.session_state["distance_cache"] = distance_cache
 
-    raise RuntimeError("Nie udało się pobrać macierzy – spróbuj mniejszej liczby punktów.")
+    dist = [[0.0] * n for _ in range(n)]
+    dur = [[0.0] * n for _ in range(n)]
+    estimated_pairs = set()
+    for i in range(n):
+        for j in range(n):
+            if i == j or codes[i] == codes[j]:
+                continue
+            pair = tuple(sorted((codes[i], codes[j])))
+            cached_value = distance_cache.get(pair)
+            if cached_value is None:
+                km = haversine_km(postcode_coords[codes[i]], postcode_coords[codes[j]]) * 1.3
+                minutes = km / 70.0 * 60.0
+                estimated_pairs.add(pair)
+            else:
+                km, minutes = cached_value
+            dist[i][j] = km * 1000.0
+            dur[i][j] = minutes * 60.0
 
+    used_cache = len([pair for pair in needed_pairs if pair in distance_cache])
+    st.session_state["matrix_counts"] = {
+        "csv": used_cache,
+        "api": len(api_values),
+        "estimated": len(estimated_pairs),
+    }
+    if estimated_pairs:
+        st.warning(
+            f"Macierz: użyto {len(estimated_pairs)} szacunków z odległości w linii prostej; "
+            "nie zapisano ich do odleglosci.csv."
+        )
+    st.info(
+        f"Macierz: {used_cache} par z odleglosci.csv, {len(api_values)} nowych z API, "
+        f"{len(estimated_pairs)} szacowanych."
+    )
+    return dist, dur, not api_values and not estimated_pairs
 
 # =========================
 # OR-Tools: VRP
@@ -1177,6 +1014,7 @@ def build_nodes(points_df: pd.DataFrame) -> pd.DataFrame:
         "latitude": BASE_LAT,
         "longitude": BASE_LNG,
         "demand_wozki": 0,
+        "wartosc": 0.0,
     }])
 
     pts = ok_df.copy().reset_index(drop=True)
@@ -1193,7 +1031,7 @@ def build_nodes(points_df: pd.DataFrame) -> pd.DataFrame:
     pts["postcode"] = pts["Kod"].astype("string").fillna("").str.strip().apply(normalize_postcode)
     pts["google_formatted_address"] = pts.get("formatted_address", "").astype("string").fillna("").str.strip()
 
-    pts = pts[["node", "name", "address", "postcode", "google_formatted_address", "latitude", "longitude", "demand_wozki"]]
+    pts = pts[["node", "name", "address", "postcode", "google_formatted_address", "latitude", "longitude", "demand_wozki", "wartosc"]]
     nodes = pd.concat([nodes, pts], ignore_index=True)
     return nodes
 
@@ -1595,9 +1433,185 @@ def build_map_html(routes, nodes, vehicle_ids) -> str:
 
 
 # =========================
+# Raport rentowności transportu (nie wpływa na solver)
+# =========================
+# Średnie ważone liczbą kursów; wielkości pośrednie przypisane do najbliższego większego pojazdu
+DEFAULT_RATES = [(6, 4.34), (10, 4.72), (11, 4.35), (12, 5.27), (20, 5.07), (21, 5.31)]
+
+
+def safe_float(x, default=0.0) -> float:
+    try:
+        if pd.isna(x):
+            return default
+        text = str(x).strip().replace("\xa0", "").replace(" ", "").replace("zł", "").replace("PLN", "")
+        text = text.replace(",", ".")
+        return float(text) if text else default
+    except Exception:
+        return default
+
+
+def find_value_column(df: pd.DataFrame):
+    for column in df.columns:
+        if str(column).strip().lower() in ("wartość", "wartosc"):
+            return column
+    return None
+
+
+def rate_for_capacity(capacity, rates: dict):
+    """Stawka PLN/km: dokładna wielkość, a gdy jej brak - najbliższa większa (lub największa)."""
+    if not rates:
+        return 0.0
+    if capacity in rates:
+        return rates[capacity]
+    bigger = [size for size in rates if size >= capacity]
+    return rates[min(bigger)] if bigger else rates[max(rates)]
+
+
+def profit_status(ratio, threshold):
+    if ratio is None:
+        return "brak wartości"
+    if ratio >= threshold:
+        return "PRZEKROCZENIE"
+    if ratio >= 0.8 * threshold:
+        return "blisko progu"
+    return "OK"
+
+
+STATUS_ICON = {"PRZEKROCZENIE": "🔴", "blisko progu": "🟡", "OK": "🟢", "brak wartości": "⚪"}
+
+
+def build_profitability(routes, nodes, vehicle_ids, vehicle_caps, dist_km_df, rates_df,
+                        route_threshold_pct, point_threshold_pct):
+    route_thr = route_threshold_pct / 100.0
+    point_thr = point_threshold_pct / 100.0
+    rates = {}
+    for _, row in rates_df.iterrows():
+        size = safe_int(row.get("Pojemność (wózki)"), 0)
+        if size > 0 and pd.notna(row.get("Stawka PLN/km")):
+            rates[size] = safe_float(row.get("Stawka PLN/km"))
+
+    dist = dist_km_df.values
+    names = nodes["name"].tolist()
+    addrs = nodes["address"].tolist()
+    values = nodes["wartosc"].astype(float).tolist() if "wartosc" in nodes else [0.0] * len(nodes)
+
+    route_rows, point_rows = [], []
+    seq = 0
+    for v_idx, route in enumerate(routes):
+        if len(route) <= 2:
+            continue
+        seq += 1
+        cap = vehicle_caps[v_idx] if v_idx < len(vehicle_caps) else 0
+        label = vehicle_ids[v_idx] if v_idx < len(vehicle_ids) else str(v_idx + 1)
+        rate = rate_for_capacity(cap, rates)
+        km = sum(float(dist[route[i]][route[i + 1]] or 0) for i in range(len(route) - 1))
+        cost = km * rate
+        stops = [n for n in route if n != 0]
+        value = sum(values[n] for n in stops)
+        ratio = cost / value if value > 0 else None
+        route_rows.append({
+            "seq": seq, "Samochód": label, "Pojemność": cap, "Punkty": len(stops),
+            "km": km, "Stawka": rate, "Koszt": cost, "Wartość": value,
+            "Wskaźnik": ratio, "Status": profit_status(ratio, route_thr),
+        })
+        for i in range(1, len(route) - 1):
+            node, prev_node, next_node = route[i], route[i - 1], route[i + 1]
+            delta_km = (
+                float(dist[prev_node][node] or 0) + float(dist[node][next_node] or 0)
+                - float(dist[prev_node][next_node] or 0)
+            )
+            delta_cost = max(delta_km, 0.0) * rate
+            node_value = values[node]
+            point_ratio = delta_cost / node_value if node_value > 0 else None
+            point_rows.append({
+                "seq": seq, "Samochód": label, "Lp.": i, "Nazwa": names[node], "Adres": addrs[node],
+                "Δkm": delta_km, "Koszt dodania": delta_cost, "Wartość": node_value,
+                "Wskaźnik": point_ratio, "Status": profit_status(point_ratio, point_thr),
+            })
+    return pd.DataFrame(route_rows), pd.DataFrame(point_rows)
+
+
+def _pct(x):
+    return "–" if x is None or pd.isna(x) else f"{x * 100:.1f}%"
+
+
+def profitability_to_html(routes_df, points_df, route_threshold_pct, point_threshold_pct, rates_df) -> str:
+    from html import escape
+
+    def money(x):
+        return f"{x:,.0f}".replace(",", " ")
+
+    css = """
+    body{font-family:Arial,sans-serif;font-size:12px;color:#000;margin:16px}
+    h1{font-size:18px} h2{font-size:14px;margin:18px 0 4px;page-break-after:avoid}
+    table{border-collapse:collapse;width:100%;margin-bottom:8px}
+    th,td{border:1px solid #888;padding:3px 6px;text-align:left}
+    th{background:#d9d9d9} td.n{text-align:right;white-space:nowrap}
+    .PRZEKROCZENIE{background:#f8c9c9;font-weight:bold}
+    .blisko{background:#fff2b3} .OK{background:#d9f2d9} .brak{background:#eee}
+    .btn{padding:6px 14px;margin-bottom:10px;cursor:pointer}
+    .note{color:#444;margin:4px 0}
+    @media print{.btn{display:none} body{margin:0} tr{page-break-inside:avoid}}
+    """
+
+    def cls(status):
+        return {"PRZEKROCZENIE": "PRZEKROCZENIE", "blisko progu": "blisko", "OK": "OK"}.get(status, "brak")
+
+    def mark(status):
+        return {"PRZEKROCZENIE": "▲ ", "blisko progu": "● ", "OK": "✔ "}.get(status, "") + status
+
+    rates_text = ", ".join(
+        f"{safe_int(r['Pojemność (wózki)'])} wózków = {safe_float(r['Stawka PLN/km']):.2f}"
+        for _, r in rates_df.iterrows() if pd.notna(r["Pojemność (wózki)"])
+    )
+    parts = [f"<html><head><meta charset='utf-8'><style>{css}</style></head><body>",
+             "<button class='btn' onclick='window.print()'>Drukuj</button>",
+             "<h1>Planowanie tras Plantpol – rentowność transportu</h1>",
+             f"<p class='note'>Data: {date.today().isoformat()} · Próg trasy: {route_threshold_pct:.0f}% "
+             f"· Próg punktu: {point_threshold_pct:.0f}% · Stawki PLN/km: {rates_text}</p>",
+             "<p class='note'>Koszt trasy = km pętli (baza → punkty → baza) × stawka dla wielkości samochodu. "
+             "Koszt dodania punktu = o ile km wydłuża trasę ten punkt (względem ominięcia go) × stawka. "
+             "Wskaźnik = koszt / wartość towaru.</p>"]
+
+    parts.append("<h2>Podsumowanie tras</h2><table><tr><th>Trasa</th><th>Samochód</th><th>Pojemność</th>"
+                 "<th>Punkty</th><th>km</th><th>PLN/km</th><th>Koszt [PLN]</th><th>Wartość [PLN]</th>"
+                 "<th>Wskaźnik</th><th>Status</th></tr>")
+    for _, r in routes_df.iterrows():
+        parts.append(
+            f"<tr class='{cls(r['Status'])}'><td>{r['seq']}</td><td>{escape(str(r['Samochód']))}</td>"
+            f"<td class='n'>{r['Pojemność']}</td><td class='n'>{r['Punkty']}</td>"
+            f"<td class='n'>{r['km']:.1f}</td><td class='n'>{r['Stawka']:.2f}</td>"
+            f"<td class='n'>{money(r['Koszt'])}</td><td class='n'>{money(r['Wartość'])}</td>"
+            f"<td class='n'>{_pct(r['Wskaźnik'])}</td><td>{mark(r['Status'])}</td></tr>"
+        )
+    parts.append("</table>")
+
+    for _, r in routes_df.iterrows():
+        parts.append(
+            f"<h2>Trasa {r['seq']} – samochód {escape(str(r['Samochód']))} (poj. {r['Pojemność']}) · "
+            f"koszt {money(r['Koszt'])} PLN / wartość {money(r['Wartość'])} PLN = {_pct(r['Wskaźnik'])} "
+            f"· {mark(r['Status'])}</h2>"
+        )
+        parts.append("<table><tr><th>Lp.</th><th>Nazwa</th><th>Adres</th><th>Δkm</th><th>Koszt dodania [PLN]</th>"
+                     "<th>Wartość [PLN]</th><th>Wskaźnik</th><th>Status</th></tr>")
+        for _, p in points_df[points_df["seq"] == r["seq"]].iterrows():
+            parts.append(
+                f"<tr class='{cls(p['Status'])}'><td>{p['Lp.']}</td><td>{escape(str(p['Nazwa']))}</td>"
+                f"<td>{escape(str(p['Adres']))}</td><td class='n'>{p['Δkm']:.1f}</td>"
+                f"<td class='n'>{money(p['Koszt dodania'])}</td><td class='n'>{money(p['Wartość'])}</td>"
+                f"<td class='n'>{_pct(p['Wskaźnik'])}</td><td>{mark(p['Status'])}</td></tr>"
+            )
+        parts.append("</table>")
+    parts.append("</body></html>")
+    return "".join(parts)
+
+
+# =========================
 # Zakładki
 # =========================
-tab_result, tab_geocode, tab_matrix, tab_map = st.tabs(["Wynik trasowania", "Geokodowanie", "Macierz", "Mapa"])
+tab_result, tab_rates, tab_profit, tab_geocode, tab_matrix, tab_map = st.tabs(
+    ["Wynik trasowania", "Stawki za transport", "Rentowność transportu", "Geokodowanie", "Macierz", "Mapa"]
+)
 
 with tab_result:
     run_all = st.button("URUCHOM CAŁY PROCES", type="primary", use_container_width=True)
@@ -1642,86 +1656,158 @@ with tab_result:
         vehicle_ids = vehicles_df["samochód"].tolist()
         vehicle_caps = vehicles_df["ilość wózków"].astype(int).tolist()
 
-        points_df["Kod"] = points_df["Kod"].astype("string").fillna("").str.strip().apply(normalize_postcode)
-        points_df["Miejscowosc"] = points_df["Miejscowosc"].astype("string").fillna("").str.strip()
+        points_df["Kod"] = (
+            points_df["Kod"].astype("string").fillna("").str.strip().apply(normalize_postcode)
+        )
+        points_df["Miejscowosc"] = (
+            points_df["Miejscowosc"].astype("string").fillna("").str.strip()
+        )
+        points_df["demand_wozki"] = points_df["Ilość wózków"].apply(safe_int)
+        value_col = find_value_column(points_df)
+        st.session_state["value_column_present"] = value_col is not None
+        points_df["wartosc"] = points_df[value_col].apply(safe_float) if value_col else 0.0
+        points_df["_input_row"] = points_df.index + 2
+        empty_rows = points_df[
+            points_df[required_points].astype("string").fillna("").apply(
+                lambda row: all(not value.strip() for value in row), axis=1
+            )
+        ].copy()
+        points_df = points_df.drop(index=empty_rows.index).copy()
+        invalid_mask = ~points_df["Kod"].apply(is_valid_postcode)
+        skipped_df = points_df.loc[invalid_mask].copy()
+        if not skipped_df.empty:
+            skipped_df["powód_pominięcia"] = "Brak lub nieprawidłowy kod pocztowy"
+        points_df = points_df.loc[~invalid_mask].copy()
+
+        if points_df.empty:
+            st.error("Brak punktów z poprawnym kodem pocztowym.")
+            st.stop()
 
         points_df["adres"] = (
-            points_df["Kod"].where(points_df["Kod"] != "", "") + " " +
-            points_df["Miejscowosc"].where(points_df["Miejscowosc"] != "", "")
+            points_df["Kod"] + " " + points_df["Miejscowosc"]
         ).str.strip() + ", Polska"
-        points_df["demand_wozki"] = points_df["Ilość wózków"].apply(safe_int)
 
-        stage.info("Etap 1/3: geokodowanie…")
+        stage.info("Etap 1/3: geokodowanie unikalnych kodów pocztowych…")
         geo_pb = st.progress(0)
         geo_txt = st.empty()
+        postcode_results = {}
+        new_point_rows = []
+        unknown_codes = [
+            code for code in points_df["Kod"].drop_duplicates()
+            if code not in st.session_state["postcode_coords"]
+        ]
 
-        lats, lngs, formatted, statuses = [], [], [], []
-        geo_sources = {
-            "lokalny JSON": 0,
-            "GitHub CSV": 0,
-            "Google API": 0,
-            "Google API (sam kod)": 0,
-            "Nominatim (OpenStreetMap)": 0,
-            "Nominatim (sam kod)": 0,
-        }
-        total = len(points_df)
-        for i, addr in enumerate(points_df["adres"]):
-            lat, lng, fmt, status, source = geocode_address(addr)
+        for index, code in enumerate(unknown_codes, 1):
+            city_values = points_df.loc[
+                (points_df["Kod"] == code) & (points_df["Miejscowosc"] != ""),
+                "Miejscowosc",
+            ]
+            city = city_values.iloc[0] if not city_values.empty else ""
+            lat, lng, formatted_address, status, source = geocode_postcode(code, city)
+            postcode_results[code] = (lat, lng, formatted_address, status, source)
+            if lat is not None and lng is not None and status == "OK":
+                st.session_state["postcode_coords"][code] = (lat, lng)
+                new_point_rows.append({
+                    "kod": code,
+                    "lat": f"{lat:.7f}",
+                    "lng": f"{lng:.7f}",
+                    "miejscowosc": city,
+                    "formatted_address": formatted_address,
+                    "zrodlo": source,
+                    "zaktualizowano": date.today().isoformat(),
+                })
+            percent = int(index / max(len(unknown_codes), 1) * 100)
+            geo_pb.progress(percent)
+            geo_txt.text(f"Geokodowanie kodów: {index}/{len(unknown_codes)} ({percent}%)")
+
+        geo_pb.empty()
+        geo_txt.empty()
+        if new_point_rows:
+            merged_points, _ = merge_and_push_csv(
+                POINTS_CSV_PATH,
+                pd.DataFrame(new_point_rows, columns=POINTS_CSV_COLUMNS),
+                ["kod"],
+            )
+            st.session_state["points_cache_df"] = merged_points
+            updated_coords = {}
+            for _, row in merged_points.iterrows():
+                try:
+                    updated_coords[row["kod"]] = (float(row["lat"]), float(row["lng"]))
+                except (TypeError, ValueError):
+                    continue
+            updated_coords[BASE_POSTCODE] = (BASE_LAT, BASE_LNG)
+            st.session_state["postcode_coords"].update(updated_coords)
+            for code in postcode_results:
+                if code in updated_coords:
+                    cached_row = merged_points.loc[merged_points["kod"] == code]
+                    formatted = (
+                        cached_row.iloc[0]["formatted_address"]
+                        if not cached_row.empty
+                        else ""
+                    )
+                    lat, lng = updated_coords[code]
+                    postcode_results[code] = (
+                        lat,
+                        lng,
+                        formatted,
+                        "OK",
+                        "punkty.csv",
+                    )
+
+        lats, lngs, formatted, statuses, sources = [], [], [], [], []
+        cache_codes = set(st.session_state["postcode_coords"])
+        for _, point in points_df.iterrows():
+            code = point["Kod"]
+            if code in postcode_results:
+                lat, lng, fmt, status, source = postcode_results[code]
+            elif code in cache_codes:
+                lat, lng = st.session_state["postcode_coords"][code]
+                cache_row = st.session_state["points_cache_df"]
+                cached_rows = cache_row.loc[cache_row["kod"] == code]
+                fmt = cached_rows.iloc[0]["formatted_address"] if not cached_rows.empty else ""
+                status, source = "OK", "punkty.csv"
+            else:
+                lat, lng, fmt, status, source = None, None, "", "ZERO_RESULTS", "brak danych"
             lats.append(lat)
             lngs.append(lng)
             formatted.append(fmt)
             statuses.append(status)
-            geo_sources[source] = geo_sources.get(source, 0) + 1
-
-            p = int((i + 1) / total * 100)
-            geo_pb.progress(p)
-            geo_txt.text(f"Geokodowanie: {i+1}/{total} ({p}%) — ostatni: {source}")
-
-        geo_pb.empty()
-        geo_txt.empty()
-        st.info(
-            f"Geokodowanie — źródła: "
-            f"{geo_sources['lokalny JSON']} z lokalnego cache | "
-            f"{geo_sources['GitHub CSV']} z GitHub CSV | "
-            f"Google API: {geo_sources['Google API']} kod+miejscowość, "
-            f"{geo_sources['Google API (sam kod)']} sam kod | "
-            f"Nominatim: {geo_sources['Nominatim (OpenStreetMap)']} kod+miejscowość, "
-            f"{geo_sources['Nominatim (sam kod)']} sam kod"
-        )
-        request_failures = [
-            status for status in statuses
-            if status.startswith(("HTTP_ERROR_", "REQUEST_ERROR", "RATE_LIMITED"))
-        ]
-        if request_failures:
-            failure_counts = pd.Series(request_failures).value_counts()
-            failure_summary = ", ".join(
-                f"{status}: {count}" for status, count in failure_counts.items()
-            )
-            st.warning(
-                f"Usługa geokodowania zwróciła błędy dla {len(request_failures)} punktów "
-                f"({failure_summary}). Te punkty zostaną pominięte w trasowaniu; "
-                "błędów nie zapisano do cache. Spróbuj ponownie później."
-            )
+            sources.append(source)
 
         points_df["latitude"] = lats
         points_df["longitude"] = lngs
         points_df["formatted_address"] = formatted
         points_df["geocode_status"] = statuses
-
+        points_df["geocode_source"] = sources
         st.session_state["points_df"] = points_df.copy()
+        st.session_state["skipped_points_df"] = skipped_df.copy()
+        st.session_state["empty_points_count"] = len(empty_rows)
 
         ok_cnt = int((points_df["geocode_status"] == "OK").sum())
+        failed_count = len(points_df) - ok_cnt
+        unique_sources = points_df[["Kod", "geocode_source"]].drop_duplicates("Kod")["geocode_source"]
+        cache_code_count = int((unique_sources == "punkty.csv").sum())
+        google_code_count = int(unique_sources.isin(["google", "google_kod"]).sum())
+        nominatim_code_count = int(unique_sources.isin(["nominatim", "nominatim_kod"]).sum())
+        st.info(
+            f"Geokodowanie unikalnych kodów: {len(unknown_codes)} nowych zapytań; "
+            f"punkty.csv: {cache_code_count}; "
+            f"Google API: {google_code_count}; "
+            f"Nominatim: {nominatim_code_count}."
+        )
+        if len(empty_rows):
+            st.info(f"Pominięto całkowicie puste wiersze: {len(empty_rows)}.")
+        if not skipped_df.empty:
+            st.warning(f"Pominięto wiersze z błędnym kodem: {len(skipped_df)}.")
+            st.dataframe(
+                skipped_df[["_input_row", "Kod", "Miejscowosc", "powód_pominięcia"]].astype(str),
+                use_container_width=True,
+            )
+        if failed_count:
+            st.warning(f"Nie udało się geokodować kodów dla {failed_count} punktów.")
         if ok_cnt == 0:
             st.error("Nie udało się geokodować żadnego punktu (OK=0).")
             st.stop()
-
-        # Auto-commit nowych adresów do GitHub
-        if len(st.session_state["geocoding_updates"]) > 0:
-            success, msg = update_geocoding_csv_github()
-            if success:
-                st.toast(f"✅ {msg}")
-            else:
-                st.warning(f"⚠️ Nie udało się zsynchronizować z GitHub: {msg}")
 
         stage.info("Etap 2/3: pobieram macierz dystansów/czasów…")
 
@@ -1858,10 +1944,122 @@ with tab_result:
         )
 
 
+with tab_rates:
+    st.subheader("Stawki za transport (PLN/km)")
+    st.caption(
+        "Stawka zależy wyłącznie od wielkości samochodu (pojemność w wózkach). Brak kosztów stałych. "
+        "Tabelę można edytować i dopisywać wiersze. Stawki służą tylko do raportu rentowności – solver ich nie używa."
+    )
+    if "rates_df" not in st.session_state:
+        st.session_state["rates_df"] = pd.DataFrame(
+            DEFAULT_RATES, columns=["Pojemność (wózki)", "Stawka PLN/km"]
+        )
+    rates_df_edited = st.data_editor(
+        st.session_state["rates_df"],
+        key="rates_editor",
+        num_rows="dynamic",
+        use_container_width=True,
+        column_config={
+            "Pojemność (wózki)": st.column_config.NumberColumn(min_value=1, step=1, format="%d"),
+            "Stawka PLN/km": st.column_config.NumberColumn(min_value=0.0, step=0.1, format="%.2f"),
+        },
+    )
+    st.info(
+        "Wartości domyślne to średnie ważone liczbą kursów ze wstępnie policzonych stawek "
+        "(wielkości pośrednie przypisane do najbliższego większego pojazdu)."
+    )
+
+
+with tab_profit:
+    st.subheader("Rentowność transportu – koszt vs wartość towaru")
+    if "routes" not in st.session_state or "nodes_df" not in st.session_state:
+        st.info("Brak danych – uruchom proces w zakładce Wynik trasowania.")
+    elif not st.session_state.get("value_column_present", False) or (
+        "wartosc" not in st.session_state["nodes_df"].columns
+    ):
+        st.warning("Plik punktów nie zawiera kolumny „Wartość” – raport niedostępny. Pobierz aktualny szablon punktów.")
+    else:
+        profit_routes_df, profit_points_df = build_profitability(
+            st.session_state["routes"],
+            st.session_state["nodes_df"],
+            st.session_state.get("vehicle_ids", []),
+            st.session_state.get("vehicle_caps", []),
+            st.session_state["dist_km_df"],
+            rates_df_edited,
+            route_cost_threshold_pct,
+            point_cost_threshold_pct,
+        )
+        if profit_routes_df.empty:
+            st.info("Brak tras do analizy.")
+        else:
+            total_cost = profit_routes_df["Koszt"].sum()
+            total_value = profit_routes_df["Wartość"].sum()
+            over_routes = int((profit_routes_df["Status"] == "PRZEKROCZENIE").sum())
+            over_points = int((profit_points_df["Status"] == "PRZEKROCZENIE").sum())
+            k1, k2, k3, k4, k5 = st.columns(5)
+            k1.metric("Koszt transportu", f"{total_cost:,.0f} PLN".replace(",", " "))
+            k2.metric("Wartość towaru", f"{total_value:,.0f} PLN".replace(",", " "))
+            k3.metric("Wskaźnik ogółem", _pct(total_cost / total_value if total_value else None))
+            k4.metric("Trasy ponad próg", f"{over_routes} / {len(profit_routes_df)}")
+            k5.metric("Punkty ponad próg", f"{over_points} / {len(profit_points_df)}")
+
+            only_over = st.checkbox("Pokaż tylko przekroczenia", value=False)
+
+            def _show(df, extra_drop=()):
+                view = df.drop(columns=["seq", *extra_drop]).copy()
+                view["Wskaźnik"] = view["Wskaźnik"].apply(_pct)
+                view["Status"] = view["Status"].apply(lambda s: f"{STATUS_ICON.get(s, '')} {s}")
+                return view
+
+            st.markdown("#### Trasy")
+            routes_view = profit_routes_df[profit_routes_df["Status"] == "PRZEKROCZENIE"] if only_over else profit_routes_df
+            st.dataframe(_show(routes_view).round(2), use_container_width=True, hide_index=True)
+
+            st.markdown("#### Punkty na trasach")
+            for _, route_row in profit_routes_df.iterrows():
+                route_points = profit_points_df[profit_points_df["seq"] == route_row["seq"]]
+                if only_over:
+                    route_points = route_points[route_points["Status"] == "PRZEKROCZENIE"]
+                    if route_points.empty and route_row["Status"] != "PRZEKROCZENIE":
+                        continue
+                title = (
+                    f"{STATUS_ICON.get(route_row['Status'], '')} Trasa {route_row['seq']} – samochód "
+                    f"{route_row['Samochód']} · wskaźnik {_pct(route_row['Wskaźnik'])}"
+                )
+                with st.expander(title, expanded=route_row["Status"] == "PRZEKROCZENIE"):
+                    st.dataframe(
+                        _show(route_points, extra_drop=("Samochód",)).round(2),
+                        use_container_width=True, hide_index=True,
+                    )
+
+            profit_html = profitability_to_html(
+                profit_routes_df, profit_points_df,
+                route_cost_threshold_pct, point_cost_threshold_pct, rates_df_edited,
+            )
+            st.download_button(
+                "Pobierz raport do druku (HTML)",
+                data=profit_html.encode("utf-8"),
+                file_name="rentownosc_transportu.html",
+                mime="text/html",
+                use_container_width=True,
+            )
+            with st.expander("Podgląd wydruku"):
+                st.components.v1.html(profit_html, height=700, scrolling=True)
+
+
 with tab_geocode:
     st.subheader("Geokodowanie – podgląd")
     if "points_df" in st.session_state:
         st.dataframe(st.session_state["points_df"].astype(str), use_container_width=True)
+        if st.session_state.get("empty_points_count", 0):
+            st.caption(f"Pominięto puste wiersze: {st.session_state['empty_points_count']}.")
+        skipped_points = st.session_state.get("skipped_points_df")
+        if skipped_points is not None and not skipped_points.empty:
+            st.warning("Punkty pominięte z powodu nieprawidłowego kodu pocztowego:")
+            st.dataframe(
+                skipped_points[["_input_row", "Kod", "Miejscowosc", "powód_pominięcia"]].astype(str),
+                use_container_width=True,
+            )
     else:
         st.info("Brak danych – uruchom proces w zakładce Wynik trasowania.")
 
@@ -1869,8 +2067,13 @@ with tab_geocode:
 with tab_matrix:
     st.subheader("Macierz – dystans i czas")
     if "dist_km_df" in st.session_state and "dur_min_df" in st.session_state and "nodes_df" in st.session_state:
-        from_cache = st.session_state.get("matrix_from_cache", False)
-        st.caption("Źródło: " + ("cache" if from_cache else "Google Distance Matrix API"))
+        counts = st.session_state.get("matrix_counts", {})
+        st.caption(
+            "Źródła par: "
+            f"{counts.get('csv', 0)} z odleglosci.csv, "
+            f"{counts.get('api', 0)} z API, "
+            f"{counts.get('estimated', 0)} szacowanych (Haversine × 1,3)."
+        )
 
         st.write("Węzły (baza + punkty OK):")
         st.dataframe(st.session_state["nodes_df"].astype(str), use_container_width=True)
