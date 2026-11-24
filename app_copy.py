@@ -64,6 +64,24 @@ with col2:
         "<h1 style='margin-top:20px;'>Planowanie tras Plantpol</h1>",
         unsafe_allow_html=True
     )
+st.markdown(
+    """
+    <style>
+    div[data-baseweb="tab-list"] { gap: 8px; border-bottom: 2px solid rgba(128,128,128,0.35); }
+    button[data-baseweb="tab"] {
+        height: auto; padding: 12px 22px;
+        background: rgba(128,128,128,0.14);
+        border-radius: 10px 10px 0 0;
+    }
+    button[data-baseweb="tab"] p { font-size: 1.2rem; font-weight: 700; }
+    button[data-baseweb="tab"]:hover { background: rgba(255,75,75,0.18); }
+    button[data-baseweb="tab"][aria-selected="true"] { background: rgba(255,75,75,0.22); }
+    button[data-baseweb="tab"][aria-selected="true"] p { color: #FF4B4B; }
+    div[data-baseweb="tab-highlight"] { background-color: #FF4B4B; height: 4px; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 st.markdown("---")
 
 API_KEY = st.secrets.get("GOOGLE_MAPS_API_KEY", "")
@@ -84,6 +102,7 @@ NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 OSRM_TABLE_URL = "https://router.project-osrm.org/table/v1/driving"
 OSM_USER_AGENT = "PlantpolRoutePlanner/1.0 (route planning application)"
 _last_nominatim_request_at = 0.0
+MATRIX_PROVIDER = "osm"  # dostawca faktycznie użyty do pobierania macierzy
 
 
 # Baza (depot)
@@ -375,15 +394,22 @@ with tpl_col2:
     )
 
 st.markdown("### Źródła geokodowania i tras")
+PROVIDER_OPTIONS = {
+    "Automatycznie": "auto",
+    "Nominatim (OpenStreetMap)": "osm",
+    "Google Maps": "google",
+}
 selected_api_provider = st.selectbox(
     "Dostawca API",
-    ["Google Maps", "OpenStreetMap (bezpłatne)"],
+    list(PROVIDER_OPTIONS),
+    index=0,
     key="routing_api_provider",
 )
-API_PROVIDER = "osm" if selected_api_provider.startswith("OpenStreetMap") else "google"
+PROVIDER_MODE = PROVIDER_OPTIONS[selected_api_provider]
 st.caption(
-    "OpenStreetMap korzysta z publicznych usług Nominatim i OSRM: bez klucza API, "
-    "bez gwarancji dostępności i z ograniczeniami użycia. Geokodowanie: maks. 1 nowe zapytanie/s. "
+    "Automatycznie: najpierw Nominatim/OSRM (OpenStreetMap), a gdy nie zadziałają – Google Maps. "
+    "OpenStreetMap to publiczne usługi bez klucza API i bez gwarancji dostępności; "
+    "geokodowanie: maks. 1 nowe zapytanie/s. "
     "[Zasady Nominatim](https://operations.osmfoundation.org/policies/nominatim/). "
     "Dane mapowe: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright)."
 )
@@ -450,7 +476,7 @@ with col_p7:
 
 time_limit_s = st.slider("Limit czasu szukania rozwiązania (sek.)", 2, 60, 12, 1)
 
-st.markdown("##### Progi rentowności transportu (tylko raport – nie wpływa na solver)")
+st.markdown("##### Progi rentowności transportu (nie wpływa na wynik trasowania)")
 col_r1, col_r2 = st.columns(2)
 with col_r1:
     route_cost_threshold_pct = st.number_input(
@@ -528,59 +554,91 @@ def safe_int(x, default=0) -> int:
 # =========================
 # Helpers: Google APIs
 # =========================
-def geocode_postcode(code: str, city: str):
-    global _last_nominatim_request_at
-
+def _geocode_queries(code: str, city: str):
     address_query = f"{code} {city}, Polska" if city else f"{code}, Polska"
     postcode_query = f"{code}, Polska"
     queries = [(address_query, False)]
     if postcode_query != address_query:
         queries.append((postcode_query, True))
+    return queries
 
-    for query, postcode_only in queries:
-        if API_PROVIDER == "osm":
-            wait_s = 1.05 - (time.monotonic() - _last_nominatim_request_at)
-            if wait_s > 0:
-                time.sleep(wait_s)
-            response = requests.get(
-                NOMINATIM_URL,
-                params={"q": query, "format": "jsonv2", "limit": 1, "countrycodes": "pl"},
-                headers={"User-Agent": OSM_USER_AGENT},
-                timeout=25,
-            )
-            response.raise_for_status()
-            _last_nominatim_request_at = time.monotonic()
-            results = response.json()
-            if results:
-                result = results[0]
-                source = "nominatim_kod" if postcode_only or not city else "nominatim"
-                return float(result["lat"]), float(result["lon"]), result.get("display_name", ""), "OK", source
-        else:
-            response = requests.get(
-                "https://maps.googleapis.com/maps/api/geocode/json",
-                params={"address": query, "key": API_KEY},
-                timeout=25,
-            )
-            response.raise_for_status()
-            data = response.json()
-            results = data.get("results", [])
-            if data.get("status") == "OK" and results:
-                result = results[0]
-                location = result["geometry"]["location"]
-                source = "google_kod" if postcode_only or not city else "google"
-                return (
-                    float(location["lat"]),
-                    float(location["lng"]),
-                    result.get("formatted_address", ""),
-                    "OK",
-                    source,
-                )
-            if data.get("status") not in ("ZERO_RESULTS", "OK"):
-                raise RuntimeError(
-                    f"Google Geocoding API error: {data.get('status')} / {data.get('error_message', '')}"
-                )
 
-    source = "nominatim_kod" if API_PROVIDER == "osm" else "google_kod"
+def _geocode_nominatim(code: str, city: str):
+    global _last_nominatim_request_at
+    for query, postcode_only in _geocode_queries(code, city):
+        wait_s = 1.05 - (time.monotonic() - _last_nominatim_request_at)
+        if wait_s > 0:
+            time.sleep(wait_s)
+        response = requests.get(
+            NOMINATIM_URL,
+            params={"q": query, "format": "jsonv2", "limit": 1, "countrycodes": "pl"},
+            headers={"User-Agent": OSM_USER_AGENT},
+            timeout=25,
+        )
+        _last_nominatim_request_at = time.monotonic()
+        response.raise_for_status()
+        results = response.json()
+        if results:
+            result = results[0]
+            source = "nominatim_kod" if postcode_only or not city else "nominatim"
+            return float(result["lat"]), float(result["lon"]), result.get("display_name", ""), "OK", source
+    return None
+
+
+def _geocode_google(code: str, city: str):
+    for query, postcode_only in _geocode_queries(code, city):
+        response = requests.get(
+            "https://maps.googleapis.com/maps/api/geocode/json",
+            params={"address": query, "key": API_KEY},
+            timeout=25,
+        )
+        response.raise_for_status()
+        data = response.json()
+        results = data.get("results", [])
+        if data.get("status") == "OK" and results:
+            result = results[0]
+            location = result["geometry"]["location"]
+            source = "google_kod" if postcode_only or not city else "google"
+            return (
+                float(location["lat"]),
+                float(location["lng"]),
+                result.get("formatted_address", ""),
+                "OK",
+                source,
+            )
+        if data.get("status") not in ("ZERO_RESULTS", "OK"):
+            raise RuntimeError(
+                f"Google Geocoding API error: {data.get('status')} / {data.get('error_message', '')}"
+            )
+    return None
+
+
+def providers_for_mode():
+    if PROVIDER_MODE == "osm":
+        return ["osm"]
+    if PROVIDER_MODE == "google":
+        return ["google"]
+    return ["osm", "google"] if API_KEY else ["osm"]
+
+
+# Fallback na Google tylko przy błędzie odpowiedzi/serwera (np. 429, 5xx, timeout, błąd połączenia).
+# Brak wyniku dla kodu (ZERO_RESULTS) to prawidłowa odpowiedź i nie uruchamia fallbacku.
+FALLBACK_ERRORS = (requests.RequestException, RuntimeError)
+
+
+def geocode_postcode(code: str, city: str):
+    providers = providers_for_mode()
+    for provider in providers:
+        try:
+            result = _geocode_nominatim(code, city) if provider == "osm" else _geocode_google(code, city)
+        except FALLBACK_ERRORS:
+            if provider == providers[-1]:
+                raise
+            continue
+        if result:
+            return result
+        break
+    source = "nominatim_kod" if provider == "osm" else "google_kod"
     return None, None, "", "ZERO_RESULTS", source
 
 
@@ -665,12 +723,13 @@ def distance_matrix_osrm(origins, destinations):
 
 
 def distance_matrix(origins, destinations, mode="driving"):
-    if API_PROVIDER == "osm":
+    if MATRIX_PROVIDER == "osm":
         return distance_matrix_osrm(origins, destinations)
     return distance_matrix_google(origins, destinations, mode=mode)
 
 
 def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05, postcodes=None):
+    global MATRIX_PROVIDER
     n = len(points_latlng)
     if postcodes is None:
         raise ValueError("Lista kodów pocztowych jest wymagana dla macierzy po kodach.")
@@ -696,94 +755,110 @@ def build_full_matrix(points_latlng, mode="driving", sleep_s=0.05, postcodes=Non
         if pair not in distance_cache
     ]
     api_values = {}
+    api_sources = {}
 
     if missing_pairs:
         st.warning(f"Macierz: brakuje {len(missing_pairs)} par kodów w odleglosci.csv; pobieram z API.")
-        for batch_size in [10, 8, 5, 4, 2]:
-            code_batches = list(chunked_idx(len(unique_codes), batch_size))
-            code_to_batch = {
-                unique_codes[index]: batch_index
-                for batch_index, batch in enumerate(code_batches)
-                for index in batch
-            }
-            batches_to_fetch = sorted({
-                (code_to_batch[code_a], code_to_batch[code_b])
-                for code_a, code_b in missing_pairs
-            })
-            direct_failures = []
-            try:
-                progress = st.progress(0)
-                status = st.empty()
-                for call_number, (origin_batch_index, destination_batch_index) in enumerate(batches_to_fetch, 1):
-                    origin_codes = [unique_codes[index] for index in code_batches[origin_batch_index]]
-                    destination_codes = [unique_codes[index] for index in code_batches[destination_batch_index]]
-                    origins = [format_latlng(*postcode_coords[code]) for code in origin_codes]
-                    destinations = [format_latlng(*postcode_coords[code]) for code in destination_codes]
-                    dist_m, dur_s = distance_matrix(origins, destinations, mode=mode)
-                    origin_indexes = {code: index for index, code in enumerate(origin_codes)}
-                    destination_indexes = {code: index for index, code in enumerate(destination_codes)}
-                    for code_a, code_b in missing_pairs:
-                        if (
-                            code_a in origin_indexes
-                            and code_b in destination_indexes
-                            and code_a < code_b
-                            and code_to_batch[code_a] == origin_batch_index
-                            and code_to_batch[code_b] == destination_batch_index
-                        ):
-                            distance = dist_m[origin_indexes[code_a]][destination_indexes[code_b]]
-                            duration = dur_s[origin_indexes[code_a]][destination_indexes[code_b]]
-                            if distance is not None and duration is not None:
-                                api_values[(code_a, code_b)] = (float(distance), float(duration))
-                            else:
-                                direct_failures.append((code_a, code_b))
-                    progress.progress(int(call_number / max(len(batches_to_fetch), 1) * 100))
-                    status.text(f"Macierz API: {call_number}/{len(batches_to_fetch)} (batch={batch_size})")
-                    time.sleep(sleep_s)
-
-                reverse_batches = {}
-                for code_a, code_b in direct_failures:
-                    reverse_key = (code_to_batch[code_b], code_to_batch[code_a])
-                    reverse_batches.setdefault(reverse_key, []).append((code_a, code_b))
-                for call_number, ((origin_batch_index, destination_batch_index), pairs) in enumerate(reverse_batches.items(), 1):
-                    origin_codes = [unique_codes[index] for index in code_batches[origin_batch_index]]
-                    destination_codes = [unique_codes[index] for index in code_batches[destination_batch_index]]
-                    origins = [format_latlng(*postcode_coords[code]) for code in origin_codes]
-                    destinations = [format_latlng(*postcode_coords[code]) for code in destination_codes]
-                    dist_m, dur_s = distance_matrix(origins, destinations, mode=mode)
-                    origin_indexes = {code: index for index, code in enumerate(origin_codes)}
-                    destination_indexes = {code: index for index, code in enumerate(destination_codes)}
-                    for code_a, code_b in pairs:
-                        distance = dist_m[origin_indexes[code_b]][destination_indexes[code_a]]
-                        duration = dur_s[origin_indexes[code_b]][destination_indexes[code_a]]
-                        if distance is not None and duration is not None:
-                            api_values[(code_a, code_b)] = (float(distance), float(duration))
-                    time.sleep(sleep_s)
-                progress.empty()
-                status.empty()
+        providers = providers_for_mode()
+        for provider in providers:
+            MATRIX_PROVIDER = provider
+            pairs_to_fetch = [pair for pair in missing_pairs if pair not in api_values]
+            if not pairs_to_fetch:
                 break
-            except RuntimeError as error:
-                if "progress" in locals():
-                    progress.empty()
-                    status.empty()
-                if "MAX_ELEMENTS_EXCEEDED" in str(error) or "TooBig" in str(error):
-                    if batch_size == 2:
+            try:
+                for batch_size in [10, 8, 5, 4, 2]:
+                    code_batches = list(chunked_idx(len(unique_codes), batch_size))
+                    code_to_batch = {
+                        unique_codes[index]: batch_index
+                        for batch_index, batch in enumerate(code_batches)
+                        for index in batch
+                    }
+                    batches_to_fetch = sorted({
+                        (code_to_batch[code_a], code_to_batch[code_b])
+                        for code_a, code_b in pairs_to_fetch
+                    })
+                    direct_failures = []
+                    try:
+                        progress = st.progress(0)
+                        status = st.empty()
+                        for call_number, (origin_batch_index, destination_batch_index) in enumerate(batches_to_fetch, 1):
+                            origin_codes = [unique_codes[index] for index in code_batches[origin_batch_index]]
+                            destination_codes = [unique_codes[index] for index in code_batches[destination_batch_index]]
+                            origins = [format_latlng(*postcode_coords[code]) for code in origin_codes]
+                            destinations = [format_latlng(*postcode_coords[code]) for code in destination_codes]
+                            dist_m, dur_s = distance_matrix(origins, destinations, mode=mode)
+                            origin_indexes = {code: index for index, code in enumerate(origin_codes)}
+                            destination_indexes = {code: index for index, code in enumerate(destination_codes)}
+                            for code_a, code_b in pairs_to_fetch:
+                                if (
+                                    code_a in origin_indexes
+                                    and code_b in destination_indexes
+                                    and code_a < code_b
+                                    and code_to_batch[code_a] == origin_batch_index
+                                    and code_to_batch[code_b] == destination_batch_index
+                                ):
+                                    distance = dist_m[origin_indexes[code_a]][destination_indexes[code_b]]
+                                    duration = dur_s[origin_indexes[code_a]][destination_indexes[code_b]]
+                                    if distance is not None and duration is not None:
+                                        api_values[(code_a, code_b)] = (float(distance), float(duration))
+                                        api_sources[(code_a, code_b)] = provider
+                                    else:
+                                        direct_failures.append((code_a, code_b))
+                            progress.progress(int(call_number / max(len(batches_to_fetch), 1) * 100))
+                            status.text(f"Macierz API: {call_number}/{len(batches_to_fetch)} (batch={batch_size})")
+                            time.sleep(sleep_s)
+
+                        reverse_batches = {}
+                        for code_a, code_b in direct_failures:
+                            reverse_key = (code_to_batch[code_b], code_to_batch[code_a])
+                            reverse_batches.setdefault(reverse_key, []).append((code_a, code_b))
+                        for call_number, ((origin_batch_index, destination_batch_index), pairs) in enumerate(reverse_batches.items(), 1):
+                            origin_codes = [unique_codes[index] for index in code_batches[origin_batch_index]]
+                            destination_codes = [unique_codes[index] for index in code_batches[destination_batch_index]]
+                            origins = [format_latlng(*postcode_coords[code]) for code in origin_codes]
+                            destinations = [format_latlng(*postcode_coords[code]) for code in destination_codes]
+                            dist_m, dur_s = distance_matrix(origins, destinations, mode=mode)
+                            origin_indexes = {code: index for index, code in enumerate(origin_codes)}
+                            destination_indexes = {code: index for index, code in enumerate(destination_codes)}
+                            for code_a, code_b in pairs:
+                                distance = dist_m[origin_indexes[code_b]][destination_indexes[code_a]]
+                                duration = dur_s[origin_indexes[code_b]][destination_indexes[code_a]]
+                                if distance is not None and duration is not None:
+                                    api_values[(code_a, code_b)] = (float(distance), float(duration))
+                                    api_sources[(code_a, code_b)] = provider
+                            time.sleep(sleep_s)
+                        progress.empty()
+                        status.empty()
+                        break
+                    except RuntimeError as error:
+                        if "progress" in locals():
+                            progress.empty()
+                            status.empty()
+                        if "MAX_ELEMENTS_EXCEEDED" in str(error) or "TooBig" in str(error):
+                            if batch_size == 2:
+                                raise
+                            st.warning(f"Limit API dla batch={batch_size}; zmniejszam rozmiar paczki.")
+                            for key in [k for k, src in api_sources.items() if src == provider]:
+                                api_values.pop(key, None)
+                                api_sources.pop(key, None)
+                            continue
                         raise
-                    st.warning(f"Limit API dla batch={batch_size}; zmniejszam rozmiar paczki.")
-                    api_values.clear()
-                    continue
-                raise
-        else:
-            raise RuntimeError("Nie udało się pobrać brakujących par z API.")
+                else:
+                    raise RuntimeError("Nie udało się pobrać brakujących par z API.")
+                break
+            except FALLBACK_ERRORS as provider_error:
+                if provider == providers[-1]:
+                    raise
+                st.warning(f"Pobieranie macierzy z {provider} nie powiodło się ({provider_error}); brakujące pary pobieram z Google Maps (zachowuję już pobrane).")
 
     today = date.today().isoformat()
-    api_source = "osrm" if API_PROVIDER == "osm" else "google"
     new_distance_rows = pd.DataFrame([
         {
             "kod_a": code_a,
             "kod_b": code_b,
             "km": f"{distance / 1000.0:.1f}",
             "min": f"{duration / 60.0:.1f}",
-            "zrodlo": api_source,
+            "zrodlo": "osrm" if api_sources.get((code_a, code_b)) == "osm" else "google",
             "zaktualizowano": today,
         }
         for (code_a, code_b), (distance, duration) in api_values.items()
@@ -2063,7 +2138,7 @@ with tab_rates:
     st.subheader("Stawki za transport (PLN/km)")
     st.caption(
         "Stawka zależy wyłącznie od wielkości samochodu (pojemność w wózkach). Brak kosztów stałych. "
-        "Tabelę można edytować i dopisywać wiersze. Stawki służą tylko do raportu rentowności – solver ich nie używa."
+        "Tabelę można edytować i dopisywać wiersze. Stawki służą tylko do raportu rentowności i nie wpływają na wynik trasowania."
     )
     if "rates_df" not in st.session_state:
         st.session_state["rates_df"] = pd.DataFrame(
